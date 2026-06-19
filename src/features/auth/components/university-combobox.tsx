@@ -85,7 +85,7 @@ export function UniversityCombobox({
               className="px-4 py-3 active:bg-wash"
             >
               <Text className="prose-body font-semibold text-ink" numberOfLines={1}>
-                My school isn&apos;t listed - use "{trimmed}"
+                My school isn&apos;t listed - use &ldquo;{trimmed}&rdquo;
               </Text>
             </Pressable>
           ) : null}
