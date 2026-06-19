@@ -1,0 +1,93 @@
+@import 'tailwindcss';
+@import 'uniwind';
+
+/* Brand design tokens (DESIGN.md). Achromatic by default; the semantic colors
+   are reserved for swipe/match states. These generate color utilities such as
+   bg-canvas, text-ink, and border-silver, plus the font-primary family. */
+@theme {
+  --color-ink: #000000;
+  --color-canvas: #ffffff;
+  --color-graphite: #333333;
+  --color-slate: #666666;
+  --color-ash: #999999;
+  --color-fog: #b3b3b3;
+  --color-silver: #cccccc;
+
+  --color-yes: #31c431;
+  --color-maybe: #ffae00;
+  --color-pass: #ff0000;
+
+  /* semantic aliases (AGENTS.md uses bg-background / text-foreground) */
+  --color-background: #ffffff;
+  --color-foreground: #000000;
+
+  --font-primary: 'Satoshi';
+  --font-display: 'SpaceGrotesk-Bold';
+  --font-display-medium: 'SpaceGrotesk-Medium';
+
+  --color-hairline: rgba(0, 0, 0, 0.06);
+  --color-wash: rgba(0, 0, 0, 0.04);
+}
+
+/* DESIGN.md --shadow-card as a reusable utility. */
+@utility shadow-card {
+  box-shadow:
+    0px 0.8px 2.4px -0.6px rgba(0, 0, 0, 0.05),
+    0px 2.4px 7.2px -1.25px rgba(0, 0, 0, 0.05),
+    0px 6.4px 19.1px -1.875px rgba(0, 0, 0, 0.05),
+    0px 20px 60px -2.5px rgba(0, 0, 0, 0.05);
+}
+
+/* Spike utilities (Step 1). */
+@utility prose-title {
+  @apply font-display text-4xl tracking-tight;
+}
+
+@utility button-primary {
+  @apply h-14 items-center justify-center rounded-full bg-ink;
+}
+
+/* Remaining prose + component utilities (Step 3). */
+@utility prose-display {
+  @apply font-display text-5xl tracking-tighter;
+}
+
+@utility prose-subtitle {
+  @apply font-primary text-base font-medium tracking-tight text-slate;
+}
+
+@utility prose-body {
+  @apply font-primary text-base tracking-tight;
+}
+
+@utility prose-label {
+  @apply font-primary text-xs font-semibold tracking-tight text-graphite;
+}
+
+@utility prose-button {
+  @apply font-primary text-base font-bold tracking-tight;
+}
+
+@utility prose-footnote {
+  @apply font-primary text-sm tracking-tight;
+}
+
+@utility prose-caption {
+  @apply font-primary text-xs tracking-tight;
+}
+
+@utility button-ghost {
+  @apply items-center justify-center py-1.5;
+}
+
+@utility card {
+  @apply rounded-xl border border-silver bg-canvas;
+}
+
+@utility dropdown {
+  @apply absolute left-0 right-0 max-h-70 overflow-hidden rounded-xl border border-silver bg-canvas;
+}
+
+@utility field-input {
+  @apply h-12 rounded-lg border px-4 font-primary text-base text-ink bg-canvas;
+}
