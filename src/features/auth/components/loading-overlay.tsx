@@ -9,7 +9,7 @@ export function LoadingOverlay({ message }: { message: string }) {
     <View className="absolute inset-0 items-center justify-center gap-4 bg-canvas">
       <MeshGradient variant="hero" className="absolute inset-0" pointerEvents="none" />
       <ActivityIndicator color={Brand.ink} size="large" />
-      <Text className="font-primary text-base font-medium tracking-[-0.2px] text-slate">
+      <Text className="prose-subtitle">
         {message}
       </Text>
     </View>
