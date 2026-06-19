@@ -23,8 +23,8 @@ export default function ComponentsGallery() {
   return (
     <View className="flex-1 bg-canvas">
       <StatusBar style="dark" />
-      <SafeAreaView edges={['top', 'bottom']} className="flex-1">
-        <ScrollView contentContainerClassName="gap-8 px-6 py-6">
+      <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
+        <ScrollView className="flex-1" contentContainerClassName="gap-8 px-6 py-6">
           <Section title="Typography">
             <Text className="prose-display text-ink">Display</Text>
             <Text className="prose-title text-ink">Title</Text>

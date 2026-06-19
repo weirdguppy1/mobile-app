@@ -42,58 +42,63 @@ export function SignUpScreen() {
   return (
     <View className="flex-1 bg-canvas">
       <StatusBar style="dark" />
-      <SafeAreaView edges={['top', 'bottom']} className="flex-1 px-6">
-        <View className="h-10 flex-row items-center gap-3">
-          <Pressable
-            onPress={goBack}
-            hitSlop={12}
-            accessibilityRole="button"
-            className="-ml-1.5 h-8 w-8 items-center justify-center"
-          >
-            <Text className="font-display text-3xl leading-8 text-ink">‹</Text>
-          </Pressable>
-          <View className="flex-1">
-            <ProgressBar current={progressStep} total={TOTAL_STEPS} />
+      {/* SafeAreaView from react-native-safe-area-context is NOT instrumented by
+          Uniwind, so className is dropped — give it flex via plain style and put
+          layout utilities on the inner View (which Uniwind does style). */}
+      <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
+        <View className="flex-1 px-6 pt-2 pb-4">
+          <View className="h-10 flex-row items-center gap-3">
+            <Pressable
+              onPress={goBack}
+              hitSlop={12}
+              accessibilityRole="button"
+              className="-ml-1.5 h-8 w-8 items-center justify-center"
+            >
+              <Text className="font-display text-3xl leading-8 text-ink">‹</Text>
+            </Pressable>
+            <View className="flex-1">
+              <ProgressBar current={progressStep} total={TOTAL_STEPS} />
+            </View>
           </View>
+
+          <KeyboardAvoidingView
+            className="flex-1"
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          >
+            <FadeIn
+              key={onVerify ? 'verify' : `step-${step}`}
+              offset={14}
+              className="flex-1 gap-3 pt-7"
+            >
+              {!onVerify && step === 'campus' && <CampusStep />}
+              {!onVerify && step === 'email' && <EmailStep />}
+              {!onVerify && step === 'review' && <ReviewStep />}
+              {onVerify && <VerifyStep />}
+            </FadeIn>
+
+            <View className="gap-3">
+              {submitError ? (
+                <Text className="prose-footnote text-pass">{submitError}</Text>
+              ) : null}
+              {!onVerify && step === 'campus' && (
+                <Cta label="Continue" disabled={!university} onPress={continueFromCampus} />
+              )}
+              {!onVerify && step === 'email' && (
+                <Cta
+                  label="Continue"
+                  disabled={email.trim().length === 0}
+                  onPress={continueFromEmail}
+                />
+              )}
+              {!onVerify && step === 'review' && (
+                <Cta label="Create account" onPress={createAccount} />
+              )}
+              {onVerify && (
+                <Cta label="Verify & continue" disabled={code.length < 6} onPress={verify} />
+              )}
+            </View>
+          </KeyboardAvoidingView>
         </View>
-
-        <KeyboardAvoidingView
-          className="flex-1"
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <FadeIn
-            key={onVerify ? 'verify' : `step-${step}`}
-            offset={14}
-            className="flex-1 gap-3 pt-7"
-          >
-            {!onVerify && step === 'campus' && <CampusStep />}
-            {!onVerify && step === 'email' && <EmailStep />}
-            {!onVerify && step === 'review' && <ReviewStep />}
-            {onVerify && <VerifyStep />}
-          </FadeIn>
-
-          <View className="gap-3">
-            {submitError ? (
-              <Text className="prose-footnote text-pass">{submitError}</Text>
-            ) : null}
-            {!onVerify && step === 'campus' && (
-              <Cta label="Continue" disabled={!university} onPress={continueFromCampus} />
-            )}
-            {!onVerify && step === 'email' && (
-              <Cta
-                label="Continue"
-                disabled={email.trim().length === 0}
-                onPress={continueFromEmail}
-              />
-            )}
-            {!onVerify && step === 'review' && (
-              <Cta label="Create account" onPress={createAccount} />
-            )}
-            {onVerify && (
-              <Cta label="Verify & continue" disabled={code.length < 6} onPress={verify} />
-            )}
-          </View>
-        </KeyboardAvoidingView>
       </SafeAreaView>
     </View>
   );
