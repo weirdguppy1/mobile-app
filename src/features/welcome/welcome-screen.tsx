@@ -1,5 +1,4 @@
 import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,10 +14,9 @@ import { FadeIn, PressScale } from '@/shared/components';
  */
 export function WelcomeScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
 
-  // Placeholder destination until auth/onboarding lands.
-  const start = () => router.push('/explore');
+  // TODO: wire up once the onboarding / auth flow exists.
+  const start = () => {};
 
   return (
     <View style={styles.root}>
