@@ -57,6 +57,16 @@ export function WelcomeScreen() {
                 I already have an account
               </Text>
             </Pressable>
+
+            {__DEV__ ? (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.push('/dev')}
+                hitSlop={8}
+                className="items-center py-1 active:opacity-50">
+                <Text className="prose-caption text-ash">Dev menu</Text>
+              </Pressable>
+            ) : null}
           </FadeIn>
         </View>
       </View>
