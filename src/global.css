@@ -89,5 +89,13 @@
 }
 
 @utility field-input {
-  @apply h-12 rounded-lg border px-4 font-primary text-base text-ink bg-canvas;
+  @apply h-12 rounded-lg border px-4 font-primary text-ink bg-canvas;
+  /* font-size only, NO line-height: an explicit lineHeight on a single-line RN
+     TextInput makes the text jump down on the first keystroke. text-base would
+     pull in a ~24px line-height, so set the size directly instead. */
+  font-size: var(--text-base);
+}
+
+@utility icon {
+  @apply h-4 w-4; 
 }
