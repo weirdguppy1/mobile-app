@@ -1,18 +1,18 @@
-import '@/global.css';
+import "@/global.css";
 
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { useEffect } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import { useEffect } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { supabase } from '@/lib/supabase';
-import { useAuthStore } from '@/store/auth-store';
+import { supabase } from "@/lib/supabase";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    Satoshi: require('@/assets/fonts/Satoshi.ttf'),
-    'SpaceGrotesk-Bold': require('@/assets/fonts/Space_Grotesk/static/SpaceGrotesk-Bold.ttf'),
-    'SpaceGrotesk-Medium': require('@/assets/fonts/Space_Grotesk/static/SpaceGrotesk-Medium.ttf'),
+    Satoshi: require("@/assets/fonts/Satoshi.ttf"),
+    "SpaceGrotesk-Bold": require("@/assets/fonts/Space_Grotesk/static/SpaceGrotesk-Bold.ttf"),
+    "SpaceGrotesk-Medium": require("@/assets/fonts/Space_Grotesk/static/SpaceGrotesk-Medium.ttf"),
   });
 
   const session = useAuthStore((s) => s.session);

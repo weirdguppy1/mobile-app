@@ -3,11 +3,12 @@ import { FlatList, Pressable, Text, View } from "react-native";
 
 import { Brand } from "@/constants/theme";
 import { filterUniversities } from "@/features/auth/data/universities";
+import type { CampusSelection } from "@/features/auth/store/sign-up-store";
 import { TextField } from "@/shared/components";
 
 interface UniversityComboboxProps {
   value: string | null;
-  onChange: (value: string | null) => void;
+  onChange: (value: CampusSelection | null) => void;
 }
 
 /**
@@ -28,9 +29,9 @@ export function UniversityCombobox({
     (u) => u.name.toLowerCase() === trimmed.toLowerCase(),
   );
 
-  const commit = (name: string) => {
+  const commit = (name: string, domain: string | null) => {
     setQuery(name);
-    onChange(name);
+    onChange({ name, domain });
     setOpen(false);
   };
 
@@ -68,7 +69,7 @@ export function UniversityCombobox({
             }
             renderItem={({ item }) => (
               <Pressable
-                onPress={() => commit(item.name)}
+                onPress={() => commit(item.name, item.domain)}
                 className="gap-0.5 border-b border-b-hairline px-4 py-3 active:bg-wash"
               >
                 <Text className="prose-body font-semibold text-ink" numberOfLines={1}>
@@ -81,7 +82,7 @@ export function UniversityCombobox({
 
           {trimmed && !hasExactMatch ? (
             <Pressable
-              onPress={() => commit(trimmed)}
+              onPress={() => commit(trimmed, null)}
               className="px-4 py-3 active:bg-wash"
             >
               <Text className="prose-body font-semibold text-ink" numberOfLines={1}>

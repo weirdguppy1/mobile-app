@@ -1,6 +1,6 @@
 # Roommate Match
 
-A Tinder-style mobile app that helps college students find their roommate.
+A Hinge-style mobile app that helps college students find their roommate.
 React Native + Expo + Expo Router + TypeScript.
 
 See [AGENTS.md](./AGENTS.md) for architecture and conventions, and

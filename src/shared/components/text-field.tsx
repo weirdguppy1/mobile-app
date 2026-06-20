@@ -18,15 +18,16 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
   function TextField({ label, message, invalid, className, ...rest }, ref) {
     return (
       <View className="gap-2">
-        {label ? (
-          <Text className="prose-label">{label}</Text>
-        ) : null}
+        {label ? <Text className="prose-label">{label}</Text> : null}
         <TextInput
           ref={ref}
           placeholderTextColor={Brand.fog}
-          className={`field-input border-continuous ${
+          className={`field-input border-continuous  ${
             invalid ? "border-pass" : "border-silver focus:border-ink"
           } ${className ?? ""}`}
+          style={{
+            paddingVertical: 0,
+          }}
           {...rest}
         />
         {message ? (

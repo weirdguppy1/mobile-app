@@ -5,7 +5,7 @@ import { useSignUpStore } from '@/features/auth/store/sign-up-store';
 
 export function CampusStep() {
   const university = useSignUpStore((s) => s.university);
-  const setUniversity = useSignUpStore((s) => s.setUniversity);
+  const setCampus = useSignUpStore((s) => s.setCampus);
 
   return (
     <>
@@ -14,7 +14,7 @@ export function CampusStep() {
         We match you with roommates at your school.
       </Text>
       <View className="mt-1 gap-3">
-        <UniversityCombobox value={university} onChange={setUniversity} />
+        <UniversityCombobox value={university} onChange={setCampus} />
       </View>
     </>
   );

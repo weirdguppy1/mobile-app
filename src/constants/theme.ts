@@ -1,9 +1,9 @@
 /**
- * Brand design tokens, from DESIGN.md.
- *
- * The system is achromatic by default — black-on-white IS the contrast system.
- * The semantic colors are reserved for swipe/match states only; color otherwise
- * enters only through content and the soft mesh washes.
+ * Runtime color + gradient constants for the few places that need a JS value
+ * rather than a Uniwind className: color *props* (placeholderTextColor,
+ * ActivityIndicator color) and the mesh washes, which have no utility equivalent
+ * (they use `experimental_backgroundImage`). Everything else is styled with
+ * className utilities defined in src/global.css.
  */
 
 export const Brand = {
@@ -14,27 +14,14 @@ export const Brand = {
   ash: '#999999',
   fog: '#b3b3b3',
   silver: '#cccccc',
-  // semantic — swipe/match states ONLY
   yes: '#31c431',
   maybe: '#ffae00',
   pass: '#ff0000',
 } as const;
 
 /**
- * Font families loaded in app/_layout.tsx via expo-font.
- * `primary` (Satoshi) carries all frequently-read UI text; `display` (Space
- * Grotesk) is the "moment" face — only for headlines and big single words.
- */
-export const FontFamily = {
-  primary: 'Satoshi',
-  display: 'SpaceGrotesk-Bold',
-  displayMedium: 'SpaceGrotesk-Medium',
-} as const;
-
-/**
- * Soft mesh washes — stacks of low-contrast radial blooms at off-grid anchors,
- * per DESIGN.md §9. Apply via `experimental_backgroundImage`; pair each with its
- * base color (`MeshBase`) as the view's `backgroundColor`. No linear gradients.
+ * Soft mesh washes — stacks of low-contrast radial blooms (DESIGN.md §9), applied
+ * via `experimental_backgroundImage`. Pair each with its `MeshBase` background.
  */
 export const MeshGradient = {
   warm: [
@@ -56,8 +43,6 @@ export const MeshGradient = {
     'radial-gradient(circle at 86% 80%, #b8f0e0 0%, transparent 56%)',
     'radial-gradient(circle at 26% 84%, #d6f5ee 0%, transparent 52%)',
   ].join(', '),
-  // Hero backdrop: blooms anchored high so color bleeds from the top edge and
-  // dissolves into the white canvas before reaching the message block below.
   hero: [
     'radial-gradient(circle at 18% 2%, #ffd6e8 0%, transparent 44%)',
     'radial-gradient(circle at 86% 8%, #f8c4ff 0%, transparent 42%)',
@@ -75,7 +60,3 @@ export const MeshBase: Record<MeshVariant, string> = {
   mint: '#c0e2e2',
   hero: '#ffffff',
 };
-
-/** DESIGN.md --shadow-card, expressed as a CSS boxShadow string. */
-export const CardShadow =
-  '0px 0.8px 2.4px -0.6px rgba(0,0,0,0.05), 0px 2.4px 7.2px -1.25px rgba(0,0,0,0.05), 0px 6.4px 19.1px -1.875px rgba(0,0,0,0.05), 0px 20px 60px -2.5px rgba(0,0,0,0.05)';

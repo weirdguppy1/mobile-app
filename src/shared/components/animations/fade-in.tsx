@@ -7,6 +7,7 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
+import { useResolveClassNames } from 'uniwind';
 
 interface FadeInProps extends ViewProps {
   /** Delay before the fade starts, in ms. */
@@ -20,11 +21,12 @@ interface FadeInProps extends ViewProps {
 /**
  * A soft entrance: fade up over a few px with an ease-out curve and no overshoot.
  *
- * Motion is driven through `useAnimatedStyle` rather than an `entering` layout
- * animation, so it composes cleanly with children that carry their own
- * `transform` (e.g. a rotated card) without Reanimated's overwrite warning.
+ * Motion runs through `useAnimatedStyle`, and any `className` is resolved to a
+ * style object and merged in — so layout classes compose with the animation (and
+ * with children that carry their own transform) without Reanimated warnings.
  */
 export function FadeIn({
+  className,
   delay = 0,
   offset = 10,
   duration = 420,
@@ -46,8 +48,10 @@ export function FadeIn({
     transform: [{ translateY: (1 - progress.value) * offset }],
   }));
 
+  const resolved = useResolveClassNames(className ?? '');
+
   return (
-    <Animated.View style={[animatedStyle, style]} {...rest}>
+    <Animated.View style={[resolved, style, animatedStyle]} {...rest}>
       {children}
     </Animated.View>
   );

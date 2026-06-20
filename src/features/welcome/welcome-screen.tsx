@@ -11,6 +11,7 @@ export function WelcomeScreen() {
   const router = useRouter();
 
   const start = () => router.push('/(auth)/sign-up');
+  const signIn = () => router.push('/(auth)/sign-in');
 
   return (
     <View className="flex-1 bg-canvas">
@@ -50,7 +51,7 @@ export function WelcomeScreen() {
 
             <Pressable
               accessibilityRole="button"
-              onPress={start}
+              onPress={signIn}
               hitSlop={12}
               className="button-ghost active:opacity-50">
               <Text className="prose-footnote font-medium text-graphite">

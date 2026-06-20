@@ -1,16 +1,28 @@
 import { Pressable, Text, View } from 'react-native';
 
 import { OtpInput } from '@/features/auth/components/otp-input';
-import { useSignUp } from '@/features/auth/hooks/use-sign-up';
-import { useSignUpStore } from '@/features/auth/store/sign-up-store';
 
-export function VerifyStep() {
-  const email = useSignUpStore((s) => s.email);
-  const code = useSignUpStore((s) => s.code);
-  const otpError = useSignUpStore((s) => s.otpError);
-  const setCode = useSignUpStore((s) => s.setCode);
-  const { verify, resend } = useSignUp();
+interface VerifyStepProps {
+  email: string;
+  code: string;
+  otpError: string | null;
+  onChangeCode: (value: string) => void;
+  onComplete: () => void;
+  onResend: () => void;
+}
 
+/**
+ * OTP entry — shared (presentational) by the sign-up and sign-in flows. Identical
+ * copy for both; the orchestrator wires its own store/hook through the props.
+ */
+export function VerifyStep({
+  email,
+  code,
+  otpError,
+  onChangeCode,
+  onComplete,
+  onResend,
+}: VerifyStepProps) {
   return (
     <>
       <Text className="prose-title text-ink">Check your{'\n'}inbox.</Text>
@@ -19,11 +31,11 @@ export function VerifyStep() {
         <Text className="prose-body font-bold text-ink">{email}</Text>.
       </Text>
       <View className="mt-1 gap-3">
-        <OtpInput value={code} onChange={setCode} onComplete={() => verify()} />
+        <OtpInput value={code} onChange={onChangeCode} onComplete={() => onComplete()} />
         {otpError ? (
           <Text className="prose-footnote text-pass">{otpError}</Text>
         ) : null}
-        <Pressable onPress={resend} hitSlop={8} className="self-start py-1">
+        <Pressable onPress={onResend} hitSlop={8} className="self-start py-1">
           <Text className="prose-footnote font-semibold text-graphite underline">
             Resend code
           </Text>

@@ -11,40 +11,31 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { LoadingOverlay } from "@/features/auth/components/loading-overlay";
-import { ProgressBar } from "@/features/auth/components/progress-bar";
-import { CampusStep } from "@/features/auth/components/steps/campus-step";
 import { EmailStep } from "@/features/auth/components/steps/email-step";
-import { ReviewStep } from "@/features/auth/components/steps/review-step";
 import { VerifyStep } from "@/features/auth/components/steps/verify-step";
-import { useSignUp } from "@/features/auth/hooks/use-sign-up";
-import { useSignUpStore } from "@/features/auth/store/sign-up-store";
+import { useSignIn } from "@/features/auth/hooks/use-sign-in";
+import { useSignInStore } from "@/features/auth/store/sign-in-store";
 import { FadeIn, PressScale } from "@/shared/components";
 
-const TOTAL_STEPS = 3;
-const STEP_INDEX = { campus: 1, email: 2, review: 3 } as const;
+/**
+ * Sign-in for existing users: email -> code, no campus. A thin orchestrator over
+ * useSignInStore + useSignIn, reusing the shared EmailStep/VerifyStep — same
+ * tools and structure as SignUpScreen. On a successful verify the auth listener
+ * swaps the root layout to the app, so this screen unmounts on its own.
+ */
+export function SignInScreen() {
+  const phase = useSignInStore((s) => s.phase);
+  const email = useSignInStore((s) => s.email);
+  const code = useSignInStore((s) => s.code);
+  const emailError = useSignInStore((s) => s.emailError);
+  const otpError = useSignInStore((s) => s.otpError);
+  const submitError = useSignInStore((s) => s.submitError);
+  const setEmail = useSignInStore((s) => s.setEmail);
+  const setEmailError = useSignInStore((s) => s.setEmailError);
+  const setCode = useSignInStore((s) => s.setCode);
+  const reset = useSignInStore((s) => s.reset);
 
-export function SignUpScreen() {
-  const step = useSignUpStore((s) => s.step);
-  const phase = useSignUpStore((s) => s.phase);
-  const university = useSignUpStore((s) => s.university);
-  const email = useSignUpStore((s) => s.email);
-  const code = useSignUpStore((s) => s.code);
-  const emailError = useSignUpStore((s) => s.emailError);
-  const otpError = useSignUpStore((s) => s.otpError);
-  const submitError = useSignUpStore((s) => s.submitError);
-  const setEmail = useSignUpStore((s) => s.setEmail);
-  const setEmailError = useSignUpStore((s) => s.setEmailError);
-  const setCode = useSignUpStore((s) => s.setCode);
-  const reset = useSignUpStore((s) => s.reset);
-
-  const {
-    goBack,
-    continueFromCampus,
-    continueFromEmail,
-    createAccount,
-    verify,
-    resend,
-  } = useSignUp();
+  const { goBack, sendCode, verify, resend } = useSignIn();
 
   // Fresh start each time the route mounts.
   useEffect(() => {
@@ -52,14 +43,13 @@ export function SignUpScreen() {
   }, [reset]);
 
   const onVerify = phase === "verify" || phase === "verifying";
-  const progressStep = onVerify ? TOTAL_STEPS : STEP_INDEX[step];
 
   return (
     <View className="flex-1 bg-canvas">
       <StatusBar style="dark" />
       <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1 }}>
         <View className="flex-1 px-6 pt-2 pb-4">
-          <View className="h-10 flex-row items-center gap-3">
+          <View className="h-10 flex-row items-center">
             <Pressable
               onPress={goBack}
               hitSlop={12}
@@ -68,9 +58,6 @@ export function SignUpScreen() {
             >
               <ArrowLeft className="icon" />
             </Pressable>
-            <View className="flex-1">
-              <ProgressBar current={progressStep} total={TOTAL_STEPS} />
-            </View>
           </View>
 
           <KeyboardAvoidingView
@@ -78,28 +65,23 @@ export function SignUpScreen() {
             behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
             <FadeIn
-              key={onVerify ? "verify" : `step-${step}`}
+              key={onVerify ? "verify" : "email"}
               offset={14}
               className="flex-1 gap-3 pt-7"
             >
-              {!onVerify && step === "campus" && <CampusStep />}
-              {!onVerify && step === "email" && (
+              {!onVerify ? (
                 <EmailStep
-                  title={"What's your\nemail?"}
-                  subtitle={
-                    "Use your .edu address so we can verify you’re a student."
-                  }
+                  title={"Welcome\nback."}
+                  subtitle={"Enter your school email and we’ll send you a code."}
                   email={email}
                   emailError={emailError}
                   onChangeEmail={(t) => {
                     setEmail(t);
                     if (emailError) setEmailError(null);
                   }}
-                  onSubmit={continueFromEmail}
+                  onSubmit={sendCode}
                 />
-              )}
-              {!onVerify && step === "review" && <ReviewStep />}
-              {onVerify && (
+              ) : (
                 <VerifyStep
                   email={email}
                   code={code}
@@ -115,26 +97,15 @@ export function SignUpScreen() {
               {submitError ? (
                 <Text className="prose-footnote text-pass">{submitError}</Text>
               ) : null}
-              {!onVerify && step === "campus" && (
+              {!onVerify ? (
                 <Cta
-                  label="Continue"
-                  disabled={!university}
-                  onPress={continueFromCampus}
-                />
-              )}
-              {!onVerify && step === "email" && (
-                <Cta
-                  label="Continue"
+                  label="Send code"
                   disabled={email.trim().length === 0}
-                  onPress={continueFromEmail}
+                  onPress={sendCode}
                 />
-              )}
-              {!onVerify && step === "review" && (
-                <Cta label="Create account" onPress={createAccount} />
-              )}
-              {onVerify && (
+              ) : (
                 <Cta
-                  label="Verify & continue"
+                  label="Verify & sign in"
                   disabled={code.length < 6}
                   onPress={verify}
                 />
@@ -146,9 +117,7 @@ export function SignUpScreen() {
 
       {(phase === "sending" || phase === "verifying") && (
         <LoadingOverlay
-          message={
-            phase === "sending" ? "Creating your account…" : "Verifying…"
-          }
+          message={phase === "sending" ? "Sending your code…" : "Signing you in…"}
         />
       )}
     </View>

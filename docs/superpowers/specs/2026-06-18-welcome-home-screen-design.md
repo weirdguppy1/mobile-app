@@ -5,7 +5,7 @@ _2026-06-18 · branch `feature/welcome-home-screen`_
 ## Goal
 
 Replace the Expo boilerplate at `src/app/index.tsx` with a beautiful, on-brand
-welcome/onboarding hero for the Tinder-style college roommate-matching app. The
+welcome/onboarding hero for the Hinge-style college roommate-matching app. The
 screen is the first impression: it must land the product promise in one glance
 and feel like the Partiful-lineage design system in `DESIGN.md` — **white stage,
 colorful content, black is the only action color, big tight display type, the

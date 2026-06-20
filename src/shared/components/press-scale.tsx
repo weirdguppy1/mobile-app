@@ -1,28 +1,30 @@
 import { type ReactNode } from 'react';
-import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, type PressableProps } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { useResolveClassNames } from 'uniwind';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface PressScaleProps extends Omit<PressableProps, 'style'> {
   children: ReactNode;
-  style?: StyleProp<ViewStyle>;
+  className?: string;
   /** Scale at full press. Closer to 1 is subtler. */
   scaleTo?: number;
 }
 
 /**
- * A pressable that dips slightly on press and springs back with a soft, barely-
- * there bounce. The standard tap feedback for buttons and tappable cards.
+ * A pressable that dips slightly on press and springs back with a soft bounce.
+ * Layout/appearance come from `className`; the scale is a Reanimated style merged
+ * on top via `useResolveClassNames`.
  */
 export function PressScale({
   children,
-  style,
+  className,
   scaleTo = 0.96,
   onPressIn,
   onPressOut,
@@ -34,6 +36,8 @@ export function PressScale({
     transform: [{ scale: 1 - pressed.value * (1 - scaleTo) }],
   }));
 
+  const resolved = useResolveClassNames(className ?? '');
+
   return (
     <AnimatedPressable
       onPressIn={(e) => {
@@ -44,7 +48,7 @@ export function PressScale({
         pressed.value = withSpring(0, { damping: 18, stiffness: 260 });
         onPressOut?.(e);
       }}
-      style={[style, animatedStyle]}
+      style={[resolved, animatedStyle]}
       {...rest}>
       {children}
     </AnimatedPressable>

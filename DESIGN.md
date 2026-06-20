@@ -2,7 +2,7 @@
 
 > _Move-in week energy on a clean white canvas — the interface stays calm and bright while the people, the cards, and the matches bring all the color._
 
-A design system for a college roommate–finding app with a Tinder-style swipe flow, built in the spirit of **Partiful**: confident, slightly editorial, playful without being childish. The whole personality lives in the _content_ (faces, dorm photos, match moments, gradient washes) while the _chrome_ (buttons, nav, structure) stays disciplined black-and-white.
+A design system for a college roommate–finding app with a Hinge-style profile feed — you scroll a person's photos and prompt answers and like the _specific_ thing that catches you — built in the spirit of **Partiful**: confident, slightly editorial, playful without being childish. The whole personality lives in the _content_ (faces, dorm photos, prompt answers, match moments, gradient washes) while the _chrome_ (buttons, nav, structure) stays disciplined black-and-white.
 
 > **Naming note:** "Roommate Match" is a placeholder — swap in your real product name throughout. Tokens are framework-agnostic; a CSS-variable starter block is at the bottom.
 
@@ -15,9 +15,9 @@ Partiful's core trick is **restraint as a stage**. A near-white page makes the c
 Five principles carry over, reframed for roommate matching:
 
 1. **White stage, colorful content.** The canvas is white. Color enters only through profile photos, dorm shots, and the gradient washes behind hero/empty states. Never let UI chrome compete with a person's face.
-2. **Black is the only action color.** Filled-black buttons, black borders, black headings. Resist the urge to make "Like" pink or "Match" purple — semantic color is reserved for a _tiny_ set of match/swipe states (§7).
+2. **Black is the only action color.** Filled-black buttons, black borders, black headings. Resist the urge to make "Like" pink or "Match" purple — semantic color is reserved for a _tiny_ set of like/match states (§7).
 3. **Big, tight display type.** Statement headlines run large with negative letter-spacing for an editorial density most apps don't have. This is the signature — spend your typographic boldness here.
-4. **The tilted card stack is the soul.** Partiful scatters invitation cards at ±10–15°. Your swipe deck _is_ that motif, made interactive. The cards under the top card peek out at a slight rotation — the pile feels physical, like a stack of polaroids of potential roommates.
+4. **Prompts are the soul; the tilted-card stack is the signature.** The live experience is a calm vertical scroll through one person — full-bleed photos interleaved with **prompt cards** (a question + a big, characterful answer), which is where personality actually lives. Partiful's scattered ±10–15° invitation cards stay on as your _visual_ signature in onboarding, marketing, and empty states — a physical-feeling pile of polaroids of potential roommates — but the in-app interaction is scroll-and-like, never a swipe deck.
 5. **Playful, not juvenile.** Rounded geometric display letterforms and confetti-on-marble lightness signal fun; tight tracking and a monochrome action system keep it from tipping into "kiddie app."
 
 The feeling at the emotional peak — a mutual match — should land like Partiful's RSVP confirmation: a small, joyful, well-earned burst of color against the quiet.
@@ -40,15 +40,15 @@ The system is **achromatic by default** with color reserved for surfaces, imager
 | `--fog`      | `#b3b3b3` | Section subheads, disabled labels.                                                                             |
 | `--silver`   | `#cccccc` | Hairline borders, disabled button fills.                                                                       |
 
-### Semantic — swipe & match states _only_
+### Semantic — like & match states _only_
 
-Reserve these for swipe feedback and match status. **Never** use them as decorative or brand color anywhere else (this is the rule that keeps the app looking intentional).
+Reserve these for like feedback and match status. **Never** use them as decorative or brand color anywhere else (this is the rule that keeps the app looking intentional).
 
 | Token     | Hex       | Role                                                                        |
 | --------- | --------- | --------------------------------------------------------------------------- |
-| `--yes`   | `#31c431` | "Like / Want to live together" affirmative state, mutual-match accent.      |
-| `--maybe` | `#ffae00` | "Maybe / Save for later" state.                                             |
-| `--pass`  | `#ff0000` | "Pass" state. Used sparingly — a thin ring or icon, never a full red panel. |
+| `--yes`   | `#31c431` | "Like" accent — the heart on a photo or prompt; also the mutual-match accent. |
+| `--maybe` | `#ffae00` | "Rose / standout" — an optional stronger like on a prompt. Used rarely.       |
+| `--pass`  | `#ff0000` | "Skip" state — dismissing a person. Used sparingly: a thin ring or icon, never a full red panel. |
 
 ### Surface gradients (backgrounds & overlays only — never on a button or text)
 
@@ -61,7 +61,7 @@ These are **soft mesh gradients** — not linear ramps. Each is a stack of 4–5
 
 **Mesh discipline:** the radial-bloom positions are intentionally irregular — feel free to jitter the `at x% y%` anchors per instance so repeated surfaces don't look stamped from one template. Keep each bloom soft-edged (fade to `transparent` well before the next blob's center) so seams never read as hard bands. Full layer stacks live in §9.
 
-**Palette discipline:** if you're reaching for a colored fill on a button, stop — the answer is black. If you're reaching for green/amber/red outside a swipe interaction, stop — those belong to match states.
+**Palette discipline:** if you're reaching for a colored fill on a button, stop — the answer is black. If you're reaching for green/amber/red outside a like or match interaction, stop — those belong to those states.
 
 ---
 
@@ -92,15 +92,28 @@ Space Grotesk is font-secondary
 
 ## Core components
 
-### Swipe card (the centerpiece)
+### Profile (the centerpiece)
 
-White surface, `border-radius: 12px`, `--shadow-card`. Full-bleed profile photo filling the top ~70%, with a bottom-up `linear-gradient(transparent → rgba(0,0,0,0.55))` scrim so white text stays legible over any photo. On the scrim: **name** in display/heading weight at 24–28px white, then **year · major · dorm preference** in 14px at ~85% white. Cards beneath the top card peek out rotated **±4–6°** and scaled to ~0.96 to form the physical "stack of polaroids."
+A single roommate presented as a **vertical scroll**, not a swipe card. A short header carries the **name** in display face (24–28px) with **year · major · dorm preference · sleep schedule** beneath in 14px `--graphite`. Below it, full-bleed photos (`border-radius: 12px`, `--shadow-card`) alternate with **prompt cards** down the page; you read one person top-to-bottom, and reaching the end advances to the next. There is no deck and no drag. Every photo and every prompt carries its own **like** affordance, so you respond to the _specific_ thing that resonates — the core Hinge mechanic. Keep all chrome quiet so the photos stay the loudest color on screen (§1).
 
-- **Drag feedback:** as the card drags right, fade in a `--yes` "LIKE" stamp (rotated -12°, pill-outlined); left → `--pass` "PASS"; up → `--maybe` "MAYBE." Stamps are outline-only, never full-bleed color.
+- **Per-element like:** a heart anchored bottom-right of each photo and prompt — white circle, `--shadow-sm`, a mono-weight `--ink` icon that fills `--yes` once tapped.
+- **Photo caption scrim:** if a caption sits on a photo, lay a bottom-up dark scrim (`transparent → rgba(0,0,0,0.55)`) behind it so white text stays legible over any image.
 
-### Swipe action buttons (under the deck)
+### Prompt card (the personality unit)
 
-Three circular buttons, full-pill radius, ~56px, white fill, `--shadow-lg`, a single mono-weight icon centered. Pass (✕, `--pass` icon), Maybe (★, `--maybe` icon), Like (♥, `--yes` icon). The center/primary one can be slightly larger (~64px). Icons only — no text labels needed.
+The Hinge signature, and where the **moment font earns its keep.** A white card (`--r-card`, `--shadow-card`, generous padding): the **prompt question** in `--slate` 14px (e.g. "My ideal roommate Sunday," "A green flag in a roommate," "We'll get along if…") sits above a **short, characterful answer** set large in Space Grotesk (24–28px, tight tracking). Keep answers to a sentence or two and let the type do the work. A heart in the bottom-right likes this specific answer.
+
+### Like sheet (with optional comment)
+
+Tapping a heart opens a bottom sheet showing the liked photo or prompt, an optional **"Add a comment…"** field, and a single black **Send like** CTA. A like _with_ a comment is the warmest signal in the app — encourage it, never require it. It slides up from the bottom (§ motion) with `--r-modal` top corners.
+
+### Skip control
+
+Dismissing a whole person is one circular button — white fill, `--shadow-lg`, ~56px, ✕ in `--pass`, pinned bottom-left or in the profile header. No row of swipe buttons: the only ways forward are "like something" or "skip this person," and the per-element heart is the center-stage action.
+
+### "Likes you" inbox
+
+The list that drives matches: people who liked one of your photos or prompts. Each entry shows _what_ they liked (a snippet in a `rgba(0,0,0,0.05)` quote block) plus any comment, on a `--r-card` / `--shadow-card` surface; a `--yes` "New" pill marks fresh likes. Liking someone back from here creates the match.
 
 ### Primary CTA button
 
@@ -116,7 +129,7 @@ Full-pill radius, `background: rgba(0,0,0,0.05)`, text `--ink` 12px text face 70
 
 ### "It's a match!" modal
 
-The emotional peak — give it the full `--grad-warm` backdrop (the one place saturated pink fills chrome). Two profile photos as overlapping circles, a big display-face headline ("You both said yes!"), and two stacked black CTAs ("Send a message" / "Keep swiping"). 16px modal radius. A brief confetti burst is on-brand here — keep it to this moment only.
+The emotional peak — fired when you like someone back (from "Likes you," or you each liked the other's content). Give it the full `--grad-warm` backdrop (the one place saturated pink fills chrome). Two profile photos as overlapping circles, a big display-face headline ("You both said yes!"), and two stacked black CTAs ("Send a message" / "Keep browsing"). 16px modal radius. A brief confetti burst is on-brand here — keep it to this moment only.
 
 ### Filter / tab selector
 
@@ -136,15 +149,15 @@ Wrap in `--grad-cool`. A short, warm, directive line in the interface's own voic
 
 **Photography.** Real, warm, candid student/dorm life — natural light, a little grain, genuine energy. Profile photos are the loudest color on screen by design; keep UI around them quiet.
 
-**Tilted-card motif.** Beyond the live deck, reuse the scattered ±10–15° card stack in onboarding and marketing to communicate "lots of potential people" — it's the visual signature tying you to the Partiful lineage.
+**Tilted-card motif.** The scattered ±10–15° card stack lives in onboarding, marketing, and empty states to communicate "lots of potential people" — it's the visual signature tying you to the Partiful lineage. It stays a _visual_ motif only; the live experience is the scrolling profile (see Core components → Profile), not a deck.
 
 **Icons.** Filled, mono-weight, 16–20px, `--ink` or `--canvas` only. No multicolor or gradient icons. No decorative SVG patterns.
 
 **Motion.** Deliberate and scarce:
 
-The primary interaction is swipe-based card dragging with spring physics. Cards should respond immediately to touch with slight resistance and snap into place on release with directional bias for like/dislike states. The next card in the stack should subtly shift and scale forward as the top card is dragged, creating a sense of depth in the deck.
+The primary interaction is a smooth **vertical scroll** through a profile's photos and prompts — light momentum, no snapping; reading a person should feel calm and unhurried. Photos and prompt cards may rise in subtly as they enter the viewport. Tapping a heart gives an immediate, lightweight scale-pop on the icon before the like sheet slides up.
 
-When a swipe is completed, the next card promotes to the top with a gentle fade and scale animation, combined with a slight upward drift to maintain continuity in the stack. Cards entering or leaving the stack should feel grounded, not abrupt.
+Sending a like or skipping a person advances to the next profile with a gentle fade and a slight upward drift — grounded, not abrupt. Skipping should ease the current profile away rather than fling it.
 
 Match events should feel special. The match modal should slide in from the bottom with a quick ease-out transition, followed by a single confetti burst animation that is exclusive to this moment. Profile transitions should use shared element animation, especially when expanding an avatar into a full profile view.
 
@@ -169,7 +182,7 @@ Notifications and toasts should slide in from the bottom with a light bounce and
   --fog: #b3b3b3;
   --silver: #cccccc;
 
-  /* Semantic — swipe/match states ONLY */
+  /* Semantic — like/match states ONLY */
   --yes: #31c431;
   --maybe: #ffae00;
   --pass: #ff0000;

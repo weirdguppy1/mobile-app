@@ -6,7 +6,7 @@ Production-grade mobile app: React Native + Expo, TypeScript, Supabase, Expo Rou
 
 **Priorities, in order:** type safety → readability → maintainability → performance. When solutions conflict, pick the simplest production-ready one. Avoid overengineering.
 
-**Application:** you are going to build a Tinder-style mobile app that helps college students (incoming freshman, sophomores, etc.) find their perfect roommate, targeted towards Gen Z students. See DESIGN.md for design specifications.
+**Application:** you are going to build a Hinge-style mobile app that helps college students (incoming freshman, sophomores, etc.) find their perfect roommate, targeted towards Gen Z students. See DESIGN.md for design specifications.
 
 ---
 

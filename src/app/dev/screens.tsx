@@ -23,7 +23,7 @@ export default function ScreensPreview() {
   // Seed sample data so review/verify look populated.
   useEffect(() => {
     const s = useSignUpStore.getState();
-    s.setUniversity('Stanford University');
+    s.setCampus({ name: 'Stanford University', domain: 'stanford.edu' });
     s.setEmail('student@stanford.edu');
   }, []);
 
@@ -41,12 +41,35 @@ export default function ScreensPreview() {
               className="prose-body font-semibold text-ink underline">
               → Sign-up (live)
             </Link>
+            <Link
+              href="/(auth)/sign-in"
+              className="prose-body font-semibold text-ink underline">
+              → Sign-in (live)
+            </Link>
           </View>
 
           <Frame title="Step: campus"><CampusStep /></Frame>
-          <Frame title="Step: email"><EmailStep /></Frame>
+          <Frame title="Step: email">
+            <EmailStep
+              title={"What's your\nemail?"}
+              subtitle="Use your .edu address so we can verify you're a student."
+              email="student@stanford.edu"
+              emailError={null}
+              onChangeEmail={() => {}}
+              onSubmit={() => {}}
+            />
+          </Frame>
           <Frame title="Step: review"><ReviewStep /></Frame>
-          <Frame title="Step: verify"><VerifyStep /></Frame>
+          <Frame title="Step: verify">
+            <VerifyStep
+              email="student@stanford.edu"
+              code=""
+              otpError={null}
+              onChangeCode={() => {}}
+              onComplete={() => {}}
+              onResend={() => {}}
+            />
+          </Frame>
         </ScrollView>
       </SafeAreaView>
     </View>
