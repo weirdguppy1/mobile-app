@@ -83,7 +83,7 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
   ];
 
   return (
-    <GestureHandlerRootView onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+    <GestureHandlerRootView style={{ width: '100%' }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
       {cellSize > 0 ? (
         <DropProvider ref={dropProviderRef}>
           <View style={{ height: gridHeight, position: 'relative' }}>
@@ -139,6 +139,7 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
                       ) : (
                         <PressScale
                           accessibilityRole="button"
+                          accessibilityLabel="Retry upload"
                           onPress={item.onRetry}
                           className="absolute inset-0 items-center justify-center bg-[rgba(255,0,0,0.12)]">
                           <Text className="prose-caption font-semibold text-pass">Failed — Retry</Text>
