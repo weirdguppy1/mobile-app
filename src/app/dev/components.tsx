@@ -6,7 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingOverlay } from '@/features/auth/components/loading-overlay';
 import { OtpInput } from '@/features/auth/components/otp-input';
 import { ProgressBar } from '@/features/auth/components/progress-bar';
-import { Button, FadeIn, Field, PressScale, TextField } from '@/shared/components';
+import { ALCOHOL, INTERESTS } from '@/features/profile/constants';
+import { Button, FadeIn, Field, OptionGroup, PressScale, TextField } from '@/shared/components';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -19,6 +20,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function ComponentsGallery() {
   const [otp, setOtp] = useState('');
+  const [single, setSingle] = useState<string | null>(null);
+  const [multi, setMulti] = useState<string[]>([]);
 
   return (
     <View className="flex-1 bg-canvas">
@@ -85,6 +88,13 @@ export default function ComponentsGallery() {
             <FadeIn>
               <Text className="prose-body text-ink">FadeIn content</Text>
             </FadeIn>
+          </Section>
+
+          <Section title="Primitives — OptionGroup">
+            <Text className="prose-caption text-ash">Single-select</Text>
+            <OptionGroup options={ALCOHOL} value={single} onChange={setSingle} />
+            <Text className="prose-caption text-ash">Multi-select (max 3)</Text>
+            <OptionGroup multiple options={INTERESTS} value={multi} onChange={setMulti} max={3} />
           </Section>
         </ScrollView>
       </SafeAreaView>
