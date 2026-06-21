@@ -7,7 +7,7 @@ import { LoadingOverlay } from '@/features/auth/components/loading-overlay';
 import { OtpInput } from '@/features/auth/components/otp-input';
 import { ProgressBar } from '@/features/auth/components/progress-bar';
 import { ALCOHOL, INTERESTS } from '@/features/profile/constants';
-import { Button, FadeIn, Field, OptionGroup, PressScale, ScaleInput, TagInput, TextField } from '@/shared/components';
+import { Button, FadeIn, Field, OptionGroup, PhotoGrid, PressScale, ScaleInput, TagInput, TextField } from '@/shared/components';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -102,6 +102,18 @@ export default function ComponentsGallery() {
           <Section title="Primitives — ScaleInput / TagInput">
             <ScaleInput value={scale} onChange={setScale} lowLabel="Messy" highLabel="Spotless" />
             <TagInput value={tags} onChange={setTags} max={3} placeholder="Add a major" />
+          </Section>
+
+          <Section title="Primitives — PhotoGrid">
+            <PhotoGrid
+              photos={[
+                { id: '1', uri: 'https://placehold.co/300', status: 'ready' },
+                { id: '2', uri: 'https://placehold.co/300', status: 'error' },
+              ]}
+              onAdd={() => {}}
+              onRemove={() => {}}
+              onReorder={() => {}}
+            />
           </Section>
         </ScrollView>
       </SafeAreaView>

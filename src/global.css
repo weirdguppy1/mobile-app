@@ -111,3 +111,7 @@
 @utility option-chip-selected {
   @apply border-ink bg-ink;
 }
+
+@utility photo-slot {
+  @apply aspect-square overflow-hidden rounded-xl border border-silver bg-wash;
+}
