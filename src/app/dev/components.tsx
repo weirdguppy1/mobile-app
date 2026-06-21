@@ -7,7 +7,7 @@ import { LoadingOverlay } from '@/features/auth/components/loading-overlay';
 import { OtpInput } from '@/features/auth/components/otp-input';
 import { ProgressBar } from '@/features/auth/components/progress-bar';
 import { ALCOHOL, INTERESTS } from '@/features/profile/constants';
-import { Button, FadeIn, Field, OptionGroup, PressScale, TextField } from '@/shared/components';
+import { Button, FadeIn, Field, OptionGroup, PressScale, ScaleInput, TagInput, TextField } from '@/shared/components';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -22,6 +22,8 @@ export default function ComponentsGallery() {
   const [otp, setOtp] = useState('');
   const [single, setSingle] = useState<string | null>(null);
   const [multi, setMulti] = useState<string[]>([]);
+  const [scale, setScale] = useState<number | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
 
   return (
     <View className="flex-1 bg-canvas">
@@ -95,6 +97,11 @@ export default function ComponentsGallery() {
             <OptionGroup options={ALCOHOL} value={single} onChange={setSingle} />
             <Text className="prose-caption text-ash">Multi-select (max 3)</Text>
             <OptionGroup multiple options={INTERESTS} value={multi} onChange={setMulti} max={3} />
+          </Section>
+
+          <Section title="Primitives — ScaleInput / TagInput">
+            <ScaleInput value={scale} onChange={setScale} lowLabel="Messy" highLabel="Spotless" />
+            <TagInput value={tags} onChange={setTags} max={3} placeholder="Add a major" />
           </Section>
         </ScrollView>
       </SafeAreaView>
