@@ -16,7 +16,8 @@
 - **Data access stays out of UI** — screens call hooks/mutations only, never `supabase` directly. (TASK.md)
 - **Reuse** the shared primitives + `constants.ts`; no duplicated onboarding-specific controls or hardcoded option lists. (TASK.md)
 - Imports ordered: React → React Native → third-party → `@/...` → relative, blank-line separated. Path aliases only (`@/*` → `src/*`). (CLAUDE.md)
-- Verification gate: **`npx tsc --noEmit`** must pass (project `npm run lint` is broken). Pure-logic tasks additionally gate on `npm test`.
+- Package manager: **pnpm** (tracked `pnpm-lock.yaml`). Install with `pnpm add` / `pnpm add -D`; commit `pnpm-lock.yaml` (never `package-lock.json`). Run tests with `npx jest <path>`.
+- Verification gate: **`npx tsc --noEmit`** must pass (project `npm run lint` is broken). Pure-logic tasks additionally gate on `npx jest`.
 - Git: work on **`feature/user-setup`** (never main). Commit after each task with the trailer `Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>`.
 - `onboarding_complete` stays `false` until the final Review step.
 
@@ -89,21 +90,21 @@ src/app/dev/screens.tsx                        onboarding links/previews
 **Interfaces:**
 - Produces: `queryClient` (a `QueryClient`) from `@/lib/query-client`.
 
-- [ ] **Step 1: Install runtime deps**
+- [ ] **Step 1: Install runtime deps** (repo uses **pnpm**)
 
 Run:
 ```bash
 npx expo install expo-image-picker
-npm install @tanstack/react-query react-hook-form @hookform/resolvers
+pnpm add @tanstack/react-query react-hook-form @hookform/resolvers
 ```
-Expected: packages added to `package.json` dependencies.
+Expected: packages added to `package.json` dependencies; `pnpm-lock.yaml` updated.
 
 - [ ] **Step 2: Install test deps + add script**
 
 Run:
 ```bash
-npm install --save-dev jest jest-expo @types/jest
-npm pkg set scripts.test="jest"
+pnpm add -D jest jest-expo @types/jest
+npm pkg set scripts.test="jest"   # only edits package.json; safe in a pnpm repo
 ```
 Expected: devDependencies updated, `"test": "jest"` script present.
 
@@ -140,7 +141,7 @@ describe('test harness', () => {
 
 - [ ] **Step 5: Run the smoke test**
 
-Run: `npm test -- src/lib/__tests__/smoke.test.ts`
+Run: `npx jest src/lib/__tests__/smoke.test.ts`
 Expected: 1 passing test.
 
 - [ ] **Step 6: Create the QueryClient**
@@ -186,7 +187,7 @@ Expected: no errors.
 - [ ] **Step 9: Commit**
 
 ```bash
-git add package.json package-lock.json jest.config.js jest.setup.js src/lib/query-client.ts src/lib/__tests__/smoke.test.ts src/app/_layout.tsx
+git add package.json pnpm-lock.yaml jest.config.js jest.setup.js src/lib/query-client.ts src/lib/__tests__/smoke.test.ts src/app/_layout.tsx
 git commit -m "chore(onboarding): add query/forms/picker deps, jest harness, QueryClientProvider
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
