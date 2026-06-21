@@ -77,7 +77,7 @@ export type ExtrasValues = z.infer<typeof extrasSchema>;
 export const onboardingCompletionSchema = z.object({
   first_name: z.string().trim().min(1),
   graduation_year: z.number().int().min(2024).max(2035),
-  majors: z.array(z.string()).min(1),
+  majors: z.array(z.string().trim().min(1)).min(1),
   sleep_schedule: oneOf(SLEEP_SCHEDULE),
   bedtime: oneOf(BEDTIME),
   wakeup_time: oneOf(WAKEUP_TIME),
