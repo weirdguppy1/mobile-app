@@ -51,8 +51,24 @@ export async function uploadPhoto(userId: string, localUri: string, position: nu
 }
 
 export async function removePhoto(photoId: string): Promise<void> {
+  // Look up the storage path before deleting the row.
+  const { data: row, error: selError } = await supabase
+    .from('profile_photos')
+    .select('url')
+    .eq('id', photoId)
+    .single();
+  if (selError) throw selError;
+
   const { error } = await supabase.from('profile_photos').delete().eq('id', photoId);
   if (error) throw error;
+
+  // Clean up the underlying object via the Storage API. Direct SQL deletes from
+  // storage.objects are blocked by Supabase's protect_delete trigger, so this
+  // can't be done in a DB trigger. Best-effort: an orphaned file is harmless and
+  // the row (the user-visible photo) is already gone.
+  if (row?.url) {
+    await supabase.storage.from(PHOTO_BUCKET).remove([row.url]);
+  }
 }
 
 export async function persistPhotoOrder(photos: { id: string; position: number }[]): Promise<void> {

@@ -7,20 +7,31 @@ import {
 } from '@/features/profile/schema';
 
 describe('basicsSchema', () => {
+  const base = {
+    first_name: 'Mia', graduation_year: 2027, majors: ['CS'],
+    sex_assigned_at_birth: 'female', sexual_orientation: 'straight',
+  };
   it('requires first name, grad year, 1–3 majors', () => {
-    expect(basicsSchema.safeParse({ first_name: '', graduation_year: 2027, majors: ['CS'] }).success).toBe(false);
-    expect(basicsSchema.safeParse({ first_name: 'Mia', graduation_year: 2027, majors: [] }).success).toBe(false);
-    expect(basicsSchema.safeParse({ first_name: 'Mia', graduation_year: 2027, majors: ['A', 'B', 'C', 'D'] }).success).toBe(false);
-    expect(basicsSchema.safeParse({ first_name: 'Mia', graduation_year: 2027, majors: ['CS'] }).success).toBe(true);
+    expect(basicsSchema.safeParse({ ...base, first_name: '' }).success).toBe(false);
+    expect(basicsSchema.safeParse({ ...base, majors: [] }).success).toBe(false);
+    expect(basicsSchema.safeParse({ ...base, majors: ['A', 'B', 'C', 'D'] }).success).toBe(false);
+    expect(basicsSchema.safeParse(base).success).toBe(true);
+  });
+  it('requires sex assigned at birth and sexual orientation', () => {
+    const { sex_assigned_at_birth, ...noSex } = base;
+    const { sexual_orientation, ...noOrientation } = base;
+    expect(basicsSchema.safeParse(noSex).success).toBe(false);
+    expect(basicsSchema.safeParse(noOrientation).success).toBe(false);
   });
 });
 
 describe('compatibilitySchema', () => {
-  it('requires all nine fields', () => {
+  it('requires all ten fields', () => {
     const full = {
       sleep_schedule: 'night_owl', bedtime: 'after_midnight', wakeup_time: 'after_9am',
       cleanliness: 4, noise_preference: 'moderate_ok', study_style: 'mix',
-      guests_frequency: 'occasionally', social_level: 3, room_temperature: 'cold',
+      guests_frequency: 'occasionally', romantic_guests_frequency: 'rarely',
+      social_level: 3, room_temperature: 'cold',
     };
     expect(compatibilitySchema.safeParse(full).success).toBe(true);
     const { cleanliness, ...missing } = full;
@@ -50,7 +61,8 @@ describe('onboardingCompletionSchema', () => {
     first_name: 'Mia', graduation_year: 2027, majors: ['CS'],
     sleep_schedule: 'night_owl', bedtime: 'after_midnight', wakeup_time: 'after_9am',
     cleanliness: 4, noise_preference: 'moderate_ok', study_style: 'mix',
-    guests_frequency: 'occasionally', social_level: 3, room_temperature: 'cold',
+    guests_frequency: 'occasionally', romantic_guests_frequency: 'rarely',
+    social_level: 3, room_temperature: 'cold',
     interests: ['gym', 'music', 'coding', 'reading', 'movies'],
     promptCount: 1, photoCount: 1,
   };

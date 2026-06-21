@@ -3,8 +3,8 @@ import { z } from 'zod';
 import {
   ALCOHOL, BEDTIME, DEAL_BREAKER_VALUES, FITNESS, GUESTS_FREQUENCY, INTEREST_VALUES,
   INTERESTS_LIMITS, MAJORS_LIMITS, NOISE_PREFERENCE, PARTIES, PROMPTS_LIMITS,
-  ROOM_TEMPERATURE, SEX_ASSIGNED_AT_BIRTH, SLEEP_SCHEDULE, SMOKING, STUDY_STYLE,
-  WAKEUP_TIME,
+  ROMANTIC_GUESTS_FREQUENCY, ROOM_TEMPERATURE, SEX_ASSIGNED_AT_BIRTH, SEXUAL_ORIENTATION,
+  SLEEP_SCHEDULE, SMOKING, STUDY_STYLE, WAKEUP_TIME,
 } from '@/features/profile/constants';
 
 const oneOf = (opts: { value: string }[]) =>
@@ -16,7 +16,8 @@ export const basicsSchema = z.object({
   graduation_year: z.number().int().min(2024).max(2035),
   majors: z.array(z.string().trim().min(1)).min(MAJORS_LIMITS.min, 'Add at least one major').max(MAJORS_LIMITS.max, 'Up to three majors'),
   gender_identity: z.string().trim().optional().or(z.literal('')),
-  sex_assigned_at_birth: oneOf(SEX_ASSIGNED_AT_BIRTH).optional(),
+  sex_assigned_at_birth: oneOf(SEX_ASSIGNED_AT_BIRTH),
+  sexual_orientation: oneOf(SEXUAL_ORIENTATION),
 });
 export type BasicsValues = z.infer<typeof basicsSchema>;
 
@@ -28,6 +29,7 @@ export const compatibilitySchema = z.object({
   noise_preference: oneOf(NOISE_PREFERENCE),
   study_style: oneOf(STUDY_STYLE),
   guests_frequency: oneOf(GUESTS_FREQUENCY),
+  romantic_guests_frequency: oneOf(ROMANTIC_GUESTS_FREQUENCY),
   social_level: z.number().int().min(1).max(5),
   room_temperature: oneOf(ROOM_TEMPERATURE),
 });
@@ -85,6 +87,7 @@ export const onboardingCompletionSchema = z.object({
   noise_preference: oneOf(NOISE_PREFERENCE),
   study_style: oneOf(STUDY_STYLE),
   guests_frequency: oneOf(GUESTS_FREQUENCY),
+  romantic_guests_frequency: oneOf(ROMANTIC_GUESTS_FREQUENCY),
   social_level: z.number().int().min(1).max(5),
   room_temperature: oneOf(ROOM_TEMPERATURE),
   interests: z.array(z.enum(INTEREST_VALUES)).min(5).max(10),
