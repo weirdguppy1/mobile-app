@@ -44,12 +44,47 @@ const ACTIVATION_DELAY_MS = 200;
  *  saved-photo order. */
 export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: PhotoGridProps) {
   const [width, setWidth] = useState(0);
+  const cellSize = width > 0 ? photoCellSize(width) : 0;
 
+  // Mount the sortable grid only once the width is measured, so its positions
+  // initialise with the real cell size. The `key` re-inits on any width change
+  // (e.g. rotation). Without this, the grid seeds every tile at (0,0) and they
+  // render overlapped on first load.
+  return (
+    <GestureHandlerRootView
+      style={{ width: '100%' }}
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      {cellSize > 0 ? (
+        <PhotoGridContent
+          key={cellSize}
+          photos={photos}
+          cellSize={cellSize}
+          onAdd={onAdd}
+          onRemove={onRemove}
+          onReorder={onReorder}
+          max={max}
+        />
+      ) : null}
+    </GestureHandlerRootView>
+  );
+}
+
+interface PhotoGridContentProps {
+  photos: PhotoItem[];
+  cellSize: number;
+  onAdd: () => void;
+  onRemove: (id: string) => void;
+  onReorder: (from: number, to: number) => void;
+  max: number;
+}
+
+/** The measured grid. Always rendered with a known `cellSize`, so
+ *  `useGridSortableList` seeds correct tile positions from its first render. */
+function PhotoGridContent({ photos, cellSize, onAdd, onRemove, onReorder, max }: PhotoGridContentProps) {
   const reorderable = photos.filter((p) => p.status === 'ready' || p.status === undefined);
   const transient = photos.filter((p) => p.status === 'uploading' || p.status === 'error');
   const canAdd = photos.length < max;
 
-  const cellSize = width > 0 ? photoCellSize(width) : 0;
   const dimensions = {
     columns: PHOTO_GRID_COLUMNS,
     itemWidth: cellSize,
@@ -58,8 +93,6 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
     rowGap: PHOTO_GRID_GAP,
   };
 
-  // Drives the reorderable photos. Safe to call with cellSize 0 before layout —
-  // positions re-sync once the real dimensions arrive.
   const { dropProviderRef, getItemProps } = useGridSortableList({
     data: reorderable,
     dimensions,
@@ -83,76 +116,72 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
   ];
 
   return (
-    <GestureHandlerRootView style={{ width: '100%' }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-      {cellSize > 0 ? (
-        <DropProvider ref={dropProviderRef}>
-          <View style={{ height: gridHeight, position: 'relative' }}>
-            {reorderable.map((item, index) => (
-              <SortableGridItem
-                key={item.id}
-                data={item}
-                {...getItemProps(item, index)}
-                activationDelay={ACTIVATION_DELAY_MS}
-                onDrop={(id, position) => {
-                  const from = reorderable.findIndex((p) => p.id === id);
-                  if (from !== -1 && from !== position) onReorder(from, position);
-                }}>
+    <DropProvider ref={dropProviderRef}>
+      <View style={{ height: gridHeight, position: 'relative' }}>
+        {reorderable.map((item, index) => (
+          <SortableGridItem
+            key={item.id}
+            data={item}
+            {...getItemProps(item, index)}
+            activationDelay={ACTIVATION_DELAY_MS}
+            onDrop={(id, position) => {
+              const from = reorderable.findIndex((p) => p.id === id);
+              if (from !== -1 && from !== position) onReorder(from, position);
+            }}>
+            <View className="photo-slot relative h-full w-full">
+              <Image source={{ uri: item.uri }} className="h-full w-full" contentFit="cover" />
+              {index === 0 ? (
+                <View className="absolute left-1 top-1 rounded-full bg-ink px-2 py-0.5">
+                  <Text className="prose-caption text-canvas">Primary</Text>
+                </View>
+              ) : null}
+              <PressScale
+                accessibilityRole="button"
+                accessibilityLabel="Remove photo"
+                onPress={() => onRemove(item.id)}
+                className="absolute right-1 top-1 h-6 w-6 items-center justify-center rounded-full bg-canvas/90">
+                <Text className="prose-caption text-pass">✕</Text>
+              </PressScale>
+            </View>
+          </SortableGridItem>
+        ))}
+
+        {trailing.map(({ key, index, item }) => {
+          const { x, y } = photoCellOffset(index, cellSize);
+          return (
+            <View
+              key={key}
+              style={{ position: 'absolute', left: x, top: y, width: cellSize, height: cellSize }}>
+              {item === null ? (
+                <PressScale
+                  accessibilityRole="button"
+                  accessibilityLabel="Add photo"
+                  onPress={onAdd}
+                  className="photo-slot h-full w-full items-center justify-center">
+                  <Text className="prose-display text-fog">+</Text>
+                </PressScale>
+              ) : (
                 <View className="photo-slot relative h-full w-full">
                   <Image source={{ uri: item.uri }} className="h-full w-full" contentFit="cover" />
-                  {index === 0 ? (
-                    <View className="absolute left-1 top-1 rounded-full bg-ink px-2 py-0.5">
-                      <Text className="prose-caption text-canvas">Primary</Text>
+                  {item.status === 'uploading' ? (
+                    <View className="absolute inset-0 items-center justify-center bg-[rgba(255,255,255,0.6)]">
+                      <Text className="prose-caption text-graphite">Uploading…</Text>
                     </View>
-                  ) : null}
-                  <PressScale
-                    accessibilityRole="button"
-                    accessibilityLabel="Remove photo"
-                    onPress={() => onRemove(item.id)}
-                    className="absolute right-1 top-1 h-6 w-6 items-center justify-center rounded-full bg-canvas/90">
-                    <Text className="prose-caption text-pass">✕</Text>
-                  </PressScale>
-                </View>
-              </SortableGridItem>
-            ))}
-
-            {trailing.map(({ key, index, item }) => {
-              const { x, y } = photoCellOffset(index, cellSize);
-              return (
-                <View
-                  key={key}
-                  style={{ position: 'absolute', left: x, top: y, width: cellSize, height: cellSize }}>
-                  {item === null ? (
+                  ) : (
                     <PressScale
                       accessibilityRole="button"
-                      accessibilityLabel="Add photo"
-                      onPress={onAdd}
-                      className="photo-slot h-full w-full items-center justify-center">
-                      <Text className="prose-display text-fog">+</Text>
+                      accessibilityLabel="Retry upload"
+                      onPress={item.onRetry}
+                      className="absolute inset-0 items-center justify-center bg-[rgba(255,0,0,0.12)]">
+                      <Text className="prose-caption font-semibold text-pass">Failed — Retry</Text>
                     </PressScale>
-                  ) : (
-                    <View className="photo-slot relative h-full w-full">
-                      <Image source={{ uri: item.uri }} className="h-full w-full" contentFit="cover" />
-                      {item.status === 'uploading' ? (
-                        <View className="absolute inset-0 items-center justify-center bg-[rgba(255,255,255,0.6)]">
-                          <Text className="prose-caption text-graphite">Uploading…</Text>
-                        </View>
-                      ) : (
-                        <PressScale
-                          accessibilityRole="button"
-                          accessibilityLabel="Retry upload"
-                          onPress={item.onRetry}
-                          className="absolute inset-0 items-center justify-center bg-[rgba(255,0,0,0.12)]">
-                          <Text className="prose-caption font-semibold text-pass">Failed — Retry</Text>
-                        </PressScale>
-                      )}
-                    </View>
                   )}
                 </View>
-              );
-            })}
-          </View>
-        </DropProvider>
-      ) : null}
-    </GestureHandlerRootView>
+              )}
+            </View>
+          );
+        })}
+      </View>
+    </DropProvider>
   );
 }
