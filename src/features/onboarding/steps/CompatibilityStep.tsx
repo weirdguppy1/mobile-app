@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { View } from 'react-native';
 
 import { StepShell } from '@/features/onboarding/components/StepShell';
 import { useOnboarding } from '@/features/onboarding/hooks/use-onboarding';

@@ -40,7 +40,7 @@ export function PromptsStep() {
   return (
     <StepShell canAdvance={result.success} onNext={onNext} saving={savePrompts.isPending}>
       <Field label={`Choose 1–${PROMPTS_LIMITS.max}`}>
-        <OptionGroup multiple options={promptOptions} value={selected} onChange={toggle} max={PROMPTS_LIMITS.max} columns={1} />
+        <OptionGroup multiple options={promptOptions} value={selected} onChange={toggle} max={PROMPTS_LIMITS.max} />
       </Field>
       {selected.length > 0 ? (
         <View className="gap-4">

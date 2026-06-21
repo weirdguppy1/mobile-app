@@ -8,7 +8,6 @@ type SingleProps = {
   options: Option[];
   value: string | null;
   onChange: (value: string) => void;
-  columns?: number;
 };
 
 type MultiProps = {
@@ -18,7 +17,6 @@ type MultiProps = {
   onChange: (value: string[]) => void;
   min?: number;
   max?: number;
-  columns?: number;
 };
 
 type OptionGroupProps = SingleProps | MultiProps;
