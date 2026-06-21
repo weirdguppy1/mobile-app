@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { StepShell } from '@/features/onboarding/components/StepShell';
 import { useOnboarding } from '@/features/onboarding/hooks/use-onboarding';
 import {
-  BEDTIME, GUESTS_FREQUENCY, NOISE_PREFERENCE, ROOM_TEMPERATURE, SLEEP_SCHEDULE,
-  STUDY_STYLE, WAKEUP_TIME,
+  BEDTIME, GUESTS_FREQUENCY, NOISE_PREFERENCE, ROMANTIC_GUESTS_FREQUENCY, ROOM_TEMPERATURE,
+  SLEEP_SCHEDULE, STUDY_STYLE, WAKEUP_TIME,
 } from '@/features/profile/constants';
 import { useProfileMutations } from '@/features/profile/hooks/use-profile-mutations';
 import { compatibilitySchema } from '@/features/profile/schema';
@@ -23,6 +23,7 @@ export function CompatibilityStep() {
     noise_preference: p?.noise_preference ?? null,
     study_style: p?.study_style ?? null,
     guests_frequency: p?.guests_frequency ?? null,
+    romantic_guests_frequency: p?.romantic_guests_frequency ?? null,
     social_level: p?.social_level ?? null,
     room_temperature: p?.room_temperature ?? null,
   });
@@ -45,6 +46,7 @@ export function CompatibilityStep() {
       <Field label="Noise preference"><OptionGroup options={NOISE_PREFERENCE} value={form.noise_preference} onChange={(v) => set('noise_preference', v)} /></Field>
       <Field label="Study style"><OptionGroup options={STUDY_STYLE} value={form.study_style} onChange={(v) => set('study_style', v)} /></Field>
       <Field label="Guests"><OptionGroup options={GUESTS_FREQUENCY} value={form.guests_frequency} onChange={(v) => set('guests_frequency', v)} /></Field>
+      <Field label="Romantic guests"><OptionGroup options={ROMANTIC_GUESTS_FREQUENCY} value={form.romantic_guests_frequency} onChange={(v) => set('romantic_guests_frequency', v)} /></Field>
       <Field label="Social level"><ScaleInput value={form.social_level} onChange={(v) => set('social_level', v)} lowLabel="Homebody" highLabel="Always out" /></Field>
       <Field label="Room temperature"><OptionGroup options={ROOM_TEMPERATURE} value={form.room_temperature} onChange={(v) => set('room_temperature', v)} /></Field>
     </StepShell>

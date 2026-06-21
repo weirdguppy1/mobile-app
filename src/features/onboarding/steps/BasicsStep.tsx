@@ -5,7 +5,7 @@ import { Text, View } from 'react-native';
 import { StepShell } from '@/features/onboarding/components/StepShell';
 import { useOnboarding } from '@/features/onboarding/hooks/use-onboarding';
 import {
-  GRADUATION_YEARS, SEX_ASSIGNED_AT_BIRTH,
+  GRADUATION_YEARS, SEX_ASSIGNED_AT_BIRTH, SEXUAL_ORIENTATION,
 } from '@/features/profile/constants';
 import { useProfileMutations } from '@/features/profile/hooks/use-profile-mutations';
 import { basicsSchema, type BasicsValues } from '@/features/profile/schema';
@@ -28,6 +28,7 @@ export function BasicsStep() {
       majors: p?.majors ?? [],
       gender_identity: p?.gender_identity ?? '',
       sex_assigned_at_birth: p?.sex_assigned_at_birth ?? undefined,
+      sexual_orientation: p?.sexual_orientation ?? undefined,
     },
   });
 
@@ -39,6 +40,7 @@ export function BasicsStep() {
       majors: values.majors,
       gender_identity: values.gender_identity?.trim() || null,
       sex_assigned_at_birth: values.sex_assigned_at_birth ?? null,
+      sexual_orientation: values.sexual_orientation,
     });
     goNext();
   });
@@ -52,11 +54,11 @@ export function BasicsStep() {
       </View>
 
       <Controller control={control} name="first_name" render={({ field, fieldState }) => (
-        <TextField label="First name" value={field.value} onChangeText={field.onChange} invalid={!!fieldState.error} message={fieldState.error?.message} placeholder="Mia" />
+        <TextField label="First name" value={field.value} onChangeText={field.onChange} invalid={!!fieldState.error} message={fieldState.error?.message} placeholder="Preferred name" />
       )} />
 
       <Controller control={control} name="pronouns" render={({ field }) => (
-        <TextField label="Pronouns (optional)" value={field.value ?? ''} onChangeText={field.onChange} placeholder="she/her" />
+        <TextField label="Pronouns (optional)" value={field.value ?? ''} onChangeText={field.onChange} placeholder="she/her, he/him, they/them, etc." />
       )} />
 
       <Controller control={control} name="graduation_year" render={({ field, fieldState }) => (
@@ -72,12 +74,18 @@ export function BasicsStep() {
       )} />
 
       <Controller control={control} name="gender_identity" render={({ field }) => (
-        <TextField label="Gender identity (optional)" value={field.value ?? ''} onChangeText={field.onChange} placeholder="Woman, Man, Non-binary…" />
+        <TextField label="Gender identity" value={field.value ?? ''} onChangeText={field.onChange} placeholder="Woman, Man, Non-binary…" />
       )} />
 
       <Controller control={control} name="sex_assigned_at_birth" render={({ field }) => (
-        <Field label="Sex assigned at birth" optional>
+        <Field label="Sex assigned at birth">
           <OptionGroup options={SEX_ASSIGNED_AT_BIRTH} value={field.value ?? null} onChange={field.onChange} />
+        </Field>
+      )} />
+
+      <Controller control={control} name="sexual_orientation" render={({ field, fieldState }) => (
+        <Field label="Sexual orientation" error={fieldState.error?.message}>
+          <OptionGroup options={SEXUAL_ORIENTATION} value={field.value ?? null} onChange={field.onChange} />
         </Field>
       )} />
     </StepShell>

@@ -37,6 +37,7 @@ export function ReviewStep() {
     noise_preference: p?.noise_preference ?? '',
     study_style: p?.study_style ?? '',
     guests_frequency: p?.guests_frequency ?? '',
+    romantic_guests_frequency: p?.romantic_guests_frequency ?? '',
     social_level: p?.social_level ?? 0,
     room_temperature: p?.room_temperature ?? '',
     interests: p?.interests ?? [],

@@ -61,7 +61,7 @@ export function PhotosStep() {
     <StepShell canAdvance={canAdvance} onNext={goNext}>
       <PhotoGrid photos={items} onAdd={onAdd} onRemove={onRemove} onReorder={onReorder} max={PHOTOS_LIMITS.max} />
       {!canAdvance ? <Text className="prose-footnote text-slate">Add at least one photo to continue.</Text> : null}
-      <Text className="prose-caption text-ash">The first photo is your primary. Touch and hold a photo to reorder.</Text>
+      <Text className="prose-caption text-ash">The first photo is your primary. Touch and hold a photo to drag and reorder.</Text>
     </StepShell>
   );
 }
