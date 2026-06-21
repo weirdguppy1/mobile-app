@@ -12,6 +12,11 @@ export default function AppLayout() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      {/* Default landing route for the group. The Protected screens below are
+          mounted conditionally, so without this expo-router has nothing to
+          render at the group path after sign-in (blank screen). index redirects
+          to the right screen by completeness. */}
+      <Stack.Screen name="index" />
       <Stack.Protected guard={!complete}>
         <Stack.Screen name="onboarding" />
       </Stack.Protected>
