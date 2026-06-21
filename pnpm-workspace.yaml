@@ -1,2 +1,8 @@
+# React Native + Metro require a flat node_modules. pnpm's default isolated
+# layout produces duplicate react / react-native copies, which crashes the app
+# at startup (Maximum call stack size exceeded / "main" not registered).
+nodeLinker: hoisted
+
 allowBuilds:
   supabase: true
+  unrs-resolver: false
