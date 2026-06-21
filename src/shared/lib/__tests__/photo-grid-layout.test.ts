@@ -20,8 +20,7 @@ describe('photoCellSize', () => {
   });
 
   it('handles an exact division', () => {
-    // (324 - 16) / 3 = 102.67 -> 102 ; pick a clean case:
-    // (340 - 16) / 3 = 108
+    // (340 - 8 * 2) / 3 = 108
     expect(photoCellSize(340)).toBe(108);
   });
 });
