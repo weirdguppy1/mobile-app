@@ -1,10 +1,12 @@
 import "@/global.css";
 
+import { QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { queryClient } from "@/lib/query-client";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -45,17 +47,19 @@ export default function RootLayout() {
   if (!fontsLoaded || !hydrated) return null;
 
   return (
-    <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={!session}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(auth)" />
-        </Stack.Protected>
-        <Stack.Protected guard={!!session}>
-          <Stack.Screen name="(app)" />
-        </Stack.Protected>
-        <Stack.Screen name="dev" />
-      </Stack>
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Protected guard={!session}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(auth)" />
+          </Stack.Protected>
+          <Stack.Protected guard={!!session}>
+            <Stack.Screen name="(app)" />
+          </Stack.Protected>
+          <Stack.Screen name="dev" />
+        </Stack>
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }
