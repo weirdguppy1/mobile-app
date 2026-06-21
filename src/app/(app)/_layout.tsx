@@ -5,8 +5,9 @@ import { useOnboardingData } from '@/features/profile/hooks/use-profile';
 export default function AppLayout() {
   const { data, isLoading } = useOnboardingData();
 
-  // Hold while we learn whether onboarding is complete (splash already cleared).
-  if (isLoading) return null;
+  // Hold while we learn whether onboarding is complete. Rendering the protected
+  // branches before this resolves can bounce between unavailable routes.
+  if (isLoading && !data) return null;
 
   const complete = data?.profile.onboarding_complete ?? false;
 

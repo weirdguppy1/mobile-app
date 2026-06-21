@@ -11,13 +11,7 @@ import { useOnboardingData } from '@/features/profile/hooks/use-profile';
  * which screens are reachable; this only resolves where to land.
  */
 export default function AppIndex() {
-  const { data, isLoading } = useOnboardingData();
+  const { data } = useOnboardingData();
 
-  // Hold (blank for a frame) until we know completeness — the gate is the same
-  // query, so this resolves quickly and consistently with the layout.
-  if (isLoading && !data) return null;
-
-  return (
-    <Redirect href={data?.profile.onboarding_complete ? '/discover' : '/onboarding'} />
-  );
+  return <Redirect href={data?.profile.onboarding_complete ? '/discover' : '/onboarding'} />;
 }
