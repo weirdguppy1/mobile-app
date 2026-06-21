@@ -84,6 +84,10 @@ create table if not exists public.profiles (
   sex_assigned_at_birth text       check (sex_assigned_at_birth is null
                                            or sex_assigned_at_birth in
                                               ('female','male','intersex')),
+  sexual_orientation   text        check (sexual_orientation is null
+                                           or sexual_orientation in
+                                              ('straight','gay','lesbian','bisexual','pansexual',
+                                               'asexual','queer','questioning','prefer_not_to_say')),
 
   -- roommate compatibility
   sleep_schedule       text        check (sleep_schedule is null
@@ -105,6 +109,9 @@ create table if not exists public.profiles (
                                               ('mostly_room','mostly_library','mix')),
   guests_frequency     text        check (guests_frequency is null
                                            or guests_frequency in
+                                              ('rarely','occasionally','frequently')),
+  romantic_guests_frequency text   check (romantic_guests_frequency is null
+                                           or romantic_guests_frequency in
                                               ('rarely','occasionally','frequently')),
   social_level         smallint    check (social_level is null
                                            or social_level between 1 and 5),

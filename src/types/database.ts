@@ -13,6 +13,7 @@ export interface Database {
           majors: string[] | null;
           gender_identity: string | null;
           sex_assigned_at_birth: string | null;
+          sexual_orientation: string | null;
           sleep_schedule: string | null;
           bedtime: string | null;
           wakeup_time: string | null;
@@ -20,6 +21,7 @@ export interface Database {
           noise_preference: string | null;
           study_style: string | null;
           guests_frequency: string | null;
+          romantic_guests_frequency: string | null;
           social_level: number | null;
           room_temperature: string | null;
           alcohol: string | null;

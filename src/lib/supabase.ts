@@ -16,11 +16,8 @@ const SecureStoreAdapter = {
   setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
   removeItem: (key: string) => SecureStore.deleteItemAsync(key),
 };
-// const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-// const supabaseKey = process.env.EXPO_PUBLIC_PUBLISHABLE_KEY;
-
-const supabaseUrl = process.env.EXPO_PUBLIC_NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.EXPO_PUBLIC_NEXT_PUBLIC_PUBLISHABLE_KEY;
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.EXPO_PUBLIC_PUBLISHABLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   throw new Error(
