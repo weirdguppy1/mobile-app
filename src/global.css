@@ -97,5 +97,17 @@
 }
 
 @utility icon {
-  @apply h-4 w-4; 
+  @apply h-4 w-4;
+}
+
+@utility button-disabled {
+  @apply opacity-40;
+}
+
+@utility option-chip {
+  @apply rounded-full border border-silver bg-canvas px-4 py-2.5;
+}
+
+@utility option-chip-selected {
+  @apply border-ink bg-ink;
 }

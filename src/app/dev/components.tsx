@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingOverlay } from '@/features/auth/components/loading-overlay';
 import { OtpInput } from '@/features/auth/components/otp-input';
 import { ProgressBar } from '@/features/auth/components/progress-bar';
-import { FadeIn, PressScale, TextField } from '@/shared/components';
+import { Button, FadeIn, Field, PressScale, TextField } from '@/shared/components';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -42,6 +42,21 @@ export default function ComponentsGallery() {
             <PressScale className="button-ghost">
               <Text className="prose-footnote font-medium text-graphite">button-ghost</Text>
             </PressScale>
+          </Section>
+
+          <Section title="Primitives — Button">
+            <Button variant="primary" onPress={() => {}}>Primary</Button>
+            <Button variant="ghost" onPress={() => {}}>Ghost</Button>
+            <Button variant="primary" loading>Loading</Button>
+            <Button variant="primary" disabled>Disabled</Button>
+          </Section>
+
+          <Section title="Primitives — Field">
+            <Field label="With label" optional error="Example error">
+              <View className="card border-continuous px-4 py-3">
+                <Text className="prose-body text-ink">control goes here</Text>
+              </View>
+            </Field>
           </Section>
 
           <Section title="Inputs">
