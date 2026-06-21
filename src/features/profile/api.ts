@@ -41,7 +41,12 @@ export async function uploadPhoto(userId: string, localUri: string, position: nu
     .insert({ profile_id: userId, url: path, position })
     .select('*')
     .single();
-  if (error) throw error;
+  if (error) {
+    // Best-effort: remove the just-uploaded object so a failed row insert
+    // doesn't leave an orphaned file in the bucket.
+    await supabase.storage.from(PHOTO_BUCKET).remove([path]);
+    throw error;
+  }
   return data;
 }
 
