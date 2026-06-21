@@ -25,9 +25,6 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
           className={`field-input border-continuous  ${
             invalid ? "border-pass" : "border-silver focus:border-ink"
           } ${className ?? ""}`}
-          style={{
-            paddingVertical: 0,
-          }}
           {...rest}
         />
         {message ? (
