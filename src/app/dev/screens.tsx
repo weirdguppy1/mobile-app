@@ -46,6 +46,12 @@ export default function ScreensPreview() {
               className="prose-body font-semibold text-ink underline">
               → Sign-in (live)
             </Link>
+            <Link href="/onboarding" className="prose-body font-semibold text-ink underline">
+              → Onboarding (live)
+            </Link>
+            <Link href="/discover" className="prose-body font-semibold text-ink underline">
+              → Discover (live)
+            </Link>
           </View>
 
           <Frame title="Step: campus"><CampusStep /></Frame>
