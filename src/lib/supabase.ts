@@ -4,6 +4,8 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import { createClient } from '@supabase/supabase-js';
 
+import { Database } from '@/types/database';
+
 /**
  * Persists the auth session in the device keychain/keystore on native. On web
  * we let supabase-js fall back to its default (localStorage), since SecureStore
@@ -26,7 +28,7 @@ if (!supabaseUrl || !supabaseKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: {
     storage: Platform.OS === 'web' ? undefined : SecureStoreAdapter,
     autoRefreshToken: true,
