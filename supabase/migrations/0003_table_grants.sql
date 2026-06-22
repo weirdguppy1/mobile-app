@@ -30,10 +30,43 @@
 
 grant usage on schema public to authenticated;
 
--- profiles: SELECT (view visible), UPDATE/DELETE own. INSERT is done
--- by the handle_new_user() signup trigger (SECURITY DEFINER), not the
--- client, and has no RLS policy — so no INSERT grant.
-grant select, update, delete on public.profiles to authenticated;
+-- profiles: SELECT (view visible), DELETE own. UPDATE is column-scoped —
+-- the client may edit profile fields but NOT identity columns (email,
+-- school_domain — also pinned by the lock_profile_identity trigger) or
+-- onboarding_complete (flipped only by the complete_onboarding() RPC in
+-- 0005). INSERT is done by the handle_new_user() signup trigger (SECURITY
+-- DEFINER), not the client, and has no RLS policy — so no INSERT grant.
+grant select, delete on public.profiles to authenticated;
+grant update (
+  first_name,
+  pronouns,
+  graduation_year,
+  majors,
+  gender_identity,
+  sex_assigned_at_birth,
+  sexual_orientation,
+  sleep_schedule,
+  bedtime,
+  wakeup_time,
+  cleanliness,
+  noise_preference,
+  study_style,
+  guests_frequency,
+  romantic_guests_frequency,
+  social_level,
+  room_temperature,
+  alcohol,
+  smoking,
+  parties,
+  fitness,
+  interests,
+  deal_breakers,
+  dorm_preference,
+  living_program,
+  clubs,
+  instagram,
+  linkedin
+) on public.profiles to authenticated;
 
 -- profile_photos: full CRUD (view / insert / update / delete own).
 grant select, insert, update, delete on public.profile_photos to authenticated;

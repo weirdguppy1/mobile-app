@@ -468,28 +468,11 @@ create policy "Delete own photos"
   on public.profile_photos for delete
   using ((select auth.uid()) = profile_id);
 
--- Storage cleanup: when a photo row is removed (directly or via the
--- account-deletion cascade), delete the underlying file too.
--- Assumes images live in a bucket named 'profile-photos' and that
--- profile_photos.url stores the object's storage path (its `name`).
-create or replace function public.delete_photo_object()
-returns trigger
-language plpgsql
-security definer
-set search_path = public, storage
-as $$
-begin
-  delete from storage.objects
-  where bucket_id = 'profile-photos'
-    and name = old.url;
-  return old;
-end;
-$$;
-
-drop trigger if exists on_photo_deleted on public.profile_photos;
-create trigger on_photo_deleted
-  after delete on public.profile_photos
-  for each row execute function public.delete_photo_object();
+-- Storage cleanup: the underlying object is removed via the Storage API
+-- in the app (removePhoto() in src/features/profile/api.ts), NOT a DB
+-- trigger. Supabase's storage.protect_delete trigger blocks direct SQL
+-- deletes from storage.objects, so deleting the file in-database is not
+-- possible. An orphaned object is harmless; the user-visible row is gone.
 
 
 -- ================================================================

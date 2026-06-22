@@ -1,8 +1,9 @@
 import { supabase } from '@/lib/supabase';
-import { OnboardingData, ProfilePhoto } from '@/features/profile/types';
+import { OnboardingData, ProfilePhoto, SignedProfilePhoto } from '@/features/profile/types';
 import { Database } from '@/types/database';
 
 const PHOTO_BUCKET = 'profile-photos';
+const SIGNED_PHOTO_URL_TTL_SECONDS = 300;
 
 export async function fetchOnboardingData(userId: string): Promise<OnboardingData> {
   const [profileRes, photosRes, promptsRes] = await Promise.all([
@@ -13,7 +14,17 @@ export async function fetchOnboardingData(userId: string): Promise<OnboardingDat
   if (profileRes.error) throw profileRes.error;
   if (photosRes.error) throw photosRes.error;
   if (promptsRes.error) throw promptsRes.error;
-  return { profile: profileRes.data, photos: photosRes.data, prompts: promptsRes.data };
+  // Signing is best-effort and MUST NOT fail the load: this same query gates
+  // app routing (see (app)/_layout.tsx and (app)/index.tsx, which only read
+  // profile.onboarding_complete). A missing object or Storage timeout degrades
+  // that one photo to signedUrl: null, never the whole profile response.
+  const photos: SignedProfilePhoto[] = await Promise.all(
+    photosRes.data.map(async (photo) => ({
+      ...photo,
+      signedUrl: await createPhotoSignedUrl(photo.url).catch(() => null),
+    })),
+  );
+  return { profile: profileRes.data, photos, prompts: promptsRes.data };
 }
 
 export async function updateProfile(
@@ -82,11 +93,8 @@ export async function savePrompts(
   userId: string,
   prompts: { prompt: string; answer: string }[],
 ): Promise<void> {
-  const { error: delError } = await supabase.from('profile_prompts').delete().eq('profile_id', userId);
-  if (delError) throw delError;
-  if (prompts.length === 0) return;
-  const rows = prompts.map((p, i) => ({ profile_id: userId, prompt: p.prompt, answer: p.answer.trim(), position: i }));
-  const { error } = await supabase.from('profile_prompts').insert(rows);
+  const rows = prompts.map((p) => ({ prompt: p.prompt, answer: p.answer.trim() }));
+  const { error } = await supabase.rpc('replace_prompts', { p_profile_id: userId, p_prompts: rows });
   if (error) throw error;
 }
 
@@ -98,10 +106,14 @@ export async function savePrivateContact(userId: string, phone: string): Promise
 }
 
 export async function completeOnboarding(userId: string): Promise<void> {
-  const { error } = await supabase.from('profiles').update({ onboarding_complete: true }).eq('id', userId);
+  const { error } = await supabase.rpc('complete_onboarding', { target_profile_id: userId });
   if (error) throw error;
 }
 
-export function photoPublicUrl(path: string): string {
-  return supabase.storage.from(PHOTO_BUCKET).getPublicUrl(path).data.publicUrl;
+export async function createPhotoSignedUrl(path: string): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from(PHOTO_BUCKET)
+    .createSignedUrl(path, SIGNED_PHOTO_URL_TTL_SECONDS);
+  if (error) throw error;
+  return data.signedUrl;
 }

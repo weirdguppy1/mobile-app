@@ -4,7 +4,6 @@ import { Text } from 'react-native';
 
 import { StepShell } from '@/features/onboarding/components/StepShell';
 import { useOnboarding } from '@/features/onboarding/hooks/use-onboarding';
-import { photoPublicUrl } from '@/features/profile/api';
 import { PHOTOS_LIMITS } from '@/features/profile/constants';
 import { useProfileMutations } from '@/features/profile/hooks/use-profile-mutations';
 import { arrayMove } from '@/shared/lib/array-move';
@@ -18,7 +17,7 @@ export function PhotosStep() {
   const [failedUri, setFailedUri] = useState<string | null>(null);
   const [pendingUri, setPendingUri] = useState<string | null>(null);
 
-  const items: PhotoItem[] = saved.map((ph) => ({ id: ph.id, uri: photoPublicUrl(ph.url), status: 'ready' as const }));
+  const items: PhotoItem[] = saved.map((ph) => ({ id: ph.id, uri: ph.signedUrl, status: 'ready' as const }));
   if (pendingUri) items.push({ id: 'pending', uri: pendingUri, status: 'uploading' });
   if (failedUri) items.push({ id: 'failed', uri: failedUri, status: 'error', onRetry: () => doUpload(failedUri) });
 

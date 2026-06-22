@@ -63,7 +63,16 @@ export interface Database {
       };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      complete_onboarding: {
+        Args: { target_profile_id: string };
+        Returns: undefined;
+      };
+      replace_prompts: {
+        Args: { p_profile_id: string; p_prompts: { prompt: string; answer: string }[] };
+        Returns: undefined;
+      };
+    };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
   };

@@ -1,20 +1,33 @@
 -- ================================================================
--- profile-photos storage bucket + owner-scoped RLS.
--- 0001's delete_photo_object() trigger already deletes objects from
--- this bucket by name; this creates the bucket and write policies.
--- Object path convention: "<user_id>/<filename>".
+-- profile-photos storage bucket (private) + RLS.
+-- Photos are private at the object layer: the owner and same-school
+-- members may read; only the owner may write. The bucket is NOT public,
+-- so the app serves images via short-lived signed URLs
+-- (createPhotoSignedUrl() in src/features/profile/api.ts).
+-- Object path convention: "<profile_id>/<filename>".
 -- ================================================================
 
 insert into storage.buckets (id, name, public)
-values ('profile-photos', 'profile-photos', true)
+values ('profile-photos', 'profile-photos', false)
 on conflict (id) do nothing;
 
--- Public read (bucket is public; same-school visibility is enforced at the
--- profile_photos row level in 0001).
+-- Read: the owner, or a same-school member who can view the profile
+-- (mirrors the profile_photos row-level visibility enforced in 0001).
 drop policy if exists "profile-photos read" on storage.objects;
-create policy "profile-photos read"
+drop policy if exists "profile-photos read visible profiles" on storage.objects;
+create policy "profile-photos read visible profiles"
   on storage.objects for select
-  using (bucket_id = 'profile-photos');
+  to authenticated
+  using (
+    bucket_id = 'profile-photos'
+    and exists (
+      select 1
+      from public.profile_photos pp
+      where pp.url = storage.objects.name
+        and pp.profile_id::text = (storage.foldername(storage.objects.name))[1]
+        and public.can_view_profile(pp.profile_id)
+    )
+  );
 
 -- Owners (path prefix = their uid) may write/replace/delete their own files.
 drop policy if exists "profile-photos insert own" on storage.objects;

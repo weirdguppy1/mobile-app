@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { type LayoutChangeEvent, Text, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import {
   calculateGridPosition,
   GridOrientation,
@@ -8,14 +9,33 @@ import {
   SortableGridItem,
   type SortableGridRenderItemProps,
 } from 'react-native-reanimated-dnd';
+import { scheduleOnRN } from 'react-native-worklets';
+import { useResolveClassNames } from 'uniwind';
 
 import { PressScale } from '@/shared/components/press-scale';
 
 export interface PhotoItem {
   id: string;
-  uri: string;
+  /** null when a saved photo's signed URL could not be generated. The tile
+   *  still renders (as a placeholder) so it stays removable. */
+  uri: string | null;
   status?: 'uploading' | 'error' | 'ready';
   onRetry?: () => void;
+}
+
+/** A square image, or a neutral "Unavailable" placeholder when there is no uri
+ *  (e.g. a saved photo whose signed URL failed to generate). */
+function PhotoImage({ uri }: { uri: string | null }) {
+  if (!uri) {
+    return (
+      <View className="h-full w-full items-center justify-center bg-hairline">
+        <Text className="prose-caption text-graphite">Unavailable</Text>
+      </View>
+    );
+  }
+  // expo-image is not a react-native component, so Uniwind doesn't apply
+  // className to it — size it with an explicit style or it renders 0x0.
+  return <Image source={{ uri }} style={{ width: '100%', height: '100%' }} contentFit="cover" />;
 }
 
 interface PhotoGridProps {
@@ -29,6 +49,9 @@ interface PhotoGridProps {
 const COLUMNS = 3;
 const GAP = 8; // px between cells, both axes
 const ACTIVATION_DELAY = 220; // ms touch-and-hold before a drag begins
+// Tile pop-out: shrink + fade, then the row is actually removed.
+const EXIT_DURATION = 220; // ms
+const EXIT_SCALE = 0.8; // how far the tile shrinks as it fades to nothing
 
 // Non-reorderable cells that trail the saved photos (in-flight upload, a failed
 // upload, and the add button). They share the same grid so the whole thing
@@ -36,6 +59,72 @@ const ACTIVATION_DELAY = 220; // ms touch-and-hold before a drag begins
 type TrailingTile =
   | { key: string; kind: 'add' }
   | { key: string; kind: 'uploading' | 'error'; item: PhotoItem };
+
+interface PhotoTileProps {
+  p: SortableGridRenderItemProps<PhotoItem>;
+  itemWidth: number;
+  itemHeight: number;
+  onRemove: (id: string) => void;
+  onDrop: (droppedId: string, position: number) => void;
+}
+
+/** A single draggable saved-photo tile. Owns its own exit animation: tapping ✕
+ *  shrinks + fades the tile via a shared value we drive directly — not the grid's
+ *  opaque, prop-driven internal style — and only when that finishes does it ask
+ *  the parent to delete the row. So the tile holds its slot while it pops, then
+ *  the remaining tiles spring up to fill the gap. The exit style lives on the
+ *  inner content view so it never fights the grid's outer drag/position transform. */
+function PhotoTile({ p, itemWidth, itemHeight, onRemove, onDrop }: PhotoTileProps) {
+  const exit = useSharedValue(0); // 0 = present, 1 = fully popped out
+  const removing = useRef(false);
+
+  const exitStyle = useAnimatedStyle(() => ({
+    opacity: 1 - exit.value,
+    transform: [{ scale: 1 - exit.value * (1 - EXIT_SCALE) }],
+  }));
+
+  const slot = useResolveClassNames('photo-slot relative');
+
+  const remove = () => {
+    if (removing.current) return; // already popping out
+    removing.current = true;
+    exit.value = withTiming(1, { duration: EXIT_DURATION }, (finished) => {
+      if (finished) scheduleOnRN(onRemove, p.item.id);
+    });
+  };
+
+  return (
+    <SortableGridItem
+      id={p.id}
+      data={p.item}
+      positions={p.positions}
+      scrollX={p.scrollX}
+      scrollY={p.scrollY}
+      autoScrollDirection={p.autoScrollDirection}
+      itemsCount={p.itemsCount}
+      dimensions={p.dimensions}
+      orientation={p.orientation}
+      strategy={p.strategy}
+      activationDelay={ACTIVATION_DELAY}
+      onDrop={onDrop}>
+      <Animated.View style={[slot, { width: itemWidth, height: itemHeight }, exitStyle]}>
+        <PhotoImage uri={p.item.uri} />
+        {p.index === 0 ? (
+          <View className="absolute left-1 top-1 rounded-full bg-ink px-2 py-0.5">
+            <Text className="prose-caption text-canvas">Primary</Text>
+          </View>
+        ) : null}
+        <PressScale
+          accessibilityRole="button"
+          accessibilityLabel="Remove photo"
+          onPress={remove}
+          className="absolute right-1 top-1 h-6 w-6 items-center justify-center rounded-full bg-canvas/90">
+          <Text className="prose-caption text-pass">✕</Text>
+        </PressScale>
+      </Animated.View>
+    </SortableGridItem>
+  );
+}
 
 /** Add / remove / reorder photo slots in a 4-up grid. Slot 0 is the primary
  *  photo. Saved photos reorder via touch-and-hold drag (SortableGrid); the
@@ -61,52 +150,39 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
   const containerHeight = rows(reorderable.length + trailing.length);
   const gridHeight = rows(reorderable.length);
 
-  // SortableGrid seeds each item's position once at mount and never repositions
-  // an item whose id was absent then (its reposition reaction skips the
-  // undefined→defined transition), so a newly added photo stacks at (0,0) under
-  // the primary instead of appearing. Remount the grid whenever the *set* of
-  // photos changes — keyed on membership, not order, so drag-reorder is unaffected.
-  const gridKey = reorderable.map((p) => p.id).sort().join(',');
+  // SortableGrid can't seed an item that wasn't present when the grid mounted
+  // (its reposition reaction skips the undefined→defined transition), so a newly
+  // *added* photo would stack at (0,0) under the primary. We remount to re-seed
+  // it. Removals must NOT remount, or the spring-repositioning of the remaining
+  // tiles gets destroyed — so this key only advances when a genuinely new id
+  // appears, never when one leaves. (Reorder keeps the same members, so it never
+  // remounts either.)
+  const idsKey = reorderable.map((p) => p.id).sort().join(',');
+  const [seenKey, setSeenKey] = useState('');
+  const [gridEpoch, setGridEpoch] = useState(0);
+  if (idsKey !== seenKey) {
+    const prev = new Set(seenKey ? seenKey.split(',') : []);
+    if (reorderable.some((p) => !prev.has(p.id))) setGridEpoch((e) => e + 1);
+    setSeenKey(idsKey);
+  }
+  const gridKey = String(gridEpoch);
 
+  const handleDrop = (droppedId: string, position: number) => {
+    const from = reorderable.findIndex((x) => x.id === droppedId);
+    if (from !== -1 && from !== position) onReorder(from, position);
+  };
+
+  // SortableGrid builds its children via data.map() but doesn't assign them a
+  // React key, so the key must live on the root element renderItem returns.
   const renderPhoto = (p: SortableGridRenderItemProps<PhotoItem>) => (
-    // SortableGrid builds its children via data.map() but doesn't assign a React
-    // key to them (itemKeyExtractor only feeds internal position tracking), so the
-    // key must live on the root element renderItem returns.
-    <SortableGridItem
+    <PhotoTile
       key={p.item.id}
-      id={p.id}
-      data={p.item}
-      positions={p.positions}
-      scrollX={p.scrollX}
-      scrollY={p.scrollY}
-      autoScrollDirection={p.autoScrollDirection}
-      itemsCount={p.itemsCount}
-      dimensions={p.dimensions}
-      orientation={p.orientation}
-      strategy={p.strategy}
-      activationDelay={ACTIVATION_DELAY}
-      onDrop={(droppedId, position) => {
-        const from = reorderable.findIndex((x) => x.id === droppedId);
-        if (from !== -1 && from !== position) onReorder(from, position);
-      }}>
-      <View className="photo-slot relative" style={{ width: itemWidth, height: itemHeight }}>
-        {/* expo-image is not a react-native component, so Uniwind doesn't apply
-            className to it — size it with an explicit style or it renders 0x0. */}
-        <Image source={{ uri: p.item.uri }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-        {p.index === 0 ? (
-          <View className="absolute left-1 top-1 rounded-full bg-ink px-2 py-0.5">
-            <Text className="prose-caption text-canvas">Primary</Text>
-          </View>
-        ) : null}
-        <PressScale
-          accessibilityRole="button"
-          accessibilityLabel="Remove photo"
-          onPress={() => onRemove(p.item.id)}
-          className="absolute right-1 top-1 h-6 w-6 items-center justify-center rounded-full bg-canvas/90">
-          <Text className="prose-caption text-pass">✕</Text>
-        </PressScale>
-      </View>
-    </SortableGridItem>
+      p={p}
+      itemWidth={itemWidth}
+      itemHeight={itemHeight}
+      onRemove={onRemove}
+      onDrop={handleDrop}
+    />
   );
 
   const renderTrailing = (tile: TrailingTile) => {
@@ -123,7 +199,7 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
     }
     return (
       <View className="photo-slot relative h-full w-full">
-        <Image source={{ uri: tile.item.uri }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+        <PhotoImage uri={tile.item.uri} />
         {tile.kind === 'uploading' ? (
           <View className="absolute inset-0 items-center justify-center bg-[rgba(255,255,255,0.6)]">
             <Text className="prose-caption text-graphite">Uploading…</Text>
