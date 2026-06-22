@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -36,26 +36,32 @@ export default function OnboardingScreen() {
     prevIndex.current = index;
   }, [index]);
 
-  // Screen-level lift + fade played after the confetti, before navigating.
+  // On finish, the current screen lifts + fades away FIRST; only once it's gone
+  // does the "You're all set" + confetti play on the cleared background, then we
+  // navigate. `showCelebration` gates the overlay until the lift completes.
   const exit = useSharedValue(0);
+  const [showCelebration, setShowCelebration] = useState(false);
   const contentStyle = useAnimatedStyle(() => ({
     opacity: 1 - exit.value,
     transform: [{ translateY: -exit.value * 40 }],
   }));
 
-  const goToApp = () => {
-    setCelebrating(false);
-    router.replace('/discover');
-  };
-
-  const handleCelebrationDone = () => {
+  useEffect(() => {
+    if (!celebrating) return;
     if (reduced) {
-      goToApp();
+      exit.value = 1; // clear the screen instantly, no animation
+      setShowCelebration(true);
       return;
     }
     exit.value = withTiming(1, { duration: 480, easing: Easing.in(Easing.cubic) }, (finished) => {
-      if (finished) runOnJS(goToApp)();
+      if (finished) runOnJS(setShowCelebration)(true);
     });
+  }, [celebrating, exit, reduced]);
+
+  const goToApp = () => {
+    setShowCelebration(false);
+    setCelebrating(false);
+    router.replace('/discover');
   };
 
   // Resume to the first incomplete step once per fresh data load.
@@ -101,7 +107,7 @@ export default function OnboardingScreen() {
           </View>
         </SafeAreaView>
       </Animated.View>
-      {celebrating ? <CompletionCelebration onComplete={handleCelebrationDone} /> : null}
+      {showCelebration ? <CompletionCelebration onComplete={goToApp} /> : null}
     </View>
   );
 }
