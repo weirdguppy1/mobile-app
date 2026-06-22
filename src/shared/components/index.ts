@@ -1,3 +1,4 @@
+export { ActivateRamp } from './animations/activate-ramp';
 export { Button } from './button';
 export { FadeIn } from './animations/fade-in';
 export { FocusScale } from './animations/focus-scale';
