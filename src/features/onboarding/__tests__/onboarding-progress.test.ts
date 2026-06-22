@@ -34,3 +34,26 @@ describe('firstIncompleteIndex', () => {
     expect(firstIncompleteIndex(steps, data({ first_name: 'Mia', cleanliness: 3 }))).toBe(2);
   });
 });
+
+import { firstIncompleteQuestion, sectionProgress } from '@/features/onboarding/lib/onboarding-progress';
+import { QUESTIONS } from '@/features/onboarding/config/questions';
+
+describe('firstIncompleteQuestion', () => {
+  it('returns 0 for a blank profile (first_name)', () => {
+    expect(firstIncompleteQuestion(QUESTIONS, data())).toBe(0);
+  });
+  it('returns the last question (review) when everything is complete', () => {
+    const complete = QUESTIONS.map((q) => ({ ...q, isComplete: () => true }));
+    expect(firstIncompleteQuestion(complete, data())).toBe(complete.length - 1);
+  });
+});
+
+describe('sectionProgress', () => {
+  it('reports position within the question\'s section, 1-based', () => {
+    expect(sectionProgress(QUESTIONS, 'first_name')).toEqual({ current: 1, total: 7 });
+    expect(sectionProgress(QUESTIONS, 'sexual_orientation')).toEqual({ current: 7, total: 7 });
+  });
+  it('single-question sections report 1 of 1', () => {
+    expect(sectionProgress(QUESTIONS, 'interests')).toEqual({ current: 1, total: 1 });
+  });
+});
