@@ -15,7 +15,10 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-import { type Tone } from "@/features/onboarding/config/step-tone";
+/** Background tones — the keys of the MESH map below. `neutral` = bare white stage. */
+export type Tone =
+  | "warm" | "neutral" | "firstLight" | "energy" | "curiosity"
+  | "conviction" | "expression" | "radiance" | "serenity" | "horizon";
 
 interface Bloom {
   /** Center, as a fraction of width/height (off-grid anchors per DESIGN.md). */

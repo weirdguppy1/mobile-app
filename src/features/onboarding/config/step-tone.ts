@@ -1,28 +1,12 @@
 import { type StepId } from "@/features/onboarding/config/steps";
+import { type Tone } from "@/features/onboarding/components/OnboardingBackground";
 
-/** Emotional background tone per onboarding category (TASK.md §5). */
-export type Tone =
-  | "warm"
-  | "neutral"
-  | "firstLight"
-  | "energy"
-  | "curiosity"
-  | "conviction"
-  | "expression"
-  | "radiance"
-  | "serenity"
-  | "horizon";
+export type { Tone };
 
 const TONE_BY_STEP: Record<StepId, Tone> = {
-  basics: "neutral",
-  compatibility: "horizon", // sleep / living habits
-  lifestyle: "neutral",
-  interests: "expression",
-  dealBreakers: "neutral",
-  prompts: "energy", // expressive / personality
-  photos: "neutral",
-  extras: "neutral",
-  review: "warm", // celebratory lead-in to completion
+  basics: "neutral", compatibility: "neutral", lifestyle: "neutral",
+  interests: "neutral", dealBreakers: "neutral", prompts: "neutral",
+  photos: "neutral", extras: "neutral", review: "warm",
 };
 
 export function toneFor(stepId: StepId): Tone {
