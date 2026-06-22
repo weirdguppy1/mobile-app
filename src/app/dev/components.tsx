@@ -7,7 +7,12 @@ import { LoadingOverlay } from '@/features/auth/components/loading-overlay';
 import { OtpInput } from '@/features/auth/components/otp-input';
 import { ProgressBar } from '@/features/auth/components/progress-bar';
 import { ALCOHOL, INTERESTS } from '@/features/profile/constants';
-import { Button, FadeIn, Field, OptionGroup, PhotoGrid, PressScale, ScaleInput, TagInput, TextField } from '@/shared/components';
+import {
+  ActivateRamp, Button, CheckPop, ConfettiBurst, FadeIn, Field, FocusScale,
+  OptionGroup, PhotoGrid, PressScale, ScaleInput, SpotlightProvider, SpotlightScrim,
+  TagInput, TextField,
+} from '@/shared/components';
+import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -24,6 +29,9 @@ export default function ComponentsGallery() {
   const [multi, setMulti] = useState<string[]>([]);
   const [scale, setScale] = useState<number | null>(null);
   const [tags, setTags] = useState<string[]>([]);
+  const [active, setActive] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+  const [confettiOn, setConfettiOn] = useState(false);
 
   return (
     <View className="flex-1 bg-canvas">
@@ -90,6 +98,48 @@ export default function ComponentsGallery() {
             <FadeIn>
               <Text className="prose-body text-ink">FadeIn content</Text>
             </FadeIn>
+          </Section>
+
+          <Section title="Animations — FocusScale">
+            <FocusScale className="card border-continuous px-4 py-4">
+              <Text className="prose-body text-ink">Breathing-in on mount</Text>
+            </FocusScale>
+          </Section>
+
+          <Section title="Animations — ActivateRamp / CheckPop">
+            <PressScale className="button-ghost" onPress={() => setActive((v) => !v)}>
+              <Text className="prose-footnote font-medium text-graphite">Toggle active: {String(active)}</Text>
+            </PressScale>
+            <ActivateRamp active={active}>
+              <View className="button-primary">
+                <Text className="prose-button text-canvas">Ramps in when active</Text>
+              </View>
+            </ActivateRamp>
+            <PressScale className="button-ghost" onPress={() => setConfirmed((v) => !v)}>
+              <Text className="prose-footnote font-medium text-graphite">Toggle check</Text>
+            </PressScale>
+            <CheckPop show={confirmed} />
+          </Section>
+
+          <Section title="Animations — OnboardingProgress">
+            <OnboardingProgress current={2} total={5} />
+          </Section>
+
+          <Section title="Animations — Spotlight (focus a field)">
+            <SpotlightProvider>
+              <View className="gap-3">
+                <TextField label="Focus me — others blur" placeholder="tap to focus" />
+                <TextField label="Sibling field" placeholder="blurs while the other is focused" />
+                <SpotlightScrim />
+              </View>
+            </SpotlightProvider>
+          </Section>
+
+          <Section title="Animations — Confetti">
+            <PressScale className="button-primary" onPress={() => setConfettiOn(true)}>
+              <Text className="prose-button text-canvas">Fire confetti</Text>
+            </PressScale>
+            {confettiOn ? <ConfettiBurst onComplete={() => setConfettiOn(false)} /> : null}
           </Section>
 
           <Section title="Primitives — OptionGroup">
