@@ -1,6 +1,6 @@
 import { BlurView } from 'expo-blur';
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   type SharedValue,
   useAnimatedProps,
@@ -15,55 +15,81 @@ const SCRIM_BLUR_MAX = 14;
 interface SpotlightContextValue {
   /** 0 = no blur, 1 = full scrim blur. */
   progress: SharedValue<number>;
-  activeId: string | null;
-  focus: (id: string) => void;
-  blur: (id: string) => void;
+  /** Index of the slot currently holding focus, or null. */
+  activeSlot: number | null;
+  focusSlot: (slot: number) => void;
+  blurSlot: (slot: number) => void;
 }
 
 const SpotlightContext = createContext<SpotlightContextValue | null>(null);
+/** The slot index a field is rendered inside, provided by SpotlightSlot. */
+const SlotIndexContext = createContext<number | null>(null);
 
 /** Returns the spotlight controls, or null when used outside a provider. */
 export function useSpotlight(): SpotlightContextValue | null {
   return useContext(SpotlightContext);
 }
 
+/** Returns the index of the SpotlightSlot the caller is rendered in, or null. */
+export function useSpotlightSlot(): number | null {
+  return useContext(SlotIndexContext);
+}
+
 /**
  * Coordinates the focus spotlight (TASK.md §2): when a field focuses, the scrim
- * blur fades in over the step body; the focused field elevates above it.
+ * blur fades in over the step body and the slot holding that field elevates
+ * above the scrim so it stays sharp — regardless of how deeply the field is
+ * nested inside the slot.
  */
 export function SpotlightProvider({ children }: { children: ReactNode }) {
   const reduced = useReducedMotion();
   const progress = useSharedValue(0);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeSlot, setActiveSlot] = useState<number | null>(null);
 
-  const focus = useCallback(
-    (id: string) => {
-      setActiveId(id);
+  const focusSlot = useCallback(
+    (slot: number) => {
+      setActiveSlot(slot);
       progress.value = reduced ? 0 : withTiming(1, { duration: 220 });
     },
     [progress, reduced],
   );
 
-  const blur = useCallback(
-    (id: string) => {
-      setActiveId((current) => (current === id ? null : current));
+  const blurSlot = useCallback(
+    (slot: number) => {
+      setActiveSlot((current) => (current === slot ? null : current));
       progress.value = withTiming(0, { duration: 220 });
     },
     [progress],
   );
 
   const value = useMemo<SpotlightContextValue>(
-    () => ({ progress, activeId, focus, blur }),
-    [progress, activeId, focus, blur],
+    () => ({ progress, activeSlot, focusSlot, blurSlot }),
+    [progress, activeSlot, focusSlot, blurSlot],
   );
 
   return <SpotlightContext.Provider value={value}>{children}</SpotlightContext.Provider>;
 }
 
 /**
+ * Wraps one top-level child of the step body. When the focused field lives
+ * inside this slot, the slot raises its zIndex above the scrim so its whole
+ * subtree (the focused field at any depth) stays sharp; other slots sit below
+ * the scrim and blur. Provides its index to descendant fields.
+ */
+export function SpotlightSlot({ index, children }: { index: number; children: ReactNode }) {
+  const ctx = useSpotlight();
+  const active = ctx?.activeSlot === index;
+  return (
+    <SlotIndexContext.Provider value={index}>
+      <View style={{ zIndex: active ? 2 : 0 }}>{children}</View>
+    </SlotIndexContext.Provider>
+  );
+}
+
+/**
  * The blur layer. Render it as the LAST child of the scroll content container so
- * it paints over unfocused siblings; the focused field raises its zIndex above
- * it. Disabled under reduced motion.
+ * it paints over the (un-elevated) slots; the active slot raises its zIndex
+ * above it. Disabled under reduced motion.
  */
 export function SpotlightScrim() {
   const ctx = useSpotlight();

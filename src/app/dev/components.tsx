@@ -10,7 +10,7 @@ import { ALCOHOL, INTERESTS } from '@/features/profile/constants';
 import {
   ActivateRamp, Button, CheckPop, ConfettiBurst, FadeIn, Field, FocusScale,
   OptionGroup, PhotoGrid, PressScale, ScaleInput, SpotlightProvider, SpotlightScrim,
-  TagInput, TextField,
+  SpotlightSlot, TagInput, TextField,
 } from '@/shared/components';
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
 
@@ -128,8 +128,12 @@ export default function ComponentsGallery() {
           <Section title="Animations — Spotlight (focus a field)">
             <SpotlightProvider>
               <View className="gap-3">
-                <TextField label="Focus me — others blur" placeholder="tap to focus" />
-                <TextField label="Sibling field" placeholder="blurs while the other is focused" />
+                <SpotlightSlot index={0}>
+                  <TextField label="Focus me — others blur" placeholder="tap to focus" />
+                </SpotlightSlot>
+                <SpotlightSlot index={1}>
+                  <TextField label="Sibling field" placeholder="blurs while the other is focused" />
+                </SpotlightSlot>
                 <SpotlightScrim />
               </View>
             </SpotlightProvider>

@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { Children, type ReactNode, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -18,6 +18,7 @@ import {
   FocusScale,
   SpotlightProvider,
   SpotlightScrim,
+  SpotlightSlot,
 } from '@/shared/components';
 
 interface StepShellProps {
@@ -66,7 +67,9 @@ export function StepShell({ children, canAdvance, onNext, saving, nextLabel = 'N
               className="flex-1"
               contentContainerClassName="gap-4 px-6 py-6"
               keyboardShouldPersistTaps="handled">
-              {children}
+              {Children.toArray(children).map((child, i) => (
+                <SpotlightSlot key={i} index={i}>{child}</SpotlightSlot>
+              ))}
               <SpotlightScrim />
             </ScrollView>
           </Animated.View>
