@@ -1,4 +1,5 @@
 export { ActivateRamp } from './animations/activate-ramp';
+export { SpotlightProvider, SpotlightScrim, useSpotlight } from './animations/spotlight';
 export { Button } from './button';
 export { CheckPop } from './animations/check-pop';
 export { FadeIn } from './animations/fade-in';
