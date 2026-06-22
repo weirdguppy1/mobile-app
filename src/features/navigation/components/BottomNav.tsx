@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
 import { TABS } from '@/features/navigation/config/tabs';
 import { tabDirection } from '@/features/navigation/lib/tab-direction';
@@ -32,7 +33,15 @@ export function BottomNav({ state, navigation, insets }: TabBarProps) {
     navigation.navigate(route.name);
   };
 
+  // Absolutely positioned so the navigator reserves no layout space for it —
+  // the scene fills the full height and flows behind the bar (immersive overlay).
   return (
-    <NavBar tabs={TABS} activeName={activeRouteName} onPressTab={onPressTab} bottomInset={insets.bottom} />
+    <View style={styles.overlay} pointerEvents="box-none">
+      <NavBar tabs={TABS} activeName={activeRouteName} onPressTab={onPressTab} bottomInset={insets.bottom} />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: { position: 'absolute', left: 0, right: 0, bottom: 0 },
+});

@@ -1,6 +1,7 @@
 import { Text, View } from 'react-native';
 
 import { type TabConfig } from '@/features/navigation/config/tabs';
+import { NAV_BAR_MIN_INSET } from '@/features/navigation/lib/use-nav-bar-height';
 import { Brand } from '@/constants/theme';
 import { PressScale } from '@/shared/components';
 
@@ -25,7 +26,7 @@ export function NavBar({ tabs, activeName, onPressTab, bottomInset = 0 }: NavBar
       className="flex-row rounded-t-3xl px-2 pt-2"
       style={{
         backgroundColor: 'rgba(255,255,255,0.92)',
-        paddingBottom: bottomInset || 8,
+        paddingBottom: Math.max(bottomInset, NAV_BAR_MIN_INSET),
         shadowColor: '#000000',
         shadowOpacity: 0.08,
         shadowRadius: 16,
