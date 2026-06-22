@@ -7,13 +7,12 @@ import Animated, {
   useAnimatedProps,
   useReducedMotion,
   useSharedValue,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
-const DISTANCE = 64;
-const BLUR_MAX = 18;
+const DISTANCE = 44;
+const BLUR_MAX = 16;
 
 type Direction = 'forward' | 'back';
 // LayoutAnimationStaticContext is defined in reanimated's commonTypes but not
@@ -27,15 +26,17 @@ function makeEnter(direction: Direction, reduced: boolean): CustomAnim {
   const fn: EntryExitAnimationFunction = () => {
     'worklet';
     if (reduced) {
-      return { initialValues: { opacity: 0 }, animations: { opacity: withTiming(1, { duration: 160 }) } };
+      return { initialValues: { opacity: 0 }, animations: { opacity: withTiming(1, { duration: 140 }) } };
     }
     const sign = direction === 'forward' ? 1 : -1;
-    const duration = direction === 'forward' ? 320 : 380;
+    // Back is a touch slower than forward for a reflective feel. Timing (not
+    // spring) so the slide settles cleanly with no overshoot/bounce.
+    const duration = direction === 'forward' ? 230 : 270;
     return {
       initialValues: { opacity: 0, transform: [{ translateX: sign * DISTANCE }] },
       animations: {
-        opacity: withTiming(1, { duration }),
-        transform: [{ translateX: withSpring(0, { damping: 20, stiffness: 170 }) }],
+        opacity: withTiming(1, { duration, easing: Easing.out(Easing.cubic) }),
+        transform: [{ translateX: withTiming(0, { duration, easing: Easing.out(Easing.cubic) }) }],
       },
     };
   };
@@ -46,14 +47,14 @@ function makeExit(direction: Direction, reduced: boolean): CustomAnim {
   const fn: EntryExitAnimationFunction = () => {
     'worklet';
     if (reduced) {
-      return { initialValues: { opacity: 1 }, animations: { opacity: withTiming(0, { duration: 120 }) } };
+      return { initialValues: { opacity: 1 }, animations: { opacity: withTiming(0, { duration: 110 }) } };
     }
     const sign = direction === 'forward' ? -1 : 1;
-    const duration = direction === 'forward' ? 280 : 340;
+    const duration = direction === 'forward' ? 190 : 230;
     return {
       initialValues: { opacity: 1, transform: [{ translateX: 0 }] },
       animations: {
-        opacity: withTiming(0, { duration }),
+        opacity: withTiming(0, { duration, easing: Easing.in(Easing.cubic) }),
         transform: [{ translateX: withTiming(sign * DISTANCE, { duration, easing: Easing.in(Easing.cubic) }) }],
       },
     };
@@ -66,7 +67,7 @@ function EntryBlur() {
   const progress = useSharedValue(1);
 
   useEffect(() => {
-    progress.value = withTiming(0, { duration: 360 });
+    progress.value = withTiming(0, { duration: 220 });
   }, [progress]);
 
   const animatedProps = useAnimatedProps(() => ({ intensity: progress.value * BLUR_MAX }));
@@ -75,7 +76,7 @@ function EntryBlur() {
     <AnimatedBlurView
       pointerEvents="none"
       tint="light"
-      experimentalBlurMethod="dimezisBlurView"
+      blurMethod="dimezisBlurView"
       style={StyleSheet.absoluteFill}
       animatedProps={animatedProps}
     />
@@ -93,8 +94,9 @@ interface StepTransitionProps {
  * Directional step transition: the outgoing step slides + fades away while the
  * incoming step enters from the opposite side and resolves from blurred to
  * sharp. Back navigation reverses direction with slightly slower timing
- * (TASK.md §1). Reanimated keeps the exiting view mounted through its exit, so
- * the two steps cross without a manual dual-mount.
+ * (TASK.md §1). Eased timing (no spring) keeps the slide crisp and bounce-free.
+ * Reanimated keeps the exiting view mounted through its exit, so the two steps
+ * cross without a manual dual-mount.
  */
 export function StepTransition({ transitionKey, direction, children }: StepTransitionProps) {
   const reduced = useReducedMotion();

@@ -74,14 +74,21 @@ export function SpotlightProvider({ children }: { children: ReactNode }) {
  * Wraps one top-level child of the step body. When the focused field lives
  * inside this slot, the slot raises its zIndex above the scrim so its whole
  * subtree (the focused field at any depth) stays sharp; other slots sit below
- * the scrim and blur. Provides its index to descendant fields.
+ * the scrim and blur. While any field is focused, the non-focused slots also
+ * stop receiving touches, so you can't tap another field/option until the
+ * current field is dismissed (TASK.md §2). Provides its index to descendants.
  */
 export function SpotlightSlot({ index, children }: { index: number; children: ReactNode }) {
   const ctx = useSpotlight();
+  const reduced = useReducedMotion();
   const active = ctx?.activeSlot === index;
+  const blocked = !reduced && ctx?.activeSlot != null && !active;
+
   return (
     <SlotIndexContext.Provider value={index}>
-      <View style={{ zIndex: active ? 2 : 0 }}>{children}</View>
+      <View style={{ zIndex: active ? 2 : 0, pointerEvents: blocked ? 'none' : 'auto' }}>
+        {children}
+      </View>
     </SlotIndexContext.Provider>
   );
 }
@@ -105,7 +112,7 @@ export function SpotlightScrim() {
     <AnimatedBlurView
       pointerEvents="none"
       tint="light"
-      experimentalBlurMethod="dimezisBlurView"
+      blurMethod="dimezisBlurView"
       style={[StyleSheet.absoluteFill, { zIndex: 1 }]}
       animatedProps={animatedProps}
     />

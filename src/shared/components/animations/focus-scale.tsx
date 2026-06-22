@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { type ViewProps } from 'react-native';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import { useResolveClassNames } from 'uniwind';
 
@@ -28,7 +29,7 @@ export function FocusScale({ className, from = 0.98, to = 1, style, children, ..
       progress.value = 1;
       return;
     }
-    progress.value = withSpring(1, { damping: 18, stiffness: 180 });
+    progress.value = withTiming(1, { duration: 260, easing: Easing.out(Easing.cubic) });
   }, [progress, reduced]);
 
   const animatedStyle = useAnimatedStyle(() => ({
