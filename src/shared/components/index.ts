@@ -3,6 +3,7 @@ export { Button } from './button';
 export { CheckPop } from './animations/check-pop';
 export { FadeIn } from './animations/fade-in';
 export { FocusScale } from './animations/focus-scale';
+export { StepTransition } from './animations/step-transition';
 export { Field } from './field';
 export { OptionGroup } from './option-group';
 export { PhotoGrid, type PhotoItem } from './photo-grid';
