@@ -4,6 +4,7 @@ import { StepShell } from '@/features/onboarding/components/StepShell';
 import { STEPS } from '@/features/onboarding/config/steps';
 import { useOnboarding } from '@/features/onboarding/hooks/use-onboarding';
 import { useProfileMutations } from '@/features/profile/hooks/use-profile-mutations';
+import { useOnboardingStore } from '@/features/onboarding/store/onboarding-store';
 import { onboardingCompletionSchema } from '@/features/profile/schema';
 import { Button } from '@/shared/components';
 
@@ -22,6 +23,7 @@ function Row({ label, value, onEdit }: { label: string; value: string; onEdit: (
 export function ReviewStep() {
   const { data, setIndex } = useOnboarding();
   const { complete } = useProfileMutations();
+  const setCelebrating = useOnboardingStore((s) => s.setCelebrating);
   const p = data?.profile;
 
   const jumpTo = (id: string) => setIndex(STEPS.findIndex((s) => s.id === id));
@@ -47,9 +49,18 @@ export function ReviewStep() {
 
   const onFinish = async () => {
     if (!completion.success) return;
-    await complete.mutateAsync();
-    // The (app) gate flips once the query invalidates; replace to the landing.
-    // router lives on the hook return.
+    // Set celebrating BEFORE the mutation: when complete() invalidates the
+    // profile query and onboarding_complete flips true, the (app) layout gate
+    // must already see celebrating=true or it unmounts this screen (and the
+    // confetti) immediately. OnboardingScreen handles the redirect once the
+    // confetti + lift finish.
+    setCelebrating(true);
+    try {
+      await complete.mutateAsync();
+    } catch (error) {
+      setCelebrating(false);
+      throw error;
+    }
   };
 
   return (

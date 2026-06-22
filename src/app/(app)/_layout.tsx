@@ -1,15 +1,19 @@
 import { Stack } from 'expo-router';
 
 import { useOnboardingData } from '@/features/profile/hooks/use-profile';
+import { useOnboardingStore } from '@/features/onboarding/store/onboarding-store';
 
 export default function AppLayout() {
   const { data, isLoading } = useOnboardingData();
+  const celebrating = useOnboardingStore((s) => s.celebrating);
 
   // Hold while we learn whether onboarding is complete. Rendering the protected
   // branches before this resolves can bounce between unavailable routes.
   if (isLoading && !data) return null;
 
-  const complete = data?.profile.onboarding_complete ?? false;
+  // Stay in onboarding while the completion celebration plays, so its confetti
+  // overlay (rendered inside the onboarding screen) isn't torn down early.
+  const complete = (data?.profile.onboarding_complete ?? false) && !celebrating;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
