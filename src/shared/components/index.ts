@@ -2,6 +2,7 @@ export { ActivateRamp } from './animations/activate-ramp';
 export { SpotlightProvider, SpotlightScrim, useSpotlight } from './animations/spotlight';
 export { Button } from './button';
 export { CheckPop } from './animations/check-pop';
+export { ConfettiBurst } from './animations/confetti-burst';
 export { FadeIn } from './animations/fade-in';
 export { FocusScale } from './animations/focus-scale';
 export { StepTransition } from './animations/step-transition';
