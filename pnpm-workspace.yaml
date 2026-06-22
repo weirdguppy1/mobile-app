@@ -4,5 +4,6 @@
 nodeLinker: hoisted
 
 allowBuilds:
+  '@shopify/react-native-skia': true
   supabase: true
   unrs-resolver: false
