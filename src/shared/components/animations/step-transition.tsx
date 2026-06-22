@@ -10,68 +10,55 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { transitionParams, type Direction, type Variant } from './transition-params';
+
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
-const DISTANCE = 44;
 const BLUR_MAX = 16;
 
-type Direction = 'forward' | 'back';
-// LayoutAnimationStaticContext is defined in reanimated's commonTypes but not
-// re-exported from the package root in this version (4.3.1). We inline the
-// equivalent shape — { presetName: string } — which is what Animated.View's
-// entering/exiting props require alongside EntryExitAnimationFunction.
 type LayoutAnimationStaticContext = { presetName: string };
 type CustomAnim = EntryExitAnimationFunction & LayoutAnimationStaticContext;
 
-function makeEnter(direction: Direction, reduced: boolean): CustomAnim {
+function makeEnter(variant: Variant, direction: Direction, reduced: boolean): CustomAnim {
+  const p = transitionParams(variant, direction, reduced);
   const fn: EntryExitAnimationFunction = () => {
     'worklet';
-    if (reduced) {
-      return { initialValues: { opacity: 0 }, animations: { opacity: withTiming(1, { duration: 140 }) } };
-    }
-    const sign = direction === 'forward' ? 1 : -1;
-    // Back is a touch slower than forward for a reflective feel. Timing (not
-    // spring) so the slide settles cleanly with no overshoot/bounce.
-    const duration = direction === 'forward' ? 230 : 270;
     return {
-      initialValues: { opacity: 0, transform: [{ translateX: sign * DISTANCE }] },
+      initialValues: { opacity: 0, transform: [{ translateX: p.enterFrom.x }, { scale: p.enterFrom.scale }] },
       animations: {
-        opacity: withTiming(1, { duration, easing: Easing.out(Easing.cubic) }),
-        transform: [{ translateX: withTiming(0, { duration, easing: Easing.out(Easing.cubic) }) }],
+        opacity: withTiming(1, { duration: p.enterMs, easing: Easing.out(Easing.cubic) }),
+        transform: [
+          { translateX: withTiming(0, { duration: p.enterMs, easing: Easing.out(Easing.cubic) }) },
+          { scale: withTiming(1, { duration: p.enterMs, easing: Easing.out(Easing.cubic) }) },
+        ],
       },
     };
   };
   return Object.assign(fn, { presetName: 'stepEnter' });
 }
 
-function makeExit(direction: Direction, reduced: boolean): CustomAnim {
+function makeExit(variant: Variant, direction: Direction, reduced: boolean): CustomAnim {
+  const p = transitionParams(variant, direction, reduced);
   const fn: EntryExitAnimationFunction = () => {
     'worklet';
-    if (reduced) {
-      return { initialValues: { opacity: 1 }, animations: { opacity: withTiming(0, { duration: 110 }) } };
-    }
-    const sign = direction === 'forward' ? -1 : 1;
-    const duration = direction === 'forward' ? 190 : 230;
     return {
-      initialValues: { opacity: 1, transform: [{ translateX: 0 }] },
+      initialValues: { opacity: 1, transform: [{ translateX: 0 }, { scale: 1 }] },
       animations: {
-        opacity: withTiming(0, { duration, easing: Easing.in(Easing.cubic) }),
-        transform: [{ translateX: withTiming(sign * DISTANCE, { duration, easing: Easing.in(Easing.cubic) }) }],
+        opacity: withTiming(0, { duration: p.exitMs, easing: Easing.in(Easing.cubic) }),
+        transform: [
+          { translateX: withTiming(p.exitTo.x, { duration: p.exitMs, easing: Easing.in(Easing.cubic) }) },
+          { scale: withTiming(p.exitTo.scale, { duration: p.exitMs, easing: Easing.in(Easing.cubic) }) },
+        ],
       },
     };
   };
   return Object.assign(fn, { presetName: 'stepExit' });
 }
 
-/** Blur overlay that ramps from blurred to sharp on mount (TASK.md §1). */
+/** Blur overlay that ramps from blurred to sharp on mount (TASK4 §6). */
 function EntryBlur() {
   const progress = useSharedValue(1);
-
-  useEffect(() => {
-    progress.value = withTiming(0, { duration: 220 });
-  }, [progress]);
-
+  useEffect(() => { progress.value = withTiming(0, { duration: 220 }); }, [progress]);
   const animatedProps = useAnimatedProps(() => ({ intensity: progress.value * BLUR_MAX }));
-
   return (
     <AnimatedBlurView
       pointerEvents="none"
@@ -84,32 +71,27 @@ function EntryBlur() {
 }
 
 interface StepTransitionProps {
-  /** Re-key per step so entering/exiting animations fire on navigation. */
   transitionKey: string;
   direction: Direction;
+  /** 'question' (default) = slide+fade. 'section' = heavier scale+fade-through. */
+  variant?: Variant;
   children: ReactNode;
 }
 
-/**
- * Directional step transition: the outgoing step slides + fades away while the
- * incoming step enters from the opposite side and resolves from blurred to
- * sharp. Back navigation reverses direction with slightly slower timing
- * (TASK.md §1). Eased timing (no spring) keeps the slide crisp and bounce-free.
- * Reanimated keeps the exiting view mounted through its exit, so the two steps
- * cross without a manual dual-mount.
- */
-export function StepTransition({ transitionKey, direction, children }: StepTransitionProps) {
+/** Directional transition between flow screens. question→question slides + fades
+ *  (eased, no spring); section interstitials use a weightier scale/fade. Reanimated
+ *  keeps the exiting view mounted through its exit so the two screens cross. */
+export function StepTransition({ transitionKey, direction, variant = 'question', children }: StepTransitionProps) {
   const reduced = useReducedMotion();
-
   return (
     <View style={{ flex: 1 }}>
       <Animated.View
         key={transitionKey}
-        entering={makeEnter(direction, reduced)}
-        exiting={makeExit(direction, reduced)}
+        entering={makeEnter(variant, direction, reduced)}
+        exiting={makeExit(variant, direction, reduced)}
         style={StyleSheet.absoluteFill}>
         {children}
-        {!reduced ? <EntryBlur /> : null}
+        {!reduced && variant === 'question' ? <EntryBlur /> : null}
       </Animated.View>
     </View>
   );
