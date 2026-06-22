@@ -1,5 +1,6 @@
 export { Button } from './button';
 export { FadeIn } from './animations/fade-in';
+export { FocusScale } from './animations/focus-scale';
 export { Field } from './field';
 export { OptionGroup } from './option-group';
 export { PhotoGrid, type PhotoItem } from './photo-grid';
