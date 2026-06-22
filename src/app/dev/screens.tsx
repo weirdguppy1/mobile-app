@@ -52,6 +52,12 @@ export default function ScreensPreview() {
             <Link href="/discover" className="prose-body font-semibold text-ink underline">
               → Discover (live)
             </Link>
+            <Link href="/messages" className="prose-body font-semibold text-ink underline">
+              → Messages (live)
+            </Link>
+            <Link href="/profile" className="prose-body font-semibold text-ink underline">
+              → Profile (live)
+            </Link>
           </View>
 
           <Frame title="Step: campus"><CampusStep /></Frame>

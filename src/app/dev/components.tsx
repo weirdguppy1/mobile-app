@@ -13,6 +13,8 @@ import {
   SpotlightSlot, TagInput, TextField,
 } from '@/shared/components';
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
+import { NavBar } from '@/features/navigation/components/NavBar';
+import { TABS } from '@/features/navigation/config/tabs';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -32,6 +34,7 @@ export default function ComponentsGallery() {
   const [active, setActive] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [confettiOn, setConfettiOn] = useState(false);
+  const [navTab, setNavTab] = useState('discover');
 
   return (
     <View className="flex-1 bg-canvas">
@@ -144,6 +147,12 @@ export default function ComponentsGallery() {
               <Text className="prose-button text-canvas">Fire confetti</Text>
             </PressScale>
             {confettiOn ? <ConfettiBurst onComplete={() => setConfettiOn(false)} /> : null}
+          </Section>
+
+          <Section title="Navigation — NavBar (bottom tabs)">
+            <View className="overflow-hidden rounded-2xl border border-silver">
+              <NavBar tabs={TABS} activeName={navTab} onPressTab={setNavTab} />
+            </View>
           </Section>
 
           <Section title="Primitives — OptionGroup">
