@@ -178,7 +178,7 @@ const DormPreference = makeFieldQuestion<string>({
 const LivingProgram = makeFieldQuestion<string>({
   getValue: (d) => d.profile.living_program ?? '',
   save: (v, m) => m.saveProfile.mutateAsync({ living_program: v.trim() || null }),
-  control: (v, set) => <TextField value={v} onChangeText={set} placeholder="e.g. Honors / LLC" />,
+  control: (v, set) => <TextField value={v} onChangeText={set} placeholder="e.g. Honors / Residential College Name" />,
 });
 const Clubs = makeFieldQuestion<string[]>({
   getValue: (d) => d.profile.clubs ?? [],

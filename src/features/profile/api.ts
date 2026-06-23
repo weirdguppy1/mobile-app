@@ -38,16 +38,21 @@ export async function updateProfile(
 }
 
 export async function uploadPhoto(userId: string, localUri: string, position: number): Promise<ProfilePhoto> {
-  const ext = (localUri.split('.').pop()?.split('?')[0] || 'jpg').toLowerCase();
+  const pathWithoutQuery = localUri.split(/[?#]/)[0] ?? '';
+  const ext = /\.([a-z0-9]+)$/i.exec(pathWithoutQuery)?.[1]?.toLowerCase() ?? 'jpg';
   const path = `${userId}/${position}-${Date.now()}.${ext}`;
   // Read the picked file's bytes natively. fetch(localUri).arrayBuffer() hangs on
   // React Native for file:// URIs, which left uploads stuck on "uploading…".
   const bytes = await new File(localUri).bytes();
+  if (bytes.byteLength === 0) {
+    throw new Error('Selected photo is empty and cannot be uploaded.');
+  }
+  const fileBody = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
   const contentType = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from(PHOTO_BUCKET)
-    .upload(path, bytes, { contentType, upsert: true });
+    .upload(path, fileBody, { cacheControl: '3600', contentType, upsert: false });
   if (uploadError) throw uploadError;
 
   const { data, error } = await supabase
@@ -58,7 +63,12 @@ export async function uploadPhoto(userId: string, localUri: string, position: nu
   if (error) {
     // Best-effort: remove the just-uploaded object so a failed row insert
     // doesn't leave an orphaned file in the bucket.
-    await supabase.storage.from(PHOTO_BUCKET).remove([path]);
+    const { error: cleanupError } = await supabase.storage.from(PHOTO_BUCKET).remove([path]);
+    if (cleanupError) {
+      throw new Error(
+        `Failed to insert profile photo row: ${error.message}; cleanup of uploaded object also failed: ${cleanupError.message}`,
+      );
+    }
     throw error;
   }
   return data;

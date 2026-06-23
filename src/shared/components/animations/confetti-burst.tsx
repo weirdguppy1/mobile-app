@@ -7,7 +7,7 @@ interface ConfettiBurstProps {
 
 // Brand confetti: ink + the grad-warm/cool wash hues from DESIGN.md. Avoids the
 // reserved semantic colors (--yes green / --maybe amber belong to like/match).
-const CONFETTI_COLORS = ['#000000', '#f8c4ff', '#96c4ff', '#ffd6e8', '#e0c3fc', '#ffe0c2'];
+const CONFETTI_COLORS = ['#f8c4ff', '#96c4ff', '#ffd6e8', '#e0c3fc', '#ffe0c2'];
 
 /**
  * A single celebratory confetti burst (TASK.md §7). One-shot (`infinite={false}`)
