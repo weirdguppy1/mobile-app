@@ -55,7 +55,11 @@ export default function OnboardingScreen() {
 
   // Resume to the first incomplete question once per fresh data load.
   useEffect(() => {
-    if (data) flow.goToQuestion(QUESTIONS[firstIncompleteQuestion(QUESTIONS, data)].id);
+    if (!data) return;
+    const resumeIdx = firstIncompleteQuestion(QUESTIONS, data);
+    // Brand-new users (resumeIdx === 0) stay on the welcome interstitial at flow
+    // index 0; only jump when resuming into a later question.
+    if (resumeIdx > 0) flow.goToQuestion(QUESTIONS[resumeIdx].id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.profile.id]);
 
