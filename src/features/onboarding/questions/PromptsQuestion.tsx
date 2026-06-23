@@ -40,7 +40,17 @@ export function PromptsQuestion() {
   };
   const setAnswer = (index: number, text: string) =>
     setDrafts((d) => d.map((x, i) => (i === index ? { ...x, answer: text } : x)));
-  const removeAt = (index: number) => setDrafts((d) => d.filter((_, i) => i !== index));
+  const removeAt = (index: number) => {
+    const removed = drafts[index];
+    const next = drafts.filter((_, i) => i !== index);
+    setDrafts(next);
+    // If this prompt was already persisted, delete it from the DB now by re-syncing
+    // the remaining answered prompts (savePrompts → replace_prompts = delete-all +
+    // reinsert; the DB rejects empty answers, so unanswered drafts stay local until
+    // Continue). Skip the round-trip when the removed prompt was never saved.
+    const wasSaved = (data?.prompts ?? []).some((p) => p.prompt === removed.prompt);
+    if (wasSaved) savePrompts.mutate(next.filter((x) => x.answer.trim().length > 0));
+  };
 
   const onNext = async () => {
     if (!result.success) return;

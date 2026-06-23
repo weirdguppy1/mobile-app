@@ -1,8 +1,8 @@
 import { X } from 'lucide-react-native';
-import { Text, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
 import { Brand } from '@/constants/theme';
-import { PressScale, TextField } from '@/shared/components';
+import { PressScale } from '@/shared/components';
 
 interface PromptCardProps {
   prompt: string;
@@ -11,8 +11,8 @@ interface PromptCardProps {
   onRemove: () => void;
 }
 
-/** One chosen prompt: the prompt text, a multiline answer field, and a remove control.
- *  Reuses the shared `card` surface + `TextField`. */
+/** One chosen prompt: the prompt text, a borderless multiline answer that blends
+ *  seamlessly into the card, and a remove control. */
 export function PromptCard({ prompt, answer, onChangeAnswer, onRemove }: PromptCardProps) {
   return (
     <View className="card border-continuous gap-2 px-4 py-4">
@@ -26,7 +26,16 @@ export function PromptCard({ prompt, answer, onChangeAnswer, onRemove }: PromptC
           <X size={18} color={Brand.graphite} strokeWidth={2} />
         </PressScale>
       </View>
-      <TextField value={answer} onChangeText={onChangeAnswer} placeholder="Your answer" multiline />
+      <TextInput
+        value={answer}
+        onChangeText={onChangeAnswer}
+        placeholder="Your answer..."
+        placeholderTextColor={Brand.fog}
+        multiline
+        textAlignVertical="top"
+        className="font-primary tracking-tight text-ink"
+        style={{ fontSize: 16, padding: 0, minHeight: 44 }}
+      />
     </View>
   );
 }
