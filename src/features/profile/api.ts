@@ -1,3 +1,5 @@
+import { File } from 'expo-file-system';
+
 import { supabase } from '@/lib/supabase';
 import { OnboardingData, ProfilePhoto, SignedProfilePhoto } from '@/features/profile/types';
 import { Database } from '@/types/database';
@@ -36,11 +38,12 @@ export async function updateProfile(
 }
 
 export async function uploadPhoto(userId: string, localUri: string, position: number): Promise<ProfilePhoto> {
-  const ext = localUri.split('.').pop()?.split('?')[0] || 'jpg';
+  const ext = (localUri.split('.').pop()?.split('?')[0] || 'jpg').toLowerCase();
   const path = `${userId}/${position}-${Date.now()}.${ext}`;
-  const res = await fetch(localUri);
-  const bytes = await res.arrayBuffer();
-  const contentType = res.headers.get('content-type') ?? `image/${ext}`;
+  // Read the picked file's bytes natively. fetch(localUri).arrayBuffer() hangs on
+  // React Native for file:// URIs, which left uploads stuck on "uploading…".
+  const bytes = await new File(localUri).bytes();
+  const contentType = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from(PHOTO_BUCKET)
