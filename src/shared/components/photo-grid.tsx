@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { ImagePlus } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { type LayoutChangeEvent, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -12,6 +13,7 @@ import {
 import { scheduleOnRN } from 'react-native-worklets';
 import { useResolveClassNames } from 'uniwind';
 
+import { Brand } from '@/constants/theme';
 import { PressScale } from '@/shared/components/press-scale';
 
 export interface PhotoItem {
@@ -193,7 +195,7 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
           accessibilityLabel="Add photo"
           onPress={onAdd}
           className="photo-slot h-full w-full items-center justify-center">
-          <Text className="prose-display text-fog">+</Text>
+          <ImagePlus size={28} color={Brand.fog} strokeWidth={2} />
         </PressScale>
       );
     }
