@@ -14,6 +14,7 @@ import {
 } from '@/shared/components';
 import { ContinueOverlay } from '@/features/onboarding/components/ContinueOverlay';
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
+import { QuestionShell } from '@/features/onboarding/components/QuestionShell';
 import { NavBar } from '@/features/navigation/components/NavBar';
 import { TABS } from '@/features/navigation/config/tabs';
 
@@ -153,6 +154,20 @@ export default function ComponentsGallery() {
           <Section title="Onboarding — ContinueOverlay">
             <View className="h-40 overflow-hidden rounded-2xl border border-silver bg-wash">
               <ContinueOverlay canAdvance onNext={() => {}} />
+            </View>
+          </Section>
+
+          <Section title="Onboarding — QuestionShell">
+            <View className="h-96 overflow-hidden rounded-2xl border border-silver">
+              <QuestionShell
+                title={"What's your\nname?"}
+                subtitle="Your preferred name."
+                canGoBack
+                onBack={() => {}}
+                canAdvance
+                onNext={() => {}}>
+                <TextField placeholder="Preferred name" />
+              </QuestionShell>
             </View>
           </Section>
 
