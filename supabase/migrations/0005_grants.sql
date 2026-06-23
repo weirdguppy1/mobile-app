@@ -61,7 +61,8 @@ grant update (
   clubs,
   instagram,
   linkedin,
-  about_me
+  about_me,
+  hidden_fields
 ) on public.profiles to authenticated;
 
 -- profile_photos — full CRUD on your own (write-time validation in 0002/0003).

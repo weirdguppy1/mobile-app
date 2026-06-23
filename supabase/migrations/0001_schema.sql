@@ -116,6 +116,8 @@ create table if not exists public.profiles (
   linkedin             text,                           -- visible to same school
   about_me             text        check (about_me is null or char_length(about_me) <= 600),
                                                         -- short bio; 50-word cap enforced in app
+  hidden_fields        text[]      not null default '{}',
+                                                        -- profile field ids the user hides from others (Edit/View)
   -- NOTE: phone lives in private_contacts (match-gated), NOT here.
 
   -- onboarding gate: false until the user finishes setup (flipped only

@@ -36,6 +36,7 @@ export interface Database {
           instagram: string | null;
           linkedin: string | null;
           about_me: string | null;
+          hidden_fields: string[];
           onboarding_complete: boolean;
           created_at: string;
           updated_at: string;

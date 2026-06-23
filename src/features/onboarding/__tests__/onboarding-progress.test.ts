@@ -12,7 +12,7 @@ const blankProfile = {
   alcohol: null, smoking: null, parties: null,
   fitness: null, interests: null, deal_breakers: null, dorm_preference: null,
   living_program: null, clubs: null, instagram: null, linkedin: null,
-  about_me: null, onboarding_complete: false, created_at: '', updated_at: '',
+  about_me: null, hidden_fields: [] as string[], onboarding_complete: false, created_at: '', updated_at: '',
 } as const;
 const data = (overrides: Record<string, unknown> = {}): OnboardingData => ({
   profile: { ...blankProfile, ...overrides } as unknown as typeof blankProfile, photos: [], prompts: [],
