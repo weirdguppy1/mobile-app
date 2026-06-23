@@ -1,4 +1,4 @@
-import { firstIncompleteIndex, firstIncompleteQuestion, sectionProgress } from '@/features/onboarding/lib/onboarding-progress';
+import { firstIncompleteQuestion, sectionProgress } from '@/features/onboarding/lib/onboarding-progress';
 import { QUESTIONS } from '@/features/onboarding/config/questions';
 import { OnboardingData } from '@/features/profile/types';
 
@@ -16,24 +16,6 @@ const blankProfile = {
 } as const;
 const data = (overrides: Record<string, unknown> = {}): OnboardingData => ({
   profile: { ...blankProfile, ...overrides } as unknown as typeof blankProfile, photos: [], prompts: [],
-});
-
-const steps = [
-  { isComplete: (d: OnboardingData) => !!d.profile.first_name },
-  { isComplete: (d: OnboardingData) => !!d.profile.cleanliness },
-  { isComplete: () => false },
-];
-
-describe('firstIncompleteIndex', () => {
-  it('returns 0 for a blank profile', () => {
-    expect(firstIncompleteIndex(steps, data())).toBe(0);
-  });
-  it('skips completed leading steps', () => {
-    expect(firstIncompleteIndex(steps, data({ first_name: 'Mia' }))).toBe(1);
-  });
-  it('returns the last index when all but the final are complete', () => {
-    expect(firstIncompleteIndex(steps, data({ first_name: 'Mia', cleanliness: 3 }))).toBe(2);
-  });
 });
 
 describe('firstIncompleteQuestion', () => {

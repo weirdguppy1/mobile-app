@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivateRamp, Button, CheckPop } from '@/shared/components';
 
 /** Content height of the overlay (button + padding), excluding the safe inset. */
-export const CONTINUE_OVERLAY_BASE = 96;
+const CONTINUE_OVERLAY_BASE = 96;
 const MIN_INSET = 12;
 
 /** Total height the overlay occupies — screens pad their scroll content by this so
