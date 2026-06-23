@@ -16,6 +16,8 @@ import { ContinueOverlay } from '@/features/onboarding/components/ContinueOverla
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
 import { SectionProgress } from '@/features/onboarding/components/SectionProgress';
 import { QuestionShell } from '@/features/onboarding/components/QuestionShell';
+import { SectionInterstitial } from '@/features/onboarding/components/SectionInterstitial';
+import { SECTIONS } from '@/features/onboarding/config/sections';
 import { NavBar } from '@/features/navigation/components/NavBar';
 import { TABS } from '@/features/navigation/config/tabs';
 
@@ -173,6 +175,17 @@ export default function ComponentsGallery() {
                 onNext={() => {}}>
                 <TextField placeholder="Preferred name" />
               </QuestionShell>
+            </View>
+          </Section>
+
+          <Section title="Onboarding — SectionInterstitial">
+            <View className="h-96 overflow-hidden rounded-2xl border border-silver">
+              <SectionInterstitial
+                headline={SECTIONS[0].interstitial.headline}
+                body={SECTIONS[0].interstitial.body}
+                schoolLabel="Signed in as student@stanford.edu"
+                onContinue={() => {}}
+              />
             </View>
           </Section>
 
