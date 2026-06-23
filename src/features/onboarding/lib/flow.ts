@@ -10,8 +10,8 @@ export function buildFlow(sections: SectionDef[], questions: QuestionMeta[]): Fl
   const flow: FlowItem[] = [];
   for (const section of sections) {
     flow.push({ kind: 'interstitial', section: section.id, key: `section:${section.id}` });
-    for (const q of questions.filter((q) => q.section === section.id)) {
-      flow.push({ kind: 'question', questionId: q.id, key: `q:${q.id}` });
+    for (const candidate of questions.filter((candidate) => candidate.section === section.id)) {
+      flow.push({ kind: 'question', questionId: candidate.id, key: `q:${candidate.id}` });
     }
   }
   return flow;

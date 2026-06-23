@@ -1,4 +1,5 @@
-import { firstIncompleteIndex } from '@/features/onboarding/lib/onboarding-progress';
+import { firstIncompleteIndex, firstIncompleteQuestion, sectionProgress } from '@/features/onboarding/lib/onboarding-progress';
+import { QUESTIONS } from '@/features/onboarding/config/questions';
 import { OnboardingData } from '@/features/profile/types';
 
 const blankProfile = {
@@ -34,9 +35,6 @@ describe('firstIncompleteIndex', () => {
     expect(firstIncompleteIndex(steps, data({ first_name: 'Mia', cleanliness: 3 }))).toBe(2);
   });
 });
-
-import { firstIncompleteQuestion, sectionProgress } from '@/features/onboarding/lib/onboarding-progress';
-import { QUESTIONS } from '@/features/onboarding/config/questions';
 
 describe('firstIncompleteQuestion', () => {
   it('returns 0 for a blank profile (first_name)', () => {

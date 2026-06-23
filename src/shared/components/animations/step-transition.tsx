@@ -54,7 +54,7 @@ function makeExit(variant: Variant, direction: Direction, reduced: boolean): Cus
   return Object.assign(fn, { presetName: 'stepExit' });
 }
 
-/** Blur overlay that ramps from blurred to sharp on mount (TASK4 §6). */
+/** Blur overlay that ramps from blurred to sharp on mount. */
 function EntryBlur() {
   const progress = useSharedValue(1);
   useEffect(() => { progress.value = withTiming(0, { duration: 220 }); }, [progress]);
@@ -71,6 +71,8 @@ function EntryBlur() {
 }
 
 interface StepTransitionProps {
+  /** Must change on every screen change so Reanimated unmounts/remounts the Animated.View,
+   *  triggering the entering/exiting animations. Typically the flow item's stable key. */
   transitionKey: string;
   direction: Direction;
   /** 'question' (default) = slide+fade. 'section' = heavier scale+fade-through. */
