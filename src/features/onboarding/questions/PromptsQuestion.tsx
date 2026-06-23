@@ -1,36 +1,46 @@
-// src/features/onboarding/questions/PromptsQuestion.tsx
+import { Quote } from 'lucide-react-native';
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 
+import { Brand } from '@/constants/theme';
+import { AddPromptButton } from '@/features/onboarding/components/AddPromptButton';
+import { PromptCard } from '@/features/onboarding/components/PromptCard';
+import { PromptPickerSheet } from '@/features/onboarding/components/PromptPickerSheet';
 import { QuestionShell } from '@/features/onboarding/components/QuestionShell';
 import { useQuestionFlow } from '@/features/onboarding/hooks/use-question-flow';
-import { PROMPTS, PROMPTS_LIMITS } from '@/features/profile/constants';
+import { PROMPT_CATEGORIES, PROMPTS_LIMITS } from '@/features/profile/constants';
 import { useProfileMutations } from '@/features/profile/hooks/use-profile-mutations';
 import { promptsSchema } from '@/features/profile/schema';
-import { Field, OptionGroup, TextField } from '@/shared/components';
+import { FadeIn } from '@/shared/components';
 
-const promptOptions = PROMPTS.map((p) => ({ value: p, label: p }));
+type Draft = { prompt: string; answer: string };
 
 export function PromptsQuestion() {
   const { data, question, goNext, goBack, canGoBack } = useQuestionFlow();
   const { savePrompts } = useProfileMutations();
 
-  const [answers, setAnswers] = useState<Record<string, string>>(() =>
-    Object.fromEntries((data?.prompts ?? []).map((p) => [p.prompt, p.answer])),
+  const [drafts, setDrafts] = useState<Draft[]>(() =>
+    (data?.prompts ?? []).map((p) => ({ prompt: p.prompt, answer: p.answer })),
   );
-  const selected = Object.keys(answers);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
-  const toggle = (next: string[]) => {
-    if (next.length > PROMPTS_LIMITS.max) return;
-    setAnswers((prev) => {
-      const out: Record<string, string> = {};
-      for (const key of next) out[key] = prev[key] ?? '';
-      return out;
-    });
+  const atMax = drafts.length >= PROMPTS_LIMITS.max;
+  const selected = new Set(drafts.map((d) => d.prompt));
+  const availableCategories = PROMPT_CATEGORIES.map((c) => ({
+    label: c.label,
+    prompts: c.prompts.filter((p) => !selected.has(p)),
+  })).filter((c) => c.prompts.length > 0);
+
+  const result = promptsSchema.safeParse({ prompts: drafts });
+
+  const addPrompt = (prompt: string) => {
+    if (drafts.length >= PROMPTS_LIMITS.max || selected.has(prompt)) return;
+    setDrafts((d) => [...d, { prompt, answer: '' }]);
+    setPickerOpen(false);
   };
-
-  const prompts = selected.map((prompt) => ({ prompt, answer: answers[prompt] ?? '' }));
-  const result = promptsSchema.safeParse({ prompts });
+  const setAnswer = (index: number, text: string) =>
+    setDrafts((d) => d.map((x, i) => (i === index ? { ...x, answer: text } : x)));
+  const removeAt = (index: number) => setDrafts((d) => d.filter((_, i) => i !== index));
 
   const onNext = async () => {
     if (!result.success) return;
@@ -43,31 +53,46 @@ export function PromptsQuestion() {
     <QuestionShell
       title={question.title}
       subtitle={question.subtitle}
+      icon={
+        <View className="h-10 w-10 items-center justify-center rounded-full border border-silver">
+          <Quote size={18} color={Brand.ink} strokeWidth={2} />
+        </View>
+      }
       canGoBack={canGoBack}
       onBack={goBack}
       canAdvance={result.success}
       onNext={onNext}
       saving={savePrompts.isPending}>
       <View className="gap-4">
-        <Field label={`Choose 1–${PROMPTS_LIMITS.max}`}>
-          <OptionGroup multiple options={promptOptions} value={selected} onChange={toggle} max={PROMPTS_LIMITS.max} />
-        </Field>
-        {selected.length > 0 ? (
-          <View className="gap-4">
-            {selected.map((prompt) => (
-              <View key={prompt} className="gap-1.5">
-                <Text className="prose-footnote font-semibold text-ink">{prompt}</Text>
-                <TextField
-                  value={answers[prompt] ?? ''}
-                  onChangeText={(t) => setAnswers((prev) => ({ ...prev, [prompt]: t }))}
-                  placeholder="Your answer"
-                  multiline
-                />
-              </View>
-            ))}
-          </View>
+        {drafts.map((d, i) => (
+          <FadeIn key={`${d.prompt}-${i}`}>
+            <PromptCard
+              prompt={d.prompt}
+              answer={d.answer}
+              onChangeAnswer={(t) => setAnswer(i, t)}
+              onRemove={() => removeAt(i)}
+            />
+          </FadeIn>
+        ))}
+
+        {!atMax ? (
+          <AddPromptButton
+            label={drafts.length === 0 ? 'Add a prompt' : 'Add another'}
+            onPress={() => setPickerOpen(true)}
+          />
         ) : null}
+
+        <Text className="prose-caption text-ash">
+          {`Answer ${PROMPTS_LIMITS.min}–${PROMPTS_LIMITS.max} prompts`}
+        </Text>
       </View>
+
+      <PromptPickerSheet
+        visible={pickerOpen}
+        categories={availableCategories}
+        onSelect={addPrompt}
+        onClose={() => setPickerOpen(false)}
+      />
     </QuestionShell>
   );
 }

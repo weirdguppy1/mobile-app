@@ -6,14 +6,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingOverlay } from '@/features/auth/components/loading-overlay';
 import { OtpInput } from '@/features/auth/components/otp-input';
 import { ProgressBar } from '@/features/auth/components/progress-bar';
-import { ALCOHOL, INTERESTS } from '@/features/profile/constants';
+import { ALCOHOL, INTERESTS, PROMPT_CATEGORIES } from '@/features/profile/constants';
 import {
   ActivateRamp, Button, CheckPop, ConfettiBurst, FadeIn, Field, FocusScale,
   OptionGroup, PhotoGrid, PressScale, ScaleInput, SpotlightProvider, SpotlightScrim,
   SpotlightSlot, TagInput, TextField,
 } from '@/shared/components';
+import { AddPromptButton } from '@/features/onboarding/components/AddPromptButton';
 import { ContinueOverlay } from '@/features/onboarding/components/ContinueOverlay';
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
+import { PromptCard } from '@/features/onboarding/components/PromptCard';
+import { PromptPickerSheet } from '@/features/onboarding/components/PromptPickerSheet';
 import { SectionProgress } from '@/features/onboarding/components/SectionProgress';
 import { QuestionShell } from '@/features/onboarding/components/QuestionShell';
 import { SectionInterstitial } from '@/features/onboarding/components/SectionInterstitial';
@@ -40,6 +43,8 @@ export default function ComponentsGallery() {
   const [confirmed, setConfirmed] = useState(false);
   const [confettiOn, setConfettiOn] = useState(false);
   const [navTab, setNavTab] = useState('discover');
+  const [promptSheetOpen, setPromptSheetOpen] = useState(false);
+  const [demoAnswer, setDemoAnswer] = useState('Late-night ramen and a movie.');
 
   return (
     <View className="flex-1 bg-canvas">
@@ -187,6 +192,23 @@ export default function ComponentsGallery() {
                 onContinue={() => {}}
               />
             </View>
+          </Section>
+
+          <Section title="Onboarding — Prompts (add button, card, picker)">
+            <AddPromptButton onPress={() => setPromptSheetOpen(true)} />
+            <AddPromptButton label="Add another" onPress={() => setPromptSheetOpen(true)} />
+            <PromptCard
+              prompt="My ideal Friday night is..."
+              answer={demoAnswer}
+              onChangeAnswer={setDemoAnswer}
+              onRemove={() => {}}
+            />
+            <PromptPickerSheet
+              visible={promptSheetOpen}
+              categories={PROMPT_CATEGORIES}
+              onSelect={() => setPromptSheetOpen(false)}
+              onClose={() => setPromptSheetOpen(false)}
+            />
           </Section>
 
           <Section title="Navigation — NavBar (bottom tabs)">

@@ -9,6 +9,8 @@ interface QuestionShellProps {
   title: string;
   subtitle?: string;
   optional?: boolean;
+  /** Optional decorative element rendered above the hero title (e.g. a circled icon). */
+  icon?: ReactNode;
   canGoBack: boolean;
   onBack: () => void;
   canAdvance: boolean;
@@ -22,7 +24,7 @@ interface QuestionShellProps {
  *  filling the space below, a blurred floating Continue. No spotlight — one input per
  *  screen is already the focus (TASK4 §1, §4, §5, §8). */
 export function QuestionShell({
-  title, subtitle, optional, canGoBack, onBack, canAdvance, onNext, saving, nextLabel, children,
+  title, subtitle, optional, icon, canGoBack, onBack, canAdvance, onNext, saving, nextLabel, children,
 }: QuestionShellProps) {
   const overlayHeight = useContinueOverlayHeight();
 
@@ -38,6 +40,7 @@ export function QuestionShell({
         ) : null}
 
         <View className="gap-2 pt-6">
+          {icon ? <View className="mb-1">{icon}</View> : null}
           {optional ? <Text className="prose-caption text-ash">Optional</Text> : null}
           <Text className="prose-display text-ink">{title}</Text>
           {subtitle ? (

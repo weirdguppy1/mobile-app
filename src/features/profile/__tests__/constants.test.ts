@@ -4,6 +4,8 @@ import {
   DEAL_BREAKERS,
   GRADUATION_YEARS,
   INTERESTS,
+  PROMPT_CATEGORIES,
+  PROMPTS,
   ROOM_TEMPERATURE,
   SEX_ASSIGNED_AT_BIRTH,
 } from '@/features/profile/constants';
@@ -39,6 +41,23 @@ describe('profile constants ↔ DB CHECK sets', () => {
   it('every option has a non-empty human label', () => {
     for (const o of [...INTERESTS, ...DEAL_BREAKERS, ...ALCOHOL]) {
       expect(o.label.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('prompt categories', () => {
+  it('PROMPTS is the flattened categories with no duplicates', () => {
+    const flat = PROMPT_CATEGORIES.flatMap((c) => c.prompts);
+    expect(PROMPTS).toEqual(flat);
+    expect(new Set(PROMPTS).size).toBe(PROMPTS.length);
+  });
+
+  it('every category has a label and at least one prompt, all non-empty', () => {
+    expect(PROMPT_CATEGORIES.length).toBeGreaterThan(0);
+    for (const c of PROMPT_CATEGORIES) {
+      expect(c.label.length).toBeGreaterThan(0);
+      expect(c.prompts.length).toBeGreaterThan(0);
+      for (const p of c.prompts) expect(p.trim().length).toBeGreaterThan(0);
     }
   });
 });

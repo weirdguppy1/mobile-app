@@ -115,3 +115,9 @@
 @utility photo-slot {
   @apply aspect-square overflow-hidden rounded-xl border border-silver bg-wash;
 }
+
+/* Dotted "add a prompt" tile. rounded-xl (not border-continuous): dashed + a
+   continuous corner curve renders unevenly in React Native. */
+@utility add-prompt-tile {
+  @apply w-full flex-row items-center justify-center gap-2 rounded-xl border-2 border-dashed border-silver bg-canvas py-5;
+}

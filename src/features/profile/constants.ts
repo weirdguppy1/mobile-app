@@ -124,59 +124,98 @@ export const DEAL_BREAKERS: Option[] = [
   { value: "noise_levels", label: "Noise levels" },
 ];
 
-export const PROMPTS: string[] = [
-  "My ideal Friday night is...",
-  "One thing I can't live without...",
-  "You should room with me if...",
-  "My biggest dorm pet peeve is...",
-  "A fun fact about me...",
-  "My morning routine...",
-  "The cleanest part of my room is...",
-  "The messiest part of my room is...",
-  "My sleep schedule is",
-  "On weekends you'll find me",
-  "The cleanest part of my room is",
-  "The messiest part of my room is",
-  "After midnight I'm usually",
-  "We would be a good roommate match if",
-  "One thing I need in a roommate is",
-  "Not my roommate if you don't listen to",
-  "My biggest freshman-year goal is",
-  "A shower thought I recently had",
-  "I bet you can't",
-  "My most irrational fear is",
-  "We'll get along if",
-  "The dorkiest thing about me is",
-  "My most controversial opinion is",
-  "I know the best spot for",
-  "The award I should be nominated for",
-  "I'm looking for",
-  "I get along best with people who",
-  "One thing I want to know about you is",
-  "A life goal of mine",
-  "The key to my heart is",
-  "What I value most in a friendship is",
-  "Let's make sure we're on the same page about",
-  "I'll never forget the time",
-  "The craziest thing I've ever done",
-  "A random skill I have",
-  "My most memorable travel story",
-  "My biggest flex",
-  "A fact about me that surprises people",
-  "The best advice I've ever received",
-  "A challenge I've overcome",
-  "My claim to fame is",
-  "The most spontaneous thing I've done",
-  "Let's",
-  "My ideal Sunday",
-  "My perfect weekend",
-  "Teach me something about",
-  "The next place I want to visit",
-  "You should leave a comment if",
-  "We're the same type of weird if",
-  "The quickest way to get me excited is",
-  "Let's debate",
+export interface PromptCategory {
+  /** Section header shown in the prompt picker. */
+  label: string;
+  prompts: string[];
+}
+
+// Prompts grouped by category for the picker. Edit copy/grouping here — this is the
+// single source of truth. `PROMPTS` is derived below for any flat consumer.
+export const PROMPT_CATEGORIES: PromptCategory[] = [
+  {
+    label: "About me",
+    prompts: [
+      "A fun fact about me...",
+      "One thing I can't live without...",
+      "The dorkiest thing about me is",
+      "My most irrational fear is",
+      "A random skill I have",
+      "My biggest flex",
+      "A fact about me that surprises people",
+      "My claim to fame is",
+      "My most controversial opinion is",
+      "A shower thought I recently had",
+      "My biggest freshman-year goal is",
+      "A life goal of mine",
+    ],
+  },
+  {
+    label: "My ideal weekend",
+    prompts: [
+      "My ideal Friday night is...",
+      "My ideal Sunday",
+      "My perfect weekend",
+      "On weekends you'll find me",
+      "After midnight I'm usually",
+      "My morning routine...",
+      "My sleep schedule is",
+    ],
+  },
+  {
+    label: "Living together",
+    prompts: [
+      "You should room with me if...",
+      "My biggest dorm pet peeve is...",
+      "The cleanest part of my room is",
+      "The messiest part of my room is",
+      "We would be a good roommate match if",
+      "One thing I need in a roommate is",
+      "We'll get along if",
+      "Let's make sure we're on the same page about",
+      "I get along best with people who",
+    ],
+  },
+  {
+    label: "What I'm looking for",
+    prompts: [
+      "I'm looking for",
+      "What I value most in a friendship is",
+      "The key to my heart is",
+      "One thing I want to know about you is",
+      "We're the same type of weird if",
+      "Not my roommate if you don't listen to",
+    ],
+  },
+  {
+    label: "Stories & flexes",
+    prompts: [
+      "The craziest thing I've ever done",
+      "I'll never forget the time",
+      "My most memorable travel story",
+      "The best advice I've ever received",
+      "A challenge I've overcome",
+      "The most spontaneous thing I've done",
+      "The award I should be nominated for",
+    ],
+  },
+  {
+    label: "Let's connect",
+    prompts: [
+      "Let's",
+      "Let's debate",
+      "I bet you can't",
+      "Teach me something about",
+      "I know the best spot for",
+      "The next place I want to visit",
+      "The quickest way to get me excited is",
+      "You should leave a comment if",
+    ],
+  },
 ];
+
+/** Flat list of every prompt, derived from the categories. */
+export const PROMPTS: string[] = PROMPT_CATEGORIES.flatMap((c) => c.prompts);
 
 export const GRADUATION_YEARS: number[] = Array.from(
   { length: 2035 - 2024 + 1 },

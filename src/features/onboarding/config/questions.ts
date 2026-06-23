@@ -74,7 +74,7 @@ export const QUESTIONS: QuestionMeta[] = [
     subtitle: "Things you can't live with.", optional: true, isComplete: always },
 
   // prompts (bespoke)
-  { id: 'prompts', section: 'prompts', title: 'Show some personality', subtitle: 'Answer 1–3 prompts.',
+  { id: 'prompts', section: 'prompts', title: 'Write your profile answers', subtitle: 'Pick a prompt and make it yours.',
     isComplete: (d) => ok(promptsSchema.safeParse({ prompts: d.prompts.map((p) => ({ prompt: p.prompt, answer: p.answer })) })) },
 
   // photos (bespoke)
