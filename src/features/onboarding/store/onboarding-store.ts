@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 interface OnboardingState {
+  /** Current position in the onboarding FLOW (interstitials + questions), not a step index. */
   index: number;
   setIndex: (index: number) => void;
   /** True while the completion celebration plays (suppresses the auto-redirect). */

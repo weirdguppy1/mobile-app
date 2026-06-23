@@ -3,42 +3,35 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
-  Easing,
-  runOnJS,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withTiming,
+  Easing, runOnJS, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming,
 } from 'react-native-reanimated';
 
 import { CompletionCelebration } from '@/features/onboarding/components/CompletionCelebration';
 import { OnboardingBackground } from '@/features/onboarding/components/OnboardingBackground';
-import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
-import { STEP_COMPONENTS } from '@/features/onboarding/config/step-components';
-import { STEPS } from '@/features/onboarding/config/steps';
-import { toneFor } from '@/features/onboarding/config/step-tone';
-import { useOnboarding } from '@/features/onboarding/hooks/use-onboarding';
-import { firstIncompleteIndex } from '@/features/onboarding/lib/onboarding-progress';
+import { SectionInterstitial } from '@/features/onboarding/components/SectionInterstitial';
+import { SectionProgress } from '@/features/onboarding/components/SectionProgress';
+import { QUESTION_COMPONENTS } from '@/features/onboarding/config/question-components';
+import { QUESTIONS } from '@/features/onboarding/config/questions';
+import { useQuestionFlow } from '@/features/onboarding/hooks/use-question-flow';
+import { firstIncompleteQuestion } from '@/features/onboarding/lib/onboarding-progress';
 import { useOnboardingStore } from '@/features/onboarding/store/onboarding-store';
 import { StepTransition } from '@/shared/components';
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const { step, index, data, isLoading, isError, setIndex } = useOnboarding();
+  const flow = useQuestionFlow();
+  const { data, isLoading, isError, item, question, section, progress } = flow;
   const celebrating = useOnboardingStore((s) => s.celebrating);
   const setCelebrating = useOnboardingStore((s) => s.setCelebrating);
   const reduced = useReducedMotion();
 
-  // Direction for the step transition: forward when the index grows.
-  const prevIndex = useRef(index);
-  const direction: 'forward' | 'back' = index >= prevIndex.current ? 'forward' : 'back';
-  useEffect(() => {
-    prevIndex.current = index;
-  }, [index]);
+  // Forward when the flow index grows.
+  const prevIndex = useRef(flow.index);
+  const direction: 'forward' | 'back' = flow.index >= prevIndex.current ? 'forward' : 'back';
+  useEffect(() => { prevIndex.current = flow.index; }, [flow.index]);
 
-  // On finish, the current screen lifts + fades away FIRST; only once it's gone
-  // does the "You're all set" + confetti play on the cleared background, then we
-  // navigate. `showCelebration` gates the overlay until the lift completes.
+  // Completion: the current screen lifts + fades FIRST; only once gone does the
+  // celebration play on the cleared background, then we navigate.
   const exit = useSharedValue(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const contentStyle = useAnimatedStyle(() => ({
@@ -48,11 +41,7 @@ export default function OnboardingScreen() {
 
   useEffect(() => {
     if (!celebrating) return;
-    if (reduced) {
-      exit.value = 1; // clear the screen instantly, no animation
-      setShowCelebration(true);
-      return;
-    }
+    if (reduced) { exit.value = 1; setShowCelebration(true); return; }
     exit.value = withTiming(1, { duration: 480, easing: Easing.in(Easing.cubic) }, (finished) => {
       if (finished) runOnJS(setShowCelebration)(true);
     });
@@ -64,9 +53,9 @@ export default function OnboardingScreen() {
     router.replace('/discover');
   };
 
-  // Resume to the first incomplete step once per fresh data load.
+  // Resume to the first incomplete question once per fresh data load.
   useEffect(() => {
-    if (data) setIndex(firstIncompleteIndex(STEPS, data));
+    if (data) flow.goToQuestion(QUESTIONS[firstIncompleteQuestion(QUESTIONS, data)].id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.profile.id]);
 
@@ -90,19 +79,38 @@ export default function OnboardingScreen() {
     );
   }
 
-  const StepComponent = STEP_COMPONENTS[step.id];
+  const isInterstitial = item.kind === 'interstitial';
+  const tone = isInterstitial ? section.tone : 'neutral';
+  const QuestionComponent = question ? QUESTION_COMPONENTS[question.id] : null;
+  const schoolLabel = section.id === 'basics'
+    ? `Signed in as ${data.profile.email ?? data.profile.school_domain ?? ''}`
+    : undefined;
 
   return (
     <View className="flex-1">
-      <OnboardingBackground tone={toneFor(step.id)} />
+      <OnboardingBackground tone={tone} />
       <Animated.View className="flex-1" style={contentStyle}>
         <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
-          <View className="px-6 pt-4">
-            <OnboardingProgress current={index + 1} total={STEPS.length} />
-          </View>
+          {!isInterstitial && progress ? (
+            <View className="px-6 pt-4">
+              <SectionProgress title={section.title} current={progress.current} total={progress.total} />
+            </View>
+          ) : null}
           <View className="flex-1">
-            <StepTransition transitionKey={step.id} direction={direction}>
-              <StepComponent />
+            <StepTransition
+              transitionKey={item.key}
+              direction={direction}
+              variant={isInterstitial ? 'section' : 'question'}>
+              {isInterstitial ? (
+                <SectionInterstitial
+                  headline={section.interstitial.headline}
+                  body={section.interstitial.body}
+                  schoolLabel={schoolLabel}
+                  onContinue={flow.goNext}
+                />
+              ) : QuestionComponent ? (
+                <QuestionComponent />
+              ) : null}
             </StepTransition>
           </View>
         </SafeAreaView>
