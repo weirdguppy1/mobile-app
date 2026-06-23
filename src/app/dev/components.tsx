@@ -21,8 +21,33 @@ import { SectionProgress } from '@/features/onboarding/components/SectionProgres
 import { QuestionShell } from '@/features/onboarding/components/QuestionShell';
 import { SectionInterstitial } from '@/features/onboarding/components/SectionInterstitial';
 import { SECTIONS } from '@/features/onboarding/config/sections';
+import { ProfileView } from '@/features/profile/components/ProfileView';
+import { Profile, ProfilePrompt, SignedProfilePhoto } from '@/features/profile/types';
 import { NavBar } from '@/features/navigation/components/NavBar';
 import { TABS } from '@/features/navigation/config/tabs';
+
+const mockProfile = {
+  id: 'demo', email: 'julia@stanford.edu', school_domain: 'stanford.edu',
+  first_name: 'Julia', pronouns: 'she/her', university: 'Stanford',
+  graduation_year: 2027, majors: ['Computer Science', 'Design'],
+  gender_identity: 'Woman', sex_assigned_at_birth: 'female', sexual_orientation: 'straight',
+  sleep_schedule: 'night_owl', bedtime: 'after_midnight', wakeup_time: 'after_9am',
+  cleanliness: 4, noise_preference: 'moderate_ok', study_style: 'mix',
+  guests_frequency: 'occasionally', romantic_guests_frequency: 'rarely',
+  social_level: 3, room_temperature: 'cold', alcohol: 'occasionally', smoking: 'no',
+  parties: 'sometimes', fitness: 'regularly', interests: ['gym', 'music', 'coding', 'reading', 'movies'],
+  deal_breakers: ['smoking', 'noise_levels'], dorm_preference: 'North campus', living_program: 'Honors',
+  clubs: ['ACM', 'Climbing'], instagram: '@julia', linkedin: 'in/julia',
+  about_me: 'CS major who loves late-night ramen, bouldering, and bad horror movies.',
+  hidden_fields: [], onboarding_complete: true, created_at: '', updated_at: '',
+} as unknown as Profile;
+const mockPhotos = [
+  { id: '1', profile_id: 'demo', url: '', position: 0, created_at: '', signedUrl: 'https://placehold.co/400x500' },
+  { id: '2', profile_id: 'demo', url: '', position: 1, created_at: '', signedUrl: 'https://placehold.co/400x500' },
+] as unknown as SignedProfilePhoto[];
+const mockPrompts = [
+  { id: 'a', profile_id: 'demo', prompt: 'You should room with me if...', answer: 'you also think 2am is a perfectly good time for ramen.', position: 0, created_at: '' },
+] as unknown as ProfilePrompt[];
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -209,6 +234,12 @@ export default function ComponentsGallery() {
               onSelect={() => setPromptSheetOpen(false)}
               onClose={() => setPromptSheetOpen(false)}
             />
+          </Section>
+
+          <Section title="Profile — ProfileView (read-only)">
+            <View className="h-150 overflow-hidden rounded-2xl border border-silver">
+              <ProfileView profile={mockProfile} photos={mockPhotos} prompts={mockPrompts} />
+            </View>
           </Section>
 
           <Section title="Navigation — NavBar (bottom tabs)">
