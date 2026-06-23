@@ -1,7 +1,8 @@
 // src/features/onboarding/config/question-components.tsx
 import { type ComponentType } from 'react';
-import { Text, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
+import { Brand } from '@/constants/theme';
 import { makeFieldQuestion, type Mutations } from '@/features/onboarding/lib/make-field-question';
 import { PhotosQuestion } from '@/features/onboarding/questions/PhotosQuestion';
 import { PromptsQuestion } from '@/features/onboarding/questions/PromptsQuestion';
@@ -149,16 +150,21 @@ const AboutMe = makeFieldQuestion<string>({
   control: (v, set) => {
     const words = countWords(v);
     return (
-      <TextField
-        value={v}
-        onChangeText={set}
-        multiline
-        textAlignVertical="top"
-        placeholder="What should a future roommate know about you?"
-        style={{ minHeight: 120 }}
-        message={`${words}/${ABOUT_ME_LIMITS.maxWords} words`}
-        invalid={words > ABOUT_ME_LIMITS.maxWords}
-      />
+      <View className="gap-2">
+        <TextInput
+          value={v}
+          onChangeText={set}
+          placeholder="What should a future roommate know about you?"
+          placeholderTextColor={Brand.fog}
+          multiline
+          textAlignVertical="top"
+          className="font-primary tracking-tight text-ink"
+          style={{ fontSize: 16, padding: 0, minHeight: 120 }}
+        />
+        <Text className={`prose-footnote ${words > ABOUT_ME_LIMITS.maxWords ? 'text-pass' : 'text-slate'}`}>
+          {words}/{ABOUT_ME_LIMITS.maxWords} words
+        </Text>
+      </View>
     );
   },
 });
