@@ -12,6 +12,7 @@ import {
   OptionGroup, PhotoGrid, PressScale, ScaleInput, SpotlightProvider, SpotlightScrim,
   SpotlightSlot, TagInput, TextField,
 } from '@/shared/components';
+import { ContinueOverlay } from '@/features/onboarding/components/ContinueOverlay';
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
 import { NavBar } from '@/features/navigation/components/NavBar';
 import { TABS } from '@/features/navigation/config/tabs';
@@ -147,6 +148,12 @@ export default function ComponentsGallery() {
               <Text className="prose-button text-canvas">Fire confetti</Text>
             </PressScale>
             {confettiOn ? <ConfettiBurst onComplete={() => setConfettiOn(false)} /> : null}
+          </Section>
+
+          <Section title="Onboarding — ContinueOverlay">
+            <View className="h-40 overflow-hidden rounded-2xl border border-silver bg-wash">
+              <ContinueOverlay canAdvance onNext={() => {}} />
+            </View>
           </Section>
 
           <Section title="Navigation — NavBar (bottom tabs)">
