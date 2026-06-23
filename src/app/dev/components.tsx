@@ -14,6 +14,7 @@ import {
 } from '@/shared/components';
 import { ContinueOverlay } from '@/features/onboarding/components/ContinueOverlay';
 import { OnboardingProgress } from '@/features/onboarding/components/OnboardingProgress';
+import { SectionProgress } from '@/features/onboarding/components/SectionProgress';
 import { QuestionShell } from '@/features/onboarding/components/QuestionShell';
 import { NavBar } from '@/features/navigation/components/NavBar';
 import { TABS } from '@/features/navigation/config/tabs';
@@ -128,6 +129,10 @@ export default function ComponentsGallery() {
 
           <Section title="Animations — OnboardingProgress">
             <OnboardingProgress current={2} total={5} />
+          </Section>
+
+          <Section title="Onboarding — SectionProgress">
+            <SectionProgress title="Living habits" current={3} total={10} />
           </Section>
 
           <Section title="Animations — Spotlight (focus a field)">
