@@ -1,14 +1,24 @@
 import { z } from 'zod';
 
 import {
-  ALCOHOL, BEDTIME, DEAL_BREAKER_VALUES, FITNESS, GUESTS_FREQUENCY, INTEREST_VALUES,
-  INTERESTS_LIMITS, MAJORS_LIMITS, NOISE_PREFERENCE, PARTIES, PROMPTS_LIMITS,
+  ABOUT_ME_LIMITS, ALCOHOL, BEDTIME, DEAL_BREAKER_VALUES, FITNESS, GUESTS_FREQUENCY,
+  INTEREST_VALUES, INTERESTS_LIMITS, MAJORS_LIMITS, NOISE_PREFERENCE, PARTIES, PROMPTS_LIMITS,
   ROMANTIC_GUESTS_FREQUENCY, ROOM_TEMPERATURE, SEX_ASSIGNED_AT_BIRTH, SEXUAL_ORIENTATION,
   SLEEP_SCHEDULE, SMOKING, STUDY_STYLE, WAKEUP_TIME,
 } from '@/features/profile/constants';
+import { countWords } from '@/shared/utils/count-words';
 
 const oneOf = (opts: { value: string }[]) =>
   z.enum(opts.map((o) => o.value) as [string, ...string[]]);
+
+// Required short bio, capped at 50 words. Defined once and reused by the section
+// schema and the final completion gate.
+const aboutMeField = z.string().trim()
+  .refine((v) => countWords(v) >= ABOUT_ME_LIMITS.minWords, 'Tell us a little about you')
+  .refine((v) => countWords(v) <= ABOUT_ME_LIMITS.maxWords, `Keep it under ${ABOUT_ME_LIMITS.maxWords} words`);
+
+export const aboutSchema = z.object({ about_me: aboutMeField });
+export type AboutValues = z.infer<typeof aboutSchema>;
 
 export const basicsSchema = z.object({
   first_name: z.string().trim().min(1, 'First name is required'),
@@ -91,6 +101,7 @@ export const onboardingCompletionSchema = z.object({
   social_level: z.number().int().min(1).max(5),
   room_temperature: oneOf(ROOM_TEMPERATURE),
   interests: z.array(z.enum(INTEREST_VALUES)).min(5).max(10),
+  about_me: aboutMeField,
   promptCount: z.number().int().min(1),
   photoCount: z.number().int().min(1),
 });

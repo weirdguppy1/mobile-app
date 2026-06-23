@@ -64,6 +64,7 @@ describe('onboardingCompletionSchema', () => {
     guests_frequency: 'occasionally', romantic_guests_frequency: 'rarely',
     social_level: 3, room_temperature: 'cold',
     interests: ['gym', 'music', 'coding', 'reading', 'movies'],
+    about_me: 'Night-owl CS major who loves bouldering and bad horror movies.',
     promptCount: 1, photoCount: 1,
   };
   it('passes when all required data present', () => {
@@ -72,5 +73,9 @@ describe('onboardingCompletionSchema', () => {
   it('fails with zero photos or zero prompts', () => {
     expect(onboardingCompletionSchema.safeParse({ ...complete, photoCount: 0 }).success).toBe(false);
     expect(onboardingCompletionSchema.safeParse({ ...complete, promptCount: 0 }).success).toBe(false);
+  });
+  it('fails when about_me is missing or over 50 words', () => {
+    expect(onboardingCompletionSchema.safeParse({ ...complete, about_me: '' }).success).toBe(false);
+    expect(onboardingCompletionSchema.safeParse({ ...complete, about_me: 'word '.repeat(51).trim() }).success).toBe(false);
   });
 });

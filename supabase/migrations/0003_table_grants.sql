@@ -65,7 +65,8 @@ grant update (
   living_program,
   clubs,
   instagram,
-  linkedin
+  linkedin,
+  about_me
 ) on public.profiles to authenticated;
 
 -- profile_photos: full CRUD (view / insert / update / delete own).

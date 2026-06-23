@@ -163,6 +163,8 @@ create table if not exists public.profiles (
   clubs                text[]      check (clubs is null or cardinality(clubs) <= 10),
   instagram            text,                           -- visible to same school
   linkedin             text,                           -- visible to same school
+  about_me             text        check (about_me is null or char_length(about_me) <= 600),
+                                                        -- short bio; 50-word cap enforced in app
   -- NOTE: phone lives in private_contacts (match-gated), NOT here.
 
   -- onboarding gate: false until the user finishes setup

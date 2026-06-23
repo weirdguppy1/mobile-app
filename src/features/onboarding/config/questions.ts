@@ -1,6 +1,6 @@
 import { type SectionId } from '@/features/onboarding/config/sections';
 import {
-  basicsSchema, compatibilitySchema, interestsSchema, lifestyleSchema, promptsSchema,
+  aboutSchema, basicsSchema, compatibilitySchema, interestsSchema, lifestyleSchema, promptsSchema,
 } from '@/features/profile/schema';
 import { OnboardingData } from '@/features/profile/types';
 
@@ -73,7 +73,9 @@ export const QUESTIONS: QuestionMeta[] = [
   { id: 'deal_breakers', section: 'dealBreakers', title: 'Any deal-breakers?',
     subtitle: "Things you can't live with.", optional: true, isComplete: always },
 
-  // prompts (bespoke)
+  // prompts section — "your words": a short bio, then the prompt cards
+  { id: 'about_me', section: 'prompts', title: 'Tell us about you', subtitle: 'A short intro — up to 50 words.',
+    isComplete: (d) => ok(aboutSchema.shape.about_me.safeParse(d.profile.about_me ?? '')) },
   { id: 'prompts', section: 'prompts', title: 'Write your profile answers', subtitle: 'Pick a prompt and make it yours.',
     isComplete: (d) => ok(promptsSchema.safeParse({ prompts: d.prompts.map((p) => ({ prompt: p.prompt, answer: p.answer })) })) },
 

@@ -35,6 +35,7 @@ export interface Database {
           clubs: string[] | null;
           instagram: string | null;
           linkedin: string | null;
+          about_me: string | null;
           onboarding_complete: boolean;
           created_at: string;
           updated_at: string;

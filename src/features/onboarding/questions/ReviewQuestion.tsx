@@ -32,7 +32,8 @@ export function ReviewQuestion() {
     cleanliness: p?.cleanliness ?? 0, noise_preference: p?.noise_preference ?? '', study_style: p?.study_style ?? '',
     guests_frequency: p?.guests_frequency ?? '', romantic_guests_frequency: p?.romantic_guests_frequency ?? '',
     social_level: p?.social_level ?? 0, room_temperature: p?.room_temperature ?? '',
-    interests: p?.interests ?? [], promptCount: data?.prompts.length ?? 0, photoCount: data?.photos.length ?? 0,
+    interests: p?.interests ?? [], about_me: p?.about_me ?? '',
+    promptCount: data?.prompts.length ?? 0, photoCount: data?.photos.length ?? 0,
   });
 
   const onFinish = async () => {
@@ -62,6 +63,7 @@ export function ReviewQuestion() {
         <Row label="Name" value={p?.first_name ?? ''} onEdit={() => goToQuestion('first_name')} />
         <Row label="Graduation year" value={p?.graduation_year ? String(p.graduation_year) : ''} onEdit={() => goToQuestion('graduation_year')} />
         <Row label="Majors" value={(p?.majors ?? []).join(', ')} onEdit={() => goToQuestion('majors')} />
+        <Row label="About" value={p?.about_me ?? ''} onEdit={() => goToQuestion('about_me')} />
         <Row label="Interests" value={`${p?.interests?.length ?? 0} selected`} onEdit={() => goToQuestion('interests')} />
         <Row label="Prompts" value={`${data?.prompts.length ?? 0} answered`} onEdit={() => goToQuestion('prompts')} />
         <Row label="Photos" value={`${data?.photos.length ?? 0} uploaded`} onEdit={() => goToQuestion('photos')} />

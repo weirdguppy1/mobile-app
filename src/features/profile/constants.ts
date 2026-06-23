@@ -228,6 +228,7 @@ export const INTERESTS_LIMITS = { min: 5, max: 10 } as const;
 export const MAJORS_LIMITS = { min: 1, max: 3 } as const;
 export const PROMPTS_LIMITS = { min: 1, max: 3 } as const;
 export const PHOTOS_LIMITS = { min: 1, max: 6 } as const;
+export const ABOUT_ME_LIMITS = { minWords: 1, maxWords: 50 } as const;
 export const CLUBS_MAX = 10;
 
 const values = (opts: Option[]) =>

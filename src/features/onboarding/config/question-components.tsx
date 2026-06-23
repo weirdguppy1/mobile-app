@@ -7,15 +7,16 @@ import { PhotosQuestion } from '@/features/onboarding/questions/PhotosQuestion';
 import { PromptsQuestion } from '@/features/onboarding/questions/PromptsQuestion';
 import { ReviewQuestion } from '@/features/onboarding/questions/ReviewQuestion';
 import {
-  ALCOHOL, BEDTIME, CLUBS_MAX, DEAL_BREAKERS, FITNESS, GRADUATION_YEARS,
+  ABOUT_ME_LIMITS, ALCOHOL, BEDTIME, CLUBS_MAX, DEAL_BREAKERS, FITNESS, GRADUATION_YEARS,
   GUESTS_FREQUENCY, INTERESTS, INTERESTS_LIMITS, NOISE_PREFERENCE, PARTIES,
   ROMANTIC_GUESTS_FREQUENCY, ROOM_TEMPERATURE, SEX_ASSIGNED_AT_BIRTH,
   SEXUAL_ORIENTATION, SLEEP_SCHEDULE, SMOKING, STUDY_STYLE, WAKEUP_TIME,
 } from '@/features/profile/constants';
 import {
-  basicsSchema, compatibilitySchema, interestsSchema, lifestyleSchema,
+  aboutSchema, basicsSchema, compatibilitySchema, interestsSchema, lifestyleSchema,
 } from '@/features/profile/schema';
 import { OptionGroup, ScaleInput, TagInput, TextField } from '@/shared/components';
+import { countWords } from '@/shared/utils/count-words';
 
 const yearOptions = GRADUATION_YEARS.map((y) => ({ value: String(y), label: String(y) }));
 const ok = (r: { success: boolean }) => r.success;
@@ -140,6 +141,28 @@ const DealBreakers = makeFieldQuestion<string[]>({
   control: (v, set) => <OptionGroup multiple options={DEAL_BREAKERS} value={v} onChange={set} />,
 });
 
+// --- prompts section: about_me (the bio that opens "your words") ---
+const AboutMe = makeFieldQuestion<string>({
+  getValue: (d) => d.profile.about_me ?? '',
+  isValid: (v) => ok(aboutSchema.shape.about_me.safeParse(v)),
+  save: (v, m) => m.saveProfile.mutateAsync({ about_me: v.trim() }),
+  control: (v, set) => {
+    const words = countWords(v);
+    return (
+      <TextField
+        value={v}
+        onChangeText={set}
+        multiline
+        textAlignVertical="top"
+        placeholder="What should a future roommate know about you?"
+        style={{ minHeight: 120 }}
+        message={`${words}/${ABOUT_ME_LIMITS.maxWords} words`}
+        invalid={words > ABOUT_ME_LIMITS.maxWords}
+      />
+    );
+  },
+});
+
 // --- extras (all optional) ---
 const DormPreference = makeFieldQuestion<string>({
   getValue: (d) => d.profile.dorm_preference ?? '',
@@ -185,7 +208,7 @@ export const QUESTION_COMPONENTS: Record<string, ComponentType> = {
   romantic_guests_frequency: RomanticGuestsFrequency, social_level: SocialLevel, room_temperature: RoomTemperature,
   alcohol: Alcohol, smoking: Smoking, parties: Parties, fitness: Fitness,
   interests: Interests, deal_breakers: DealBreakers,
-  prompts: PromptsQuestion, photos: PhotosQuestion,
+  about_me: AboutMe, prompts: PromptsQuestion, photos: PhotosQuestion,
   dorm_preference: DormPreference, living_program: LivingProgram, clubs: Clubs,
   instagram: Instagram, linkedin: Linkedin, phone: Phone,
   review: ReviewQuestion,
