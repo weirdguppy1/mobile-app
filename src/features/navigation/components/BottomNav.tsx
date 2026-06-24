@@ -18,8 +18,13 @@ type TabBarProps = Parameters<NonNullable<React.ComponentProps<typeof Tabs>['tab
 export function BottomNav({ state, navigation, insets }: TabBarProps) {
   const setDirection = useTabNavStore((s) => s.setDirection);
 
-  const activeRouteName = state.routes[state.index]?.name ?? TABS[0].name;
+  const activeRoute = state.routes[state.index];
+  const activeRouteName = activeRoute?.name ?? TABS[0].name;
   const activeTabIndex = TABS.findIndex((t) => t.name === activeRouteName);
+
+  // Hide the bar when the active tab's nested stack is pushed past its root
+  // (e.g. a profile edit/settings screen), so it doesn't float over those forms.
+  if ((activeRoute?.state?.index ?? 0) > 0) return null;
 
   const onPressTab = (name: string) => {
     const route = state.routes.find((r) => r.name === name);
