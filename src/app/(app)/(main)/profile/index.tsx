@@ -38,7 +38,7 @@ export default function ProfileScreen() {
     }
     return mode === 'view'
       ? <ProfileView profile={data.profile} photos={data.photos} prompts={data.prompts} bottomInset={navBarHeight} />
-      : <EditList profile={data.profile} bottomInset={navBarHeight} />;
+      : <EditList profile={data.profile} photoCount={data.photos.length} promptCount={data.prompts.length} bottomInset={navBarHeight} />;
   };
 
   return (
@@ -63,14 +63,20 @@ export default function ProfileScreen() {
   );
 }
 
-function EditList({ profile, bottomInset }: { profile: Profile; bottomInset: number }) {
+function EditList({ profile, photoCount, promptCount, bottomInset }: { profile: Profile; photoCount: number; promptCount: number; bottomInset: number }) {
   return (
     <ScrollView
       className="flex-1"
       contentContainerClassName="gap-5 px-6 pt-2"
       contentContainerStyle={{ paddingBottom: bottomInset + 24 }}
       showsVerticalScrollIndicator={false}>
-      {/* Inline Photos + Prompts editor blocks are added above the field rows in a later step. */}
+      <View className="gap-2">
+        <Text className="prose-label text-graphite">Photos & prompts</Text>
+        <View className="card border-continuous px-4">
+          <LinkRow label="Photos" value={`${photoCount} added`} onPress={() => router.push({ pathname: '/profile/edit/photos' })} />
+          <LinkRow label="Prompts" value={`${promptCount} answered`} divider onPress={() => router.push({ pathname: '/profile/edit/prompts' })} />
+        </View>
+      </View>
       {PROFILE_FIELD_GROUPS.map((group) => (
         <View key={group} className="gap-2">
           <Text className="prose-label text-graphite">{group}</Text>
@@ -82,6 +88,21 @@ function EditList({ profile, bottomInset }: { profile: Profile; bottomInset: num
         </View>
       ))}
     </ScrollView>
+  );
+}
+
+function LinkRow({ label, value, onPress, divider }: { label: string; value: string; onPress: () => void; divider?: boolean }) {
+  return (
+    <PressScale
+      accessibilityRole="button"
+      onPress={onPress}
+      className={`flex-row items-center gap-3 py-3 ${divider ? 'border-t border-silver' : ''}`}>
+      <View className="flex-1">
+        <Text className="prose-footnote font-semibold text-ink">{label}</Text>
+        <Text className="prose-caption text-ash">{value}</Text>
+      </View>
+      <ChevronRight size={18} color={Brand.fog} strokeWidth={2} />
+    </PressScale>
   );
 }
 
