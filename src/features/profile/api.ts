@@ -118,6 +118,16 @@ export async function savePrivateContact(userId: string, phone: string): Promise
   if (error) throw error;
 }
 
+export async function fetchPrivateContact(userId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('private_contacts')
+    .select('phone')
+    .eq('profile_id', userId)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.phone ?? null;
+}
+
 export async function completeOnboarding(userId: string): Promise<void> {
   const { error } = await supabase.rpc('complete_onboarding', { target_profile_id: userId });
   if (error) throw error;
