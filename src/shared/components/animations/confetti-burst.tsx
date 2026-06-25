@@ -1,4 +1,4 @@
-import { Confetti } from 'react-native-fast-confetti';
+import { Confetti } from "react-native-fast-confetti";
 
 interface ConfettiBurstProps {
   /** Fired once when the one-shot burst finishes. */
@@ -7,8 +7,16 @@ interface ConfettiBurstProps {
 
 // Brand confetti: ink + the grad-warm/cool wash hues from DESIGN.md. Avoids the
 // reserved semantic colors (--yes green / --maybe amber belong to like/match).
-const CONFETTI_COLORS = ['#f8c4ff', '#96c4ff', '#ffd6e8', '#e0c3fc', '#ffe0c2'];
-
+const CONFETTI_COLORS = [
+  "#FF0000",
+  "#FFA500",
+  "#FFFF00",
+  "#00FF00",
+  "#00BFFF",
+  "#0000FF",
+  "#8A2BE2",
+  "#FF1493",
+];
 /**
  * A single celebratory confetti burst (TASK.md §7). One-shot (`infinite={false}`)
  * and self-positioning (falls back to screen dimensions). Skia-backed via

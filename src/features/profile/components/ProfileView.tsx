@@ -1,7 +1,8 @@
 import { Image } from 'expo-image';
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
+import { createPhotoSignedUrl } from '@/features/profile/api';
 import { DEAL_BREAKERS, INTERESTS } from '@/features/profile/constants';
 import {
   PROFILE_FIELD_GROUPS, PROFILE_FIELDS, type ProfileField,
@@ -23,6 +24,9 @@ interface ProfileViewProps {
   prompts: ProfilePrompt[];
   /** Top-right header slot (e.g. a settings gear on the self-profile). */
   headerAccessory?: ReactNode;
+  /** Content rendered directly under the name/vitals header (e.g. a Discovery
+   *  compatibility card); omitted ⇒ nothing shown. */
+  belowHeader?: ReactNode;
   /** Discovery-only per-element like affordances; omitted ⇒ no overlays (self-preview). */
   renderPhotoOverlay?: (photo: SignedProfilePhoto, index: number) => ReactNode;
   renderPromptOverlay?: (prompt: ProfilePrompt, index: number) => ReactNode;
@@ -34,7 +38,7 @@ interface ProfileViewProps {
  *  interleaved with prompt cards, then visible detail sections. Pure/props-driven
  *  so it also powers the Discovery card later. Hidden fields are never rendered. */
 export function ProfileView({
-  profile, photos, prompts, headerAccessory, renderPhotoOverlay, renderPromptOverlay, bottomInset = 0,
+  profile, photos, prompts, headerAccessory, belowHeader, renderPhotoOverlay, renderPromptOverlay, bottomInset = 0,
 }: ProfileViewProps) {
   const vitals = buildVitals(profile);
   const feed = buildProfileFeed(photos, prompts);
@@ -67,6 +71,8 @@ export function ProfileView({
         </View>
         {headerAccessory}
       </View>
+
+      {belowHeader}
 
       {profile.about_me ? (
         <Text className="prose-body text-ink">{profile.about_me}</Text>
@@ -103,10 +109,32 @@ export function ProfileView({
 }
 
 function ProfilePhoto({ photo, overlay }: { photo: SignedProfilePhoto; overlay?: ReactNode }) {
+  const [uri, setUri] = useState<string | null>(photo.signedUrl);
+  const attempts = useRef(0);
+
+  // Photos normally arrive pre-signed (batch fetch). Signed URLs are short-lived,
+  // so this is a backstop: re-sign from the storage path if a URL is missing, or if
+  // the image fails to load (e.g. it expired during a very long session). Capped so
+  // it can't loop.
+  useEffect(() => {
+    setUri(photo.signedUrl);
+    attempts.current = 0;
+    if (!photo.signedUrl && photo.url) {
+      attempts.current += 1;
+      createPhotoSignedUrl(photo.url).then(setUri).catch(() => {});
+    }
+  }, [photo.id, photo.signedUrl, photo.url]);
+
+  const handleError = () => {
+    if (attempts.current >= 3 || !photo.url) return;
+    attempts.current += 1;
+    createPhotoSignedUrl(photo.url).then(setUri).catch(() => {});
+  };
+
   return (
     <View className="overflow-hidden rounded-xl border border-silver bg-wash shadow-card" style={{ width: '100%', aspectRatio: 4 / 5 }}>
-      {photo.signedUrl ? (
-        <Image source={{ uri: photo.signedUrl }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+      {uri ? (
+        <Image source={{ uri }} style={{ width: '100%', height: '100%' }} contentFit="cover" onError={handleError} />
       ) : (
         <View className="h-full w-full items-center justify-center">
           <Text className="prose-caption text-graphite">Unavailable</Text>

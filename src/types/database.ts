@@ -63,6 +63,76 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['private_contacts']['Row']>;
         Relationships: [];
       };
+      likes: {
+        Row: {
+          liker_id: string;
+          likee_id: string;
+          liked_photo_id: string | null;
+          liked_prompt_id: string | null;
+          comment: string | null;
+          created_at: string;
+        };
+        Insert: {
+          liker_id: string;
+          likee_id: string;
+          liked_photo_id?: string | null;
+          liked_prompt_id?: string | null;
+          comment?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['likes']['Row']>;
+        Relationships: [];
+      };
+      passes: {
+        Row: { passer_id: string; passee_id: string; created_at: string };
+        Insert: { passer_id: string; passee_id: string; created_at?: string };
+        Update: Partial<Database['public']['Tables']['passes']['Row']>;
+        Relationships: [];
+      };
+      matches: {
+        Row: { id: string; user_a: string; user_b: string; created_at: string };
+        Insert: { id?: string; user_a: string; user_b: string; created_at?: string };
+        Update: Partial<Database['public']['Tables']['matches']['Row']>;
+        Relationships: [];
+      };
+      messages: {
+        Row: {
+          id: string;
+          match_id: string;
+          sender_id: string;
+          body: string;
+          created_at: string;
+          read_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          match_id: string;
+          sender_id: string;
+          body: string;
+          created_at?: string;
+          read_at?: string | null;
+        };
+        Update: Partial<Database['public']['Tables']['messages']['Row']>;
+        Relationships: [];
+      };
+      message_reactions: {
+        Row: {
+          message_id: string;
+          match_id: string;
+          user_id: string;
+          emoji: string;
+          created_at: string;
+        };
+        Insert: {
+          message_id: string;
+          match_id: string;
+          user_id: string;
+          emoji: string;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['message_reactions']['Row']>;
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
     Functions: {

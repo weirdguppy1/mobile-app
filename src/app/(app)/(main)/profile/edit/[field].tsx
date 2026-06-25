@@ -71,9 +71,15 @@ function FieldEditor({ field, profile }: { field: ProfileField; profile: Profile
     router.back();
   });
 
+  // Only the Save footer avoids the keyboard; the field content stays put (the
+  // ScrollView shrinks and scrolls) instead of the whole screen being shoved up.
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-      <ScrollView className="flex-1" contentContainerClassName="gap-5 px-6 pt-4" keyboardShouldPersistTaps="handled">
+    <View className="flex-1">
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="gap-5 px-6 pb-6 pt-4"
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive">
         <Controller
           control={control}
           name="value"
@@ -91,10 +97,12 @@ function FieldEditor({ field, profile }: { field: ProfileField; profile: Profile
           </View>
         ) : null}
       </ScrollView>
-      <View className="px-6 pb-2 pt-2">
-        <Button variant="primary" onPress={onSave} loading={saveProfile.isPending}>Save</Button>
-      </View>
-    </KeyboardAvoidingView>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View className="px-6 pb-2 pt-2">
+          <Button variant="primary" onPress={onSave} loading={saveProfile.isPending}>Save</Button>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 

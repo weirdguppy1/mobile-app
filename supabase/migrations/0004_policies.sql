@@ -192,3 +192,34 @@ create policy "Update messages in own matches"
   on public.messages for update
   using  (public.is_match_participant(match_id))
   with check (public.is_match_participant(match_id));
+
+
+-- ----------------------------------------------------------------
+-- message_reactions — read any reaction in your matches; add/change/
+-- remove only your own. match_id gates participation (denormalized).
+-- ----------------------------------------------------------------
+alter table public.message_reactions enable row level security;
+
+drop policy if exists "Read reactions in own matches" on public.message_reactions;
+create policy "Read reactions in own matches"
+  on public.message_reactions for select
+  using (public.is_match_participant(match_id));
+
+drop policy if exists "Add own reactions in own matches" on public.message_reactions;
+create policy "Add own reactions in own matches"
+  on public.message_reactions for insert
+  with check (
+    (select auth.uid()) = user_id
+    and public.is_match_participant(match_id)
+  );
+
+drop policy if exists "Update own reactions" on public.message_reactions;
+create policy "Update own reactions"
+  on public.message_reactions for update
+  using  ((select auth.uid()) = user_id and public.is_match_participant(match_id))
+  with check ((select auth.uid()) = user_id and public.is_match_participant(match_id));
+
+drop policy if exists "Remove own reactions" on public.message_reactions;
+create policy "Remove own reactions"
+  on public.message_reactions for delete
+  using ((select auth.uid()) = user_id);

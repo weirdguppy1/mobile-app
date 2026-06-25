@@ -17,6 +17,7 @@ export const Brand = {
   yes: '#31c431',
   maybe: '#ffae00',
   pass: '#ff0000',
+  sent: '#0a84ff',
 } as const;
 
 /**

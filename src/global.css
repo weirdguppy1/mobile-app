@@ -17,6 +17,9 @@
   --color-maybe: #ffae00;
   --color-pass: #ff0000;
 
+  /* Sent-message bubble (chat). */
+  --color-sent: #0a84ff;
+
   /* semantic aliases (AGENTS.md uses bg-background / text-foreground) */
   --color-background: #ffffff;
   --color-foreground: #000000;

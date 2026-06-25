@@ -248,3 +248,26 @@ create table if not exists public.messages (
 
 create index if not exists messages_match_idx
   on public.messages (match_id, created_at);
+
+
+-- ----------------------------------------------------------------
+-- message_reactions  (one emoji per user per message; change by
+-- upsert, clear by delete). match_id is denormalized so RLS and
+-- realtime can filter by match without joining through messages.
+-- ----------------------------------------------------------------
+create table if not exists public.message_reactions (
+  message_id uuid        not null references public.messages (id) on delete cascade,
+  match_id   uuid        not null references public.matches (id)  on delete cascade,
+  user_id    uuid        not null references public.profiles (id) on delete cascade,
+  emoji      text        not null check (length(trim(emoji)) > 0),
+  created_at timestamptz not null default now(),
+  primary key (message_id, user_id)
+);
+
+create index if not exists message_reactions_match_idx
+  on public.message_reactions (match_id);
+
+-- Realtime DELETE events only carry the replica identity. Default is the PK
+-- (message_id, user_id), which omits match_id — so a match_id-filtered/RLS'd
+-- DELETE subscription couldn't see cleared reactions. FULL includes every column.
+alter table public.message_reactions replica identity full;

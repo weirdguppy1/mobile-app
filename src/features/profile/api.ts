@@ -5,7 +5,13 @@ import { OnboardingData, ProfilePhoto, SignedProfilePhoto } from '@/features/pro
 import { Database } from '@/types/database';
 
 const PHOTO_BUCKET = 'profile-photos';
-const SIGNED_PHOTO_URL_TTL_SECONDS = 300;
+// Session-length: a discovery batch is signed once at fetch, so the URLs must stay
+// valid for as long as the user browses that batch. 12h covers any realistic
+// session; ProfilePhoto re-signs on error as a backstop for anything longer.
+// Trade-off: a signed URL is a bearer link, so a longer TTL widens the window if one
+// ever leaks — generous, not infinite. (Supabase takes a fixed expiry, not a true
+// session binding, so a long TTL + re-sign-on-expiry is the practical equivalent.)
+const SIGNED_PHOTO_URL_TTL_SECONDS = 43200; // 12 hours
 
 export async function fetchOnboardingData(userId: string): Promise<OnboardingData> {
   const [profileRes, photosRes, promptsRes] = await Promise.all([
@@ -16,17 +22,22 @@ export async function fetchOnboardingData(userId: string): Promise<OnboardingDat
   if (profileRes.error) throw profileRes.error;
   if (photosRes.error) throw photosRes.error;
   if (promptsRes.error) throw promptsRes.error;
-  // Signing is best-effort and MUST NOT fail the load: this same query gates
-  // app routing (see (app)/_layout.tsx and (app)/index.tsx, which only read
-  // profile.onboarding_complete). A missing object or Storage timeout degrades
-  // that one photo to signedUrl: null, never the whole profile response.
-  const photos: SignedProfilePhoto[] = await Promise.all(
-    photosRes.data.map(async (photo) => ({
+  return { profile: profileRes.data, photos: await signPhotoRows(photosRes.data), prompts: promptsRes.data };
+}
+
+/**
+ * Attach a signed URL to each photo row. Signing is best-effort and MUST NOT
+ * fail the caller: a missing object or Storage timeout degrades that one photo
+ * to signedUrl: null, never the whole response. Used by both the profile load
+ * (which gates app routing on profile.onboarding_complete) and the discovery feed.
+ */
+export async function signPhotoRows(rows: ProfilePhoto[]): Promise<SignedProfilePhoto[]> {
+  return Promise.all(
+    rows.map(async (photo) => ({
       ...photo,
       signedUrl: await createPhotoSignedUrl(photo.url).catch(() => null),
     })),
   );
-  return { profile: profileRes.data, photos, prompts: promptsRes.data };
 }
 
 export async function updateProfile(

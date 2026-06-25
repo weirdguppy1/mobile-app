@@ -88,6 +88,9 @@ grant select, insert on public.passes to authenticated;
 -- pinned by lock_message_content).
 grant select, insert, update on public.messages to authenticated;
 
+-- message_reactions — read in own matches, add/change/remove your own.
+grant select, insert, update, delete on public.message_reactions to authenticated;
+
 
 -- ----------------------------------------------------------------
 -- RPC execute grants — lock the privileged write paths to authenticated.

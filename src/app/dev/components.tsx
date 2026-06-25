@@ -23,8 +23,20 @@ import { SectionInterstitial } from '@/features/onboarding/components/SectionInt
 import { SECTIONS } from '@/features/onboarding/config/sections';
 import { ProfileView } from '@/features/profile/components/ProfileView';
 import { Profile, ProfilePrompt, SignedProfilePhoto } from '@/features/profile/types';
+import { CompatibilityCard } from '@/features/discovery/components/CompatibilityCard';
+import { DiscoveryEmptyState } from '@/features/discovery/components/DiscoveryEmptyState';
+import { RequestHeart } from '@/features/discovery/components/RequestHeart';
+import { RequestSheet } from '@/features/discovery/components/RequestSheet';
+import { SkipButton } from '@/features/discovery/components/SkipButton';
 import { NavBar } from '@/features/navigation/components/NavBar';
 import { TABS } from '@/features/navigation/config/tabs';
+import { ChatComposer } from '@/features/messaging/components/ChatComposer';
+import { ChatHeader } from '@/features/messaging/components/ChatHeader';
+import { ConversationRow } from '@/features/messaging/components/ConversationRow';
+import { EmptyConversations } from '@/features/messaging/components/EmptyConversations';
+import { MessageBubble } from '@/features/messaging/components/MessageBubble';
+import { ReactionBar } from '@/features/messaging/components/ReactionBar';
+import { Conversation, MessageWithReactions, PeerSummary } from '@/features/messaging/types';
 
 const mockProfile = {
   id: 'demo', email: 'julia@stanford.edu', school_domain: 'stanford.edu',
@@ -49,6 +61,21 @@ const mockPrompts = [
   { id: 'a', profile_id: 'demo', prompt: 'You should room with me if...', answer: 'you also think 2am is a perfectly good time for ramen.', position: 0, created_at: '' },
 ] as unknown as ProfilePrompt[];
 
+const mockPeer: PeerSummary = { id: 'p', firstName: 'Julia', avatarUrl: 'https://placehold.co/100' };
+const mockConversation: Conversation = {
+  match: { id: 'm1', user_a: 'me', user_b: 'p', created_at: '2024-06-01T12:00:00Z' },
+  peer: mockPeer,
+  lastMessage: { id: 'x', match_id: 'm1', sender_id: 'p', body: 'see you at orientation! 🎉', created_at: '2024-06-01T12:00:00Z', read_at: null },
+  unread: 2,
+};
+const mockTheirs: MessageWithReactions = {
+  id: 't1', match_id: 'm1', sender_id: 'p', body: 'wait we have the same major lol', created_at: '2024-06-01T12:00:00Z', read_at: null,
+  reactions: [{ message_id: 't1', match_id: 'm1', user_id: 'me', emoji: '❤️', created_at: '2024-06-01T12:00:00Z' }],
+};
+const mockMine: MessageWithReactions = {
+  id: 'mine1', match_id: 'm1', sender_id: 'me', body: 'no way 😄 we should def room together', created_at: '2024-06-01T12:01:00Z', read_at: '2024-06-01T12:02:00Z', reactions: [],
+};
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View className="gap-3">
@@ -70,6 +97,7 @@ export default function ComponentsGallery() {
   const [navTab, setNavTab] = useState('discover');
   const [promptSheetOpen, setPromptSheetOpen] = useState(false);
   const [demoAnswer, setDemoAnswer] = useState('Late-night ramen and a movie.');
+  const [requestSheetOpen, setRequestSheetOpen] = useState(false);
 
   return (
     <View className="flex-1 bg-canvas">
@@ -242,9 +270,79 @@ export default function ComponentsGallery() {
             </View>
           </Section>
 
+          <Section title="Discovery — request card (ProfileView + hearts + skip)">
+            <View className="h-150 overflow-hidden rounded-2xl border border-silver">
+              <ProfileView
+                profile={mockProfile}
+                photos={mockPhotos}
+                prompts={mockPrompts}
+                renderPhotoOverlay={(photo) => (
+                  <RequestHeart target={{ kind: 'photo', photoId: photo.id }} onPress={() => setRequestSheetOpen(true)} />
+                )}
+                renderPromptOverlay={(prompt) => (
+                  <RequestHeart target={{ kind: 'prompt', promptId: prompt.id }} onPress={() => setRequestSheetOpen(true)} />
+                )}
+              />
+              <SkipButton onPress={() => {}} className="absolute bottom-4 left-4" />
+            </View>
+            <Button variant="ghost" onPress={() => setRequestSheetOpen(true)}>Open request sheet</Button>
+            <RequestSheet
+              visible={requestSheetOpen}
+              preview={{ kind: 'prompt', prompt: mockPrompts[0].prompt, answer: mockPrompts[0].answer }}
+              recipientName={mockProfile.first_name}
+              recipientPhotoUrl={mockPhotos[0].signedUrl}
+              onSubmit={async () => {}}
+              onComplete={() => setRequestSheetOpen(false)}
+              onClose={() => setRequestSheetOpen(false)}
+            />
+          </Section>
+
+          <Section title="Discovery — compatibility card (count-up on mount)">
+            <CompatibilityCard
+              compatibility={{
+                score: 92,
+                emoji: '🔥',
+                reasons: ['Similar sleep schedules', 'Both prefer quiet study environments', '3 shared interests'],
+              }}
+            />
+          </Section>
+
+          <Section title="Discovery — empty state">
+            <View className="h-80 overflow-hidden rounded-2xl border border-silver">
+              <DiscoveryEmptyState onRefresh={() => {}} />
+            </View>
+          </Section>
+
           <Section title="Navigation — NavBar (bottom tabs)">
             <View className="overflow-hidden rounded-2xl border border-silver">
-              <NavBar tabs={TABS} activeName={navTab} onPressTab={setNavTab} />
+              <NavBar tabs={TABS} activeName={navTab} onPressTab={setNavTab} badges={{ messages: 3 }} />
+            </View>
+          </Section>
+
+          <Section title="Messaging — conversation row">
+            <View className="overflow-hidden rounded-2xl border border-silver">
+              <ConversationRow conversation={mockConversation} onPress={() => {}} />
+            </View>
+          </Section>
+
+          <Section title="Messaging — bubbles + reactions">
+            <View className="rounded-2xl border border-silver py-2">
+              <MessageBubble message={mockTheirs} isMine={false} myUserId="me" isLastOwn={false} onLongPress={() => {}} />
+              <MessageBubble message={mockMine} isMine myUserId="me" isLastOwn onLongPress={() => {}} />
+            </View>
+          </Section>
+
+          <Section title="Messaging — chat header + reaction bar + composer">
+            <View className="gap-3 rounded-2xl border border-silver py-2">
+              <ChatHeader peer={mockPeer} onBack={() => {}} />
+              <View className="items-center"><ReactionBar selected="❤️" onPick={() => {}} /></View>
+              <ChatComposer onSend={() => {}} onTyping={() => {}} />
+            </View>
+          </Section>
+
+          <Section title="Messaging — empty conversations">
+            <View className="h-72 overflow-hidden rounded-2xl border border-silver">
+              <EmptyConversations />
             </View>
           </Section>
 
