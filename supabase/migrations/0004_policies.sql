@@ -223,3 +223,26 @@ drop policy if exists "Remove own reactions" on public.message_reactions;
 create policy "Remove own reactions"
   on public.message_reactions for delete
   using ((select auth.uid()) = user_id);
+
+
+-- ----------------------------------------------------------------
+-- notifications — read/update/delete your own. No INSERT policy:
+-- rows are written only by the SECURITY DEFINER notify_* triggers.
+-- ----------------------------------------------------------------
+alter table public.notifications enable row level security;
+
+drop policy if exists "Read own notifications" on public.notifications;
+create policy "Read own notifications"
+  on public.notifications for select
+  using ((select auth.uid()) = user_id);
+
+drop policy if exists "Update own notifications" on public.notifications;
+create policy "Update own notifications"
+  on public.notifications for update
+  using  ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
+
+drop policy if exists "Delete own notifications" on public.notifications;
+create policy "Delete own notifications"
+  on public.notifications for delete
+  using ((select auth.uid()) = user_id);

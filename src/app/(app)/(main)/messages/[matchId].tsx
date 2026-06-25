@@ -66,8 +66,8 @@ export default function ChatThreadScreen() {
 
   useEffect(() => () => { if (typingTimer.current) clearTimeout(typingTimer.current); }, []);
 
-  // One realtime channel for the thread: live messages, read updates, reactions, typing.
-  const channelRef = useRealtimeChannel(matchId ? `thread:${matchId}` : null, (channel) => {
+  // Live messages / reads / reactions — its own (unique-topic) postgres_changes channel.
+  useRealtimeChannel(matchId ? `thread:${matchId}` : null, (channel) => {
     const f = `match_id=eq.${matchId}`;
     channel
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: f }, (p) => {
@@ -94,13 +94,22 @@ export default function ChatThreadScreen() {
         if (old.message_id && old.user_id) {
           qc.setQueryData<MessageWithReactions[]>(key, (list = []) => removeReaction(list, old.message_id!, old.user_id!));
         }
-      })
-      .on('broadcast', { event: 'typing' }, () => {
+      });
+  });
+
+  // Typing indicator — a separate broadcast channel on a STATIC topic so both
+  // peers share it. (Broadcast isn't subject to the postgres_changes reuse guard.)
+  const typingChannelRef = useRealtimeChannel(
+    matchId ? `typing:${matchId}` : null,
+    (channel) => {
+      channel.on('broadcast', { event: 'typing' }, () => {
         setPeerTyping(true);
         if (typingTimer.current) clearTimeout(typingTimer.current);
         typingTimer.current = setTimeout(() => setPeerTyping(false), TYPING_CLEAR_MS);
       });
-  });
+    },
+    { staticTopic: true },
+  );
 
   const consumeFresh = useCallback((id: string) => {
     if (!freshIds.current.has(id)) return false;
@@ -112,7 +121,7 @@ export default function ChatThreadScreen() {
     const now = Date.now();
     if (now - lastTypingSent.current < TYPING_THROTTLE_MS) return;
     lastTypingSent.current = now;
-    channelRef.current?.send({ type: 'broadcast', event: 'typing', payload: {} });
+    typingChannelRef.current?.send({ type: 'broadcast', event: 'typing', payload: {} });
   };
 
   const lastOwnId = useMemo(() => {

@@ -91,6 +91,9 @@ grant select, insert, update on public.messages to authenticated;
 -- message_reactions — read in own matches, add/change/remove your own.
 grant select, insert, update, delete on public.message_reactions to authenticated;
 
+-- notifications — read/mark-read/dismiss your own (INSERT is the triggers' job).
+grant select, update, delete on public.notifications to authenticated;
+
 
 -- ----------------------------------------------------------------
 -- RPC execute grants — lock the privileged write paths to authenticated.

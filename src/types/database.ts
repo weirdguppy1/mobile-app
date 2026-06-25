@@ -133,6 +133,32 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['message_reactions']['Row']>;
         Relationships: [];
       };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          type: 'message' | 'match' | 'request' | 'reaction';
+          actor_id: string;
+          match_id: string | null;
+          message_id: string | null;
+          preview: string | null;
+          read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          type: 'message' | 'match' | 'request' | 'reaction';
+          actor_id: string;
+          match_id?: string | null;
+          message_id?: string | null;
+          preview?: string | null;
+          read?: boolean;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['notifications']['Row']>;
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
     Functions: {

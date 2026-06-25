@@ -531,3 +531,68 @@ begin
   end if;
 end;
 $$;
+
+
+-- ================================================================
+-- notification triggers — populate public.notifications. SECURITY
+-- DEFINER so they can insert regardless of the recipient's RLS.
+-- ================================================================
+
+-- New message → notify the other participant in the match.
+create or replace function public.notify_on_message()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  insert into public.notifications (user_id, type, actor_id, match_id, preview)
+  select case when m.user_a = new.sender_id then m.user_b else m.user_a end,
+         'message', new.sender_id, new.match_id, left(new.body, 140)
+  from public.matches m
+  where m.id = new.match_id;
+  return new;
+end;
+$$;
+
+-- New match → notify both users; clear any now-stale pending request notifs
+-- between them (the request just became a match).
+create or replace function public.notify_on_match()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  delete from public.notifications
+  where type = 'request'
+    and ((user_id = new.user_a and actor_id = new.user_b)
+      or (user_id = new.user_b and actor_id = new.user_a));
+
+  insert into public.notifications (user_id, type, actor_id, match_id) values
+    (new.user_a, 'match', new.user_b, new.id),
+    (new.user_b, 'match', new.user_a, new.id);
+  return new;
+end;
+$$;
+
+-- New like → a 'request' notif for the likee, unless it's reciprocal (that
+-- becomes a match via handle_like(), which fires notify_on_match instead).
+create or replace function public.notify_on_like()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if not exists (
+    select 1 from public.likes l
+    where l.liker_id = new.likee_id and l.likee_id = new.liker_id
+  ) then
+    insert into public.notifications (user_id, type, actor_id)
+    values (new.likee_id, 'request', new.liker_id);
+  end if;
+  return new;
+end;
+$$;
+
+-- New reaction → notify the reacted message's sender (skip self-reactions).
+create or replace function public.notify_on_reaction()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  insert into public.notifications (user_id, type, actor_id, match_id, message_id, preview)
+  select msg.sender_id, 'reaction', new.user_id, new.match_id, new.message_id, new.emoji
+  from public.messages msg
+  where msg.id = new.message_id
+    and msg.sender_id <> new.user_id;
+  return new;
+end;
+$$;

@@ -37,6 +37,9 @@ import { EmptyConversations } from '@/features/messaging/components/EmptyConvers
 import { MessageBubble } from '@/features/messaging/components/MessageBubble';
 import { ReactionBar } from '@/features/messaging/components/ReactionBar';
 import { Conversation, MessageWithReactions, PeerSummary } from '@/features/messaging/types';
+import { ConnectionCelebration } from '@/features/notifications/components/ConnectionCelebration';
+import { NotificationRow } from '@/features/notifications/components/NotificationRow';
+import { NotificationItem } from '@/features/notifications/types';
 
 const mockProfile = {
   id: 'demo', email: 'julia@stanford.edu', school_domain: 'stanford.edu',
@@ -76,6 +79,12 @@ const mockMine: MessageWithReactions = {
   id: 'mine1', match_id: 'm1', sender_id: 'me', body: 'no way 😄 we should def room together', created_at: '2024-06-01T12:01:00Z', read_at: '2024-06-01T12:02:00Z', reactions: [],
 };
 
+const mockNotifs: NotificationItem[] = [
+  { id: 'n1', user_id: 'me', type: 'request', actor_id: 'p', match_id: null, message_id: null, preview: null, read: false, created_at: '2024-06-01T12:00:00Z', actor: { id: 'p', firstName: 'Julia', avatarUrl: 'https://placehold.co/100' } },
+  { id: 'n2', user_id: 'me', type: 'message', actor_id: 'q', match_id: 'm1', message_id: null, preview: 'see you at orientation!', read: true, created_at: '2024-06-01T11:00:00Z', actor: { id: 'q', firstName: 'Maya', avatarUrl: 'https://placehold.co/100' } },
+  { id: 'n3', user_id: 'me', type: 'match', actor_id: 'r', match_id: 'm2', message_id: null, preview: null, read: false, created_at: '2024-06-01T10:00:00Z', actor: { id: 'r', firstName: 'Sam', avatarUrl: null } },
+];
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View className="gap-3">
@@ -98,6 +107,7 @@ export default function ComponentsGallery() {
   const [promptSheetOpen, setPromptSheetOpen] = useState(false);
   const [demoAnswer, setDemoAnswer] = useState('Late-night ramen and a movie.');
   const [requestSheetOpen, setRequestSheetOpen] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
 
   return (
     <View className="flex-1 bg-canvas">
@@ -344,6 +354,27 @@ export default function ComponentsGallery() {
             <View className="h-72 overflow-hidden rounded-2xl border border-silver">
               <EmptyConversations />
             </View>
+          </Section>
+
+          <Section title="Notifications — rows (request / message / match)">
+            <View className="rounded-2xl border border-silver py-1">
+              {mockNotifs.map((n) => (
+                <NotificationRow key={n.id} item={n} onOpen={() => {}} onAccept={() => {}} onDecline={() => {}} />
+              ))}
+            </View>
+          </Section>
+
+          <Section title="Notifications — connection celebration">
+            <Button variant="ghost" onPress={() => setCelebrating(true)}>Play connection celebration</Button>
+            <ConnectionCelebration
+              visible={celebrating}
+              origin={null}
+              meAvatarUrl="https://placehold.co/100"
+              themAvatarUrl="https://placehold.co/100"
+              meName="You"
+              themName="Julia"
+              onComplete={() => setCelebrating(false)}
+            />
           </Section>
 
           <Section title="Primitives — OptionGroup">

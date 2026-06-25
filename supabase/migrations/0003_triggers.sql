@@ -93,3 +93,28 @@ drop trigger if exists messages_lock_content on public.messages;
 create trigger messages_lock_content
   before update on public.messages
   for each row execute function public.lock_message_content();
+
+
+-- ----------------------------------------------------------------
+-- notifications (populated by the notify_* functions in 0002)
+-- ----------------------------------------------------------------
+
+drop trigger if exists notify_on_message on public.messages;
+create trigger notify_on_message
+  after insert on public.messages
+  for each row execute function public.notify_on_message();
+
+drop trigger if exists notify_on_match on public.matches;
+create trigger notify_on_match
+  after insert on public.matches
+  for each row execute function public.notify_on_match();
+
+drop trigger if exists notify_on_like on public.likes;
+create trigger notify_on_like
+  after insert on public.likes
+  for each row execute function public.notify_on_like();
+
+drop trigger if exists notify_on_reaction on public.message_reactions;
+create trigger notify_on_reaction
+  after insert on public.message_reactions
+  for each row execute function public.notify_on_reaction();

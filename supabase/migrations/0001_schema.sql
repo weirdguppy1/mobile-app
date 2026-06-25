@@ -271,3 +271,24 @@ create index if not exists message_reactions_match_idx
 -- (message_id, user_id), which omits match_id — so a match_id-filtered/RLS'd
 -- DELETE subscription couldn't see cleared reactions. FULL includes every column.
 alter table public.message_reactions replica identity full;
+
+
+-- ----------------------------------------------------------------
+-- notifications  (per-recipient feed; rows written only by the
+-- notify_* triggers in 0002/0003, never the client). actor_id is who
+-- triggered it; match_id/message_id/preview support display + tap-through.
+-- ----------------------------------------------------------------
+create table if not exists public.notifications (
+  id         uuid        primary key default gen_random_uuid(),
+  user_id    uuid        not null references public.profiles (id) on delete cascade,  -- recipient
+  type       text        not null check (type in ('message','match','request','reaction')),
+  actor_id   uuid        not null references public.profiles (id) on delete cascade,  -- who triggered it
+  match_id   uuid        references public.matches (id)  on delete cascade,
+  message_id uuid        references public.messages (id) on delete cascade,
+  preview    text,                                  -- message snippet or reaction emoji
+  read       boolean     not null default false,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists notifications_user_idx
+  on public.notifications (user_id, created_at desc);
