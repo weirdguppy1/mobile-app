@@ -139,6 +139,7 @@ export const PROFILE_FIELDS: ProfileField[] = [
   tagsField('clubs', 'Clubs', 'Socials', CLUBS_MAX, extrasSchema.shape.clubs, true, 'Add a club'),
   optionalText('instagram', 'Instagram', 'Socials', true, extrasSchema.shape.instagram, '@handle'),
   optionalText('linkedin', 'LinkedIn', 'Socials', true, extrasSchema.shape.linkedin, 'profile url'),
+  optionalText('snapchat', 'Snapchat', 'Socials', true, extrasSchema.shape.snapchat, '@username'),
 ];
 
 export const profileFieldById = (id: string): ProfileField | undefined =>

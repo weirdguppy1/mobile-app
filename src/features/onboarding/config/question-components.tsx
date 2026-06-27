@@ -195,6 +195,11 @@ const Linkedin = makeFieldQuestion<string>({
   save: (v, m) => m.saveProfile.mutateAsync({ linkedin: v.trim() || null }),
   control: (v, set) => <TextField value={v} onChangeText={set} autoCapitalize="none" placeholder="profile url" />,
 });
+const Snapchat = makeFieldQuestion<string>({
+  getValue: (d) => d.profile.snapchat ?? '',
+  save: (v, m) => m.saveProfile.mutateAsync({ snapchat: v.trim() || null }),
+  control: (v, set) => <TextField value={v} onChangeText={set} autoCapitalize="none" placeholder="@username" />,
+});
 const Phone = makeFieldQuestion<string>({
   getValue: () => '',
   save: async (v, m) => { if (v.trim()) await m.savePrivateContact.mutateAsync(v.trim()); },
@@ -216,6 +221,6 @@ export const QUESTION_COMPONENTS: Record<string, ComponentType> = {
   interests: Interests, deal_breakers: DealBreakers,
   about_me: AboutMe, prompts: PromptsQuestion, photos: PhotosQuestion,
   dorm_preference: DormPreference, living_program: LivingProgram, clubs: Clubs,
-  instagram: Instagram, linkedin: Linkedin, phone: Phone,
+  instagram: Instagram, linkedin: Linkedin, snapchat: Snapchat, phone: Phone,
   review: ReviewQuestion,
 };

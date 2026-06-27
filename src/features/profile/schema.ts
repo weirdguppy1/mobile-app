@@ -81,6 +81,7 @@ export const extrasSchema = z.object({
   clubs: z.array(z.string().trim().min(1)).max(10).optional(),
   instagram: z.string().trim().optional().or(z.literal('')),
   linkedin: z.string().trim().optional().or(z.literal('')),
+  snapchat: z.string().trim().optional().or(z.literal('')),
   phone: z.string().trim().optional().or(z.literal('')),
 });
 export type ExtrasValues = z.infer<typeof extrasSchema>;

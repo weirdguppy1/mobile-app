@@ -61,6 +61,7 @@ grant update (
   clubs,
   instagram,
   linkedin,
+  snapchat,
   about_me,
   hidden_fields
 ) on public.profiles to authenticated;
@@ -93,6 +94,12 @@ grant select, insert, update, delete on public.message_reactions to authenticate
 
 -- notifications — read/mark-read/dismiss your own (INSERT is the triggers' job).
 grant select, update, delete on public.notifications to authenticated;
+
+-- blocks — manage your own (as the blocker).
+grant select, insert, delete on public.blocks to authenticated;
+
+-- reports — file your own (record-only).
+grant select, insert on public.reports to authenticated;
 
 
 -- ----------------------------------------------------------------

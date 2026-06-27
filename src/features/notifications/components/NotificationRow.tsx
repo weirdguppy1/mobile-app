@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useRef } from 'react';
 import { Text, View } from 'react-native';
 
@@ -27,7 +28,13 @@ export function NotificationRow({ item, onOpen, onAccept, onDecline, disabled }:
 
   const content = (
     <View className="flex-row items-center gap-3 px-6 py-3">
-      <Avatar uri={item.actor.avatarUrl} name={item.actor.firstName} size={48} />
+      <PressScale
+        accessibilityRole="button"
+        accessibilityLabel={`View ${item.actor.firstName ?? 'profile'}`}
+        hitSlop={6}
+        onPress={() => router.push({ pathname: '/u/[id]', params: { id: item.actor.id } })}>
+        <Avatar uri={item.actor.avatarUrl} name={item.actor.firstName} size={48} />
+      </PressScale>
       <View className="flex-1 gap-1">
         <Text className="prose-footnote font-semibold text-ink" numberOfLines={1}>{copy.title}</Text>
         {copy.subtitle ? (

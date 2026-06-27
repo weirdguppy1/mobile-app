@@ -1,6 +1,7 @@
 import { File } from 'expo-file-system';
 
 import { supabase } from '@/lib/supabase';
+import { relationshipState, type Relationship } from '@/features/profile/lib/relationship';
 import { OnboardingData, ProfilePhoto, SignedProfilePhoto } from '@/features/profile/types';
 import { Database } from '@/types/database';
 
@@ -150,4 +151,82 @@ export async function createPhotoSignedUrl(path: string): Promise<string> {
     .createSignedUrl(path, SIGNED_PHOTO_URL_TTL_SECONDS);
   if (error) throw error;
   return data.signedUrl;
+}
+
+/** Any user's read-only profile (RLS via can_view_profile gates access — a row that
+ *  isn't viewable simply won't return). Mirrors fetchOnboardingData but by id. */
+export async function fetchUserProfile(userId: string): Promise<OnboardingData> {
+  return fetchOnboardingData(userId);
+}
+
+/** Derive my relationship to another user from matches / likes / blocks. RLS lets me
+ *  read my own matches, likes I sent or received, and blocks I created; a block by the
+ *  other party is unobservable but also hides their profile, so it never reaches here. */
+export async function fetchRelationship(meId: string, userId: string): Promise<Relationship> {
+  if (meId === userId) return { state: 'self' };
+
+  const [lo, hi] = meId < userId ? [meId, userId] : [userId, meId];
+  const [matchRes, myLikeRes, theirLikeRes, blockRes] = await Promise.all([
+    supabase.from('matches').select('id, created_at').eq('user_a', lo).eq('user_b', hi).maybeSingle(),
+    supabase.from('likes').select('liker_id').eq('liker_id', meId).eq('likee_id', userId).maybeSingle(),
+    supabase.from('likes').select('liker_id').eq('liker_id', userId).eq('likee_id', meId).maybeSingle(),
+    supabase.from('blocks').select('blocked_id').eq('blocker_id', meId).eq('blocked_id', userId).maybeSingle(),
+  ]);
+  if (matchRes.error) throw matchRes.error;
+  if (myLikeRes.error) throw myLikeRes.error;
+  if (theirLikeRes.error) throw theirLikeRes.error;
+  if (blockRes.error) throw blockRes.error;
+
+  return relationshipState({
+    meId,
+    userId,
+    match: matchRes.data ?? null,
+    iLiked: !!myLikeRes.data,
+    theyLiked: !!theirLikeRes.data,
+    iBlocked: !!blockRes.data,
+    theyBlocked: false,
+  });
+}
+
+/** Block a user: record the block, drop any match between you, and pass so they never
+ *  resurface in discovery. can_view_profile then hides you both from each other. */
+export async function blockUser(meId: string, userId: string): Promise<void> {
+  const blockRes = await supabase.from('blocks').insert({ blocker_id: meId, blocked_id: userId });
+  if (blockRes.error && blockRes.error.code !== '23505') throw blockRes.error;
+
+  const [lo, hi] = meId < userId ? [meId, userId] : [userId, meId];
+  const matchRes = await supabase.from('matches').delete().eq('user_a', lo).eq('user_b', hi);
+  if (matchRes.error) throw matchRes.error;
+
+  const passRes = await supabase.from('passes').insert({ passer_id: meId, passee_id: userId });
+  if (passRes.error && passRes.error.code !== '23505') throw passRes.error;
+}
+
+/** Decline an incoming request straight from a profile (no notification id in hand):
+ *  pass on them (prevents resurfacing) and clear any pending 'request' notification. */
+export async function declineRequestFrom(meId: string, requesterId: string): Promise<void> {
+  const passRes = await supabase.from('passes').insert({ passer_id: meId, passee_id: requesterId });
+  if (passRes.error && passRes.error.code !== '23505') throw passRes.error;
+
+  const { error } = await supabase
+    .from('notifications')
+    .delete()
+    .eq('user_id', meId)
+    .eq('actor_id', requesterId)
+    .eq('type', 'request');
+  if (error) throw error;
+}
+
+/** Record a report (no moderation backend this pass — record-only). */
+export async function reportUser(meId: string, userId: string, reason: string): Promise<void> {
+  const { error } = await supabase
+    .from('reports')
+    .insert({ reporter_id: meId, reported_id: userId, reason });
+  if (error) throw error;
+}
+
+/** Unmatch: delete the match row (RLS allows either participant). */
+export async function unmatchUser(matchId: string): Promise<void> {
+  const { error } = await supabase.from('matches').delete().eq('id', matchId);
+  if (error) throw error;
 }

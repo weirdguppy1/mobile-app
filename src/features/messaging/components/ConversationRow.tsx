@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Text, View } from 'react-native';
 
 import { Avatar } from '@/features/messaging/components/Avatar';
@@ -16,7 +17,13 @@ export function ConversationRow({ conversation, onPress }: ConversationRowProps)
 
   return (
     <PressScale accessibilityRole="button" onPress={onPress} className="flex-row items-center gap-3 px-6 py-3">
-      <Avatar uri={peer.avatarUrl} name={peer.firstName} />
+      <PressScale
+        accessibilityRole="button"
+        accessibilityLabel={`View ${peer.firstName ?? 'profile'}`}
+        hitSlop={6}
+        onPress={() => router.push({ pathname: '/u/[id]', params: { id: peer.id } })}>
+        <Avatar uri={peer.avatarUrl} name={peer.firstName} />
+      </PressScale>
       <View className="flex-1 gap-0.5">
         <View className="flex-row items-center justify-between gap-2">
           <Text className="prose-footnote font-semibold text-ink" numberOfLines={1}>

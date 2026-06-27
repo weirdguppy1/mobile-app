@@ -65,6 +65,11 @@ as $$
           me.school_domain is not null
           and me.school_domain = them.school_domain
           and them.onboarding_complete
+          and not exists (
+            select 1 from public.blocks b
+            where (b.blocker_id = me.id and b.blocked_id = them.id)
+               or (b.blocker_id = them.id and b.blocked_id = me.id)
+          )
           and exists (
             select 1
             from public.profile_photos pp

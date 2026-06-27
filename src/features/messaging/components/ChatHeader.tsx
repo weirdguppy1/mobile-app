@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { Text, View } from 'react-native';
 
@@ -17,8 +18,15 @@ export function ChatHeader({ peer, onBack }: ChatHeaderProps) {
       <PressScale accessibilityRole="button" accessibilityLabel="Back" hitSlop={12} onPress={onBack}>
         <ChevronLeft size={26} color={Brand.ink} strokeWidth={2} />
       </PressScale>
-      <Avatar uri={peer?.avatarUrl ?? null} name={peer?.firstName ?? null} size={36} />
-      <Text className="prose-button text-ink">{peer?.firstName ?? 'Chat'}</Text>
+      <PressScale
+        accessibilityRole="button"
+        accessibilityLabel={`View ${peer?.firstName ?? 'profile'}`}
+        disabled={!peer}
+        onPress={() => peer && router.push({ pathname: '/u/[id]', params: { id: peer.id } })}
+        className="flex-1 flex-row items-center gap-3">
+        <Avatar uri={peer?.avatarUrl ?? null} name={peer?.firstName ?? null} size={36} />
+        <Text className="prose-button text-ink">{peer?.firstName ?? 'Chat'}</Text>
+      </PressScale>
     </View>
   );
 }

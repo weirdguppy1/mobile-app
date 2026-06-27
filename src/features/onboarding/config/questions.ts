@@ -89,6 +89,7 @@ export const QUESTIONS: QuestionMeta[] = [
   { id: 'clubs', section: 'extras', title: "Clubs you're in?", optional: true, isComplete: always },
   { id: 'instagram', section: 'extras', title: 'Your Instagram?', optional: true, isComplete: always },
   { id: 'linkedin', section: 'extras', title: 'LinkedIn?', optional: true, isComplete: always },
+  { id: 'snapchat', section: 'extras', title: 'Snapchat?', optional: true, isComplete: always },
   { id: 'phone', section: 'extras', title: 'Phone number?', subtitle: '🔒 Private — only shared after you match.',
     optional: true, isComplete: always },
 

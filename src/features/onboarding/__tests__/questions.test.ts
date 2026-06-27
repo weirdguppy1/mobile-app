@@ -11,7 +11,7 @@ const blankProfile = {
   social_level: null, room_temperature: null, alcohol: null, smoking: null,
   parties: null, fitness: null, interests: null, deal_breakers: null,
   dorm_preference: null, living_program: null, clubs: null, instagram: null,
-  linkedin: null, about_me: null, hidden_fields: [] as string[], onboarding_complete: false, created_at: '', updated_at: '',
+  linkedin: null, snapchat: null, about_me: null, hidden_fields: [] as string[], onboarding_complete: false, created_at: '', updated_at: '',
 } as const;
 const data = (o: Record<string, unknown> = {}): OnboardingData =>
   ({ profile: { ...blankProfile, ...o } as unknown as typeof blankProfile, photos: [], prompts: [] });
@@ -34,7 +34,7 @@ describe('QUESTIONS', () => {
   });
   it('marks the known optional questions optional and the required ones required', () => {
     const optional = new Set(['pronouns', 'gender_identity', 'deal_breakers',
-      'dorm_preference', 'living_program', 'clubs', 'instagram', 'linkedin', 'phone']);
+      'dorm_preference', 'living_program', 'clubs', 'instagram', 'linkedin', 'snapchat', 'phone']);
     for (const q of QUESTIONS) expect(!!q.optional).toBe(optional.has(q.id));
   });
   it('optional questions are complete even when blank', () => {

@@ -1,5 +1,4 @@
 import { FlashList } from '@shopify/flash-list';
-import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Bell } from 'lucide-react-native';
@@ -9,29 +8,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Brand } from '@/constants/theme';
 import { ConversationRow } from '@/features/messaging/components/ConversationRow';
 import { EmptyConversations } from '@/features/messaging/components/EmptyConversations';
-import { messagingKeys, useConversations } from '@/features/messaging/hooks/use-conversations';
-import { useRealtimeChannel } from '@/features/messaging/hooks/use-realtime-channel';
-import { useNotificationsRealtime, useUnreadNotificationCount } from '@/features/notifications/hooks/use-notifications';
+import { useConversations } from '@/features/messaging/hooks/use-conversations';
+import { useUnreadNotificationCount } from '@/features/notifications/hooks/use-notifications';
 import { TabTransition } from '@/features/navigation/components/TabTransition';
 import { useNavBarHeight } from '@/features/navigation/lib/use-nav-bar-height';
-import { useCurrentUserId } from '@/features/profile/hooks/use-profile';
 import { PressScale } from '@/shared/components';
 
 export default function MessagesScreen() {
   const navBarHeight = useNavBarHeight();
-  const userId = useCurrentUserId();
-  const qc = useQueryClient();
+  // Conversations + notifications realtime are mounted app-wide in BottomNav, which
+  // keeps this list and the unread badges live across tabs.
   const { data, isLoading, isError } = useConversations();
   const unreadNotifications = useUnreadNotificationCount();
-  useNotificationsRealtime();
-
-  // Any message change in one of my matches → refresh previews + unread (RLS
-  // scopes the stream to my own matches).
-  useRealtimeChannel(userId ? 'conversations' : null, (channel) => {
-    channel.on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
-      if (userId) qc.invalidateQueries({ queryKey: messagingKeys.conversations(userId) });
-    });
-  });
 
   const body = () => {
     if (isLoading) {
@@ -67,7 +55,7 @@ export default function MessagesScreen() {
       <StatusBar style="dark" />
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
         <View className="flex-row items-center gap-3 px-6 pb-2 pt-2">
-          <Text className="prose-display flex-1 text-ink">Messages</Text>
+          <Text className="prose-title flex-1 text-ink">Messages</Text>
           <PressScale
             accessibilityRole="button"
             accessibilityLabel={unreadNotifications > 0 ? `Notifications, ${unreadNotifications} unread` : 'Notifications'}

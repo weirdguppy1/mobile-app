@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, Text, View } from 'react-native';
@@ -19,6 +20,7 @@ import { TabTransition } from '@/features/navigation/components/TabTransition';
 import { useNavBarHeight } from '@/features/navigation/lib/use-nav-bar-height';
 import { ProfileView } from '@/features/profile/components/ProfileView';
 import { useOnboardingData } from '@/features/profile/hooks/use-profile';
+import { PressScale } from '@/shared/components';
 
 interface SheetState {
   target: RequestTarget;
@@ -141,6 +143,16 @@ export default function Discover() {
           photos={current.photos}
           prompts={current.prompts}
           bottomInset={navBarHeight + 72}
+          headerAccessory={
+            <PressScale
+              accessibilityRole="button"
+              accessibilityLabel={`View ${current.profile.first_name ?? 'profile'}`}
+              hitSlop={8}
+              onPress={() => router.push({ pathname: '/u/[id]', params: { id: current.profile.id } })}
+              className="rounded-full border border-silver px-3 py-1.5">
+              <Text className="prose-caption font-medium text-graphite">View profile</Text>
+            </PressScale>
+          }
           belowHeader={compatibility ? <CompatibilityCard compatibility={compatibility} /> : undefined}
           renderPhotoOverlay={(photo) => (
             <RequestHeart

@@ -23,6 +23,14 @@ export function useUnreadNotificationCount(): number {
   return (data ?? []).filter((n) => !n.read).length;
 }
 
+/** Unread notifications that aren't messages (requests, matches, reactions). Messages
+ *  are already counted by the conversation unread badge, so excluding them here lets the
+ *  Messages tab badge sum both sources without double-counting new messages. */
+export function useUnreadActivityCount(): number {
+  const { data } = useNotifications();
+  return (data ?? []).filter((n) => !n.read && n.type !== 'message').length;
+}
+
 /** Keep notifications live: any change to my rows refreshes the list + badge.
  *  RLS scopes the stream to the current user's notifications. */
 export function useNotificationsRealtime() {

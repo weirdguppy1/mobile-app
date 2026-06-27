@@ -27,6 +27,9 @@ export default function AppLayout() {
       </Stack.Protected>
       <Stack.Protected guard={complete}>
         <Stack.Screen name="(main)" />
+        {/* Full-screen user profile, above the tabs (no tab bar). Reached from chat,
+            the conversations list, notifications, and discovery. */}
+        <Stack.Screen name="u/[id]" />
       </Stack.Protected>
     </Stack>
   );

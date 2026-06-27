@@ -246,3 +246,40 @@ drop policy if exists "Delete own notifications" on public.notifications;
 create policy "Delete own notifications"
   on public.notifications for delete
   using ((select auth.uid()) = user_id);
+
+
+-- ----------------------------------------------------------------
+-- blocks — read/create/remove your own (you are the blocker).
+-- ----------------------------------------------------------------
+alter table public.blocks enable row level security;
+
+drop policy if exists "Read own blocks" on public.blocks;
+create policy "Read own blocks"
+  on public.blocks for select
+  using ((select auth.uid()) = blocker_id);
+
+drop policy if exists "Create own blocks" on public.blocks;
+create policy "Create own blocks"
+  on public.blocks for insert
+  with check ((select auth.uid()) = blocker_id);
+
+drop policy if exists "Remove own blocks" on public.blocks;
+create policy "Remove own blocks"
+  on public.blocks for delete
+  using ((select auth.uid()) = blocker_id);
+
+
+-- ----------------------------------------------------------------
+-- reports — file your own (read-only to you); no moderation reads.
+-- ----------------------------------------------------------------
+alter table public.reports enable row level security;
+
+drop policy if exists "File own reports" on public.reports;
+create policy "File own reports"
+  on public.reports for insert
+  with check ((select auth.uid()) = reporter_id);
+
+drop policy if exists "Read own reports" on public.reports;
+create policy "Read own reports"
+  on public.reports for select
+  using ((select auth.uid()) = reporter_id);

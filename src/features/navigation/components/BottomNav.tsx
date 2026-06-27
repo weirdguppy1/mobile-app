@@ -5,7 +5,8 @@ import { TABS } from '@/features/navigation/config/tabs';
 import { tabDirection } from '@/features/navigation/lib/tab-direction';
 import { useTabNavStore } from '@/features/navigation/store/tab-nav-store';
 import { NavBar } from '@/features/navigation/components/NavBar';
-import { useUnreadCount } from '@/features/messaging/hooks/use-conversations';
+import { useConversationsRealtime, useUnreadCount } from '@/features/messaging/hooks/use-conversations';
+import { useNotificationsRealtime, useUnreadActivityCount } from '@/features/notifications/hooks/use-notifications';
 
 // The props expo-router hands a custom `tabBar`, derived from the Tabs
 // component so we don't deep-import the vendored react-navigation types.
@@ -18,7 +19,13 @@ type TabBarProps = Parameters<NonNullable<React.ComponentProps<typeof Tabs>['tab
  */
 export function BottomNav({ state, navigation, insets }: TabBarProps) {
   const setDirection = useTabNavStore((s) => s.setDirection);
-  const unread = useUnreadCount();
+
+  // Mounted app-wide here (the tab bar lives for the whole authenticated session), so
+  // the Messages badge stays live from any tab. The badge sums unread messages and
+  // unread activity (requests / matches / reactions) without double-counting messages.
+  useConversationsRealtime();
+  useNotificationsRealtime();
+  const messagesBadge = useUnreadCount() + useUnreadActivityCount();
 
   const activeRoute = state.routes[state.index];
   const activeRouteName = activeRoute?.name ?? TABS[0].name;
@@ -49,7 +56,7 @@ export function BottomNav({ state, navigation, insets }: TabBarProps) {
         activeName={activeRouteName}
         onPressTab={onPressTab}
         bottomInset={insets.bottom}
-        badges={{ messages: unread }}
+        badges={{ messages: messagesBadge }}
       />
     </View>
   );

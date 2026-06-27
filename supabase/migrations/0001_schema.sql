@@ -114,6 +114,7 @@ create table if not exists public.profiles (
   clubs                text[]      check (clubs is null or cardinality(clubs) <= 10),
   instagram            text,                           -- visible to same school
   linkedin             text,                           -- visible to same school
+  snapchat             text,                           -- visible to same school
   about_me             text        check (about_me is null or char_length(about_me) <= 600),
                                                         -- short bio; 50-word cap enforced in app
   hidden_fields        text[]      not null default '{}',
@@ -292,3 +293,32 @@ create table if not exists public.notifications (
 
 create index if not exists notifications_user_idx
   on public.notifications (user_id, created_at desc);
+
+
+-- ----------------------------------------------------------------
+-- blocks  (blocker hides blocked: removes the match, prevents
+-- resurfacing, and — via can_view_profile (0002) — makes them
+-- mutually invisible).
+-- ----------------------------------------------------------------
+create table if not exists public.blocks (
+  blocker_id uuid        not null references public.profiles (id) on delete cascade,
+  blocked_id uuid        not null references public.profiles (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (blocker_id, blocked_id),
+  constraint blocks_no_self check (blocker_id <> blocked_id)
+);
+
+create index if not exists blocks_blocked_idx on public.blocks (blocked_id);
+
+
+-- ----------------------------------------------------------------
+-- reports  (record-only; no moderation backend this pass)
+-- ----------------------------------------------------------------
+create table if not exists public.reports (
+  id          uuid        primary key default gen_random_uuid(),
+  reporter_id uuid        not null references public.profiles (id) on delete cascade,
+  reported_id uuid        not null references public.profiles (id) on delete cascade,
+  reason      text        not null check (length(trim(reason)) > 0),
+  created_at  timestamptz not null default now(),
+  constraint reports_no_self check (reporter_id <> reported_id)
+);

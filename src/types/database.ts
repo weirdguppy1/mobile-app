@@ -35,6 +35,7 @@ export interface Database {
           clubs: string[] | null;
           instagram: string | null;
           linkedin: string | null;
+          snapchat: string | null;
           about_me: string | null;
           hidden_fields: string[];
           onboarding_complete: boolean;
@@ -157,6 +158,18 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['notifications']['Row']>;
+        Relationships: [];
+      };
+      blocks: {
+        Row: { blocker_id: string; blocked_id: string; created_at: string };
+        Insert: { blocker_id: string; blocked_id: string; created_at?: string };
+        Update: Partial<Database['public']['Tables']['blocks']['Row']>;
+        Relationships: [];
+      };
+      reports: {
+        Row: { id: string; reporter_id: string; reported_id: string; reason: string; created_at: string };
+        Insert: { id?: string; reporter_id: string; reported_id: string; reason: string; created_at?: string };
+        Update: Partial<Database['public']['Tables']['reports']['Row']>;
         Relationships: [];
       };
     };

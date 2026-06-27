@@ -22,6 +22,8 @@ import { QuestionShell } from '@/features/onboarding/components/QuestionShell';
 import { SectionInterstitial } from '@/features/onboarding/components/SectionInterstitial';
 import { SECTIONS } from '@/features/onboarding/config/sections';
 import { ProfileView } from '@/features/profile/components/ProfileView';
+import { PhotoCarousel } from '@/features/profile/components/PhotoCarousel';
+import { SocialsBar } from '@/features/profile/components/SocialsBar';
 import { Profile, ProfilePrompt, SignedProfilePhoto } from '@/features/profile/types';
 import { CompatibilityCard } from '@/features/discovery/components/CompatibilityCard';
 import { DiscoveryEmptyState } from '@/features/discovery/components/DiscoveryEmptyState';
@@ -52,7 +54,7 @@ const mockProfile = {
   social_level: 3, room_temperature: 'cold', alcohol: 'occasionally', smoking: 'no',
   parties: 'sometimes', fitness: 'regularly', interests: ['gym', 'music', 'coding', 'reading', 'movies'],
   deal_breakers: ['smoking', 'noise_levels'], dorm_preference: 'North campus', living_program: 'Honors',
-  clubs: ['ACM', 'Climbing'], instagram: '@julia', linkedin: 'in/julia',
+  clubs: ['ACM', 'Climbing'], instagram: '@julia', linkedin: 'linkedin.com/in/julia', snapchat: '@julia.snap',
   about_me: 'CS major who loves late-night ramen, bouldering, and bad horror movies.',
   hidden_fields: [], onboarding_complete: true, created_at: '', updated_at: '',
 } as unknown as Profile;
@@ -272,6 +274,16 @@ export default function ComponentsGallery() {
               onSelect={() => setPromptSheetOpen(false)}
               onClose={() => setPromptSheetOpen(false)}
             />
+          </Section>
+
+          <Section title="Profile — SocialsBar (Instagram / LinkedIn / Snapchat)">
+            <SocialsBar profile={mockProfile} />
+          </Section>
+
+          <Section title="Profile — PhotoCarousel (paged, full-bleed)">
+            <View className="overflow-hidden rounded-2xl border border-silver">
+              <PhotoCarousel photos={mockPhotos} />
+            </View>
           </Section>
 
           <Section title="Profile — ProfileView (read-only)">

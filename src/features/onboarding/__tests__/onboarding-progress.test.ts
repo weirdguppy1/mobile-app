@@ -11,7 +11,7 @@ const blankProfile = {
   romantic_guests_frequency: null, social_level: null, room_temperature: null,
   alcohol: null, smoking: null, parties: null,
   fitness: null, interests: null, deal_breakers: null, dorm_preference: null,
-  living_program: null, clubs: null, instagram: null, linkedin: null,
+  living_program: null, clubs: null, instagram: null, linkedin: null, snapchat: null,
   about_me: null, hidden_fields: [] as string[], onboarding_complete: false, created_at: '', updated_at: '',
 } as const;
 const data = (overrides: Record<string, unknown> = {}): OnboardingData => ({

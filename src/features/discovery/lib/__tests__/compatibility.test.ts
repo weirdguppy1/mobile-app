@@ -9,7 +9,7 @@ const base: Profile = {
   study_style: 'mostly_library', guests_frequency: 'rarely', romantic_guests_frequency: 'rarely',
   social_level: 4, room_temperature: 'cold', alcohol: 'never', smoking: 'no', parties: 'sometimes',
   fitness: 'regularly', interests: ['gym', 'coding', 'music'], deal_breakers: ['smoking'],
-  dorm_preference: null, living_program: null, clubs: null, instagram: null, linkedin: null,
+  dorm_preference: null, living_program: null, clubs: null, instagram: null, linkedin: null, snapchat: null,
   about_me: null, hidden_fields: [], onboarding_complete: true, created_at: '', updated_at: '',
 };
 
