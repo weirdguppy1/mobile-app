@@ -7,7 +7,7 @@ import { Button } from '@/shared/components';
 export function EmptyConversations() {
   return (
     <View className="flex-1 items-center justify-center gap-3 px-10">
-      <Text className="prose-display text-center text-ink">No matches yet</Text>
+      <Text className="prose-title text-center text-ink">No matches yet</Text>
       <Text className="prose-subtitle text-center">
         When you and someone you've requested both connect, your chat shows up here.
       </Text>
