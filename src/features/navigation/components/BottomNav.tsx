@@ -31,9 +31,16 @@ export function BottomNav({ state, navigation, insets }: TabBarProps) {
   const activeRouteName = activeRoute?.name ?? TABS[0].name;
   const activeTabIndex = TABS.findIndex((t) => t.name === activeRouteName);
 
-  // Hide the bar when the active tab's nested stack is pushed past its root
-  // (e.g. a profile edit/settings screen), so it doesn't float over those forms.
-  if ((activeRoute?.state?.index ?? 0) > 0) return null;
+  // Hide the bar when the active tab is showing anything other than its root
+  // screen, so it never floats over a pushed screen (profile edit/settings, or a
+  // chat thread). We check the focused nested route by name rather than only
+  // `index > 0`: entering a thread cross-stack (e.g. Message from a user profile)
+  // can land with the thread as the only route in the messages stack (index 0),
+  // which the index check alone misses — leaving the bar over the composer.
+  const nested = activeRoute?.state;
+  const focusedChild = nested?.routes?.[nested.index ?? 0]?.name;
+  const onPushedScreen = (nested?.index ?? 0) > 0 || (!!focusedChild && focusedChild !== 'index');
+  if (onPushedScreen) return null;
 
   const onPressTab = (name: string) => {
     const route = state.routes.find((r) => r.name === name);
