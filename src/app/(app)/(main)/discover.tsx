@@ -5,7 +5,7 @@ import { ActivityIndicator, Platform, Text, View } from 'react-native';
 import Animated, { Easing, withTiming } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, DARK_PAGE } from '@/constants/theme';
 import { DISCOVERY_PAGE_SIZE } from '@/features/discovery/api';
 import { CompatibilityCard } from '@/features/discovery/components/CompatibilityCard';
 import { DiscoveryEmptyState } from '@/features/discovery/components/DiscoveryEmptyState';
@@ -21,6 +21,7 @@ import { useNavBarHeight } from '@/features/navigation/lib/use-nav-bar-height';
 import { ProfileView } from '@/features/profile/components/ProfileView';
 import { useOnboardingData } from '@/features/profile/hooks/use-profile';
 import { PressScale } from '@/shared/components';
+import { washForId } from '@/shared/lib/wash';
 
 interface SheetState {
   target: RequestTarget;
@@ -142,6 +143,7 @@ export default function Discover() {
           profile={current.profile}
           photos={current.photos}
           prompts={current.prompts}
+          showDetails={false}
           bottomInset={navBarHeight + 72}
           headerAccessory={
             <PressScale
@@ -180,8 +182,22 @@ export default function Discover() {
 
   return (
     <TabTransition className="flex-1 bg-canvas">
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
+        {current ? (
+          <View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              backgroundColor: DARK_PAGE,
+              experimental_backgroundImage: washForId(current.profile.id).stops,
+            }}
+          />
+        ) : null}
         {body()}
         {current ? (
           <View
