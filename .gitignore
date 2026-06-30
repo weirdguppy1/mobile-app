@@ -49,3 +49,4 @@ src/uniwind-types.d.ts
 # local-only WIP (dev seed scripts, task notes) — not committed
 scripts/
 tasks/
+.superpowers/
