@@ -47,7 +47,7 @@ Direction was validated through ~12 mockup rounds in the visual companion. The d
 - Each **Discover** profile gets a **different ambient mesh wash**, rotating per person, so browsing feels lively and each person reads as distinct.
 - **Peach-rose** is the confirmed favorite (warm peach + rose radial blooms). Rotation pool = the candidate blends explored (periwinkle, pink·violet·periwinkle, peach·rose, mint·aqua, lavender·lilac, sky·mint, indigo·violet, teal·lavender, rose·lilac, iris·cotton-candy, sky·periwinkle·mint).
 - Washes are **low-opacity glows** behind the header/feed, composited via the existing `experimental_backgroundImage` + `MeshGradient` mechanism, retuned for the dark base. Photos + glass cards stay the dominant elements.
-- Selection should be **stable per profile** within a session (e.g. deterministic from the profile id, not re-randomized every render) so a card doesn't flicker colors on scroll.
+- Selection is **random for each user shown** — a fresh wash is rolled whenever the current profile changes, so every user/refresh gets a different color (user's explicit ask). It is memoized on the current profile id so it stays put while you scroll that one profile (no flicker mid-view); advancing to the next person re-rolls.
 - Semantic warm hues now appear ambiently, so the **match moment differentiates by intensity** (fuller, brighter warm wash + confetti), not by being "the only warm thing."
 
 ### C — Glass (real glassmorphism)

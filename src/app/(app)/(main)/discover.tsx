@@ -21,7 +21,7 @@ import { useNavBarHeight } from '@/features/navigation/lib/use-nav-bar-height';
 import { ProfileView } from '@/features/profile/components/ProfileView';
 import { useOnboardingData } from '@/features/profile/hooks/use-profile';
 import { PressScale } from '@/shared/components';
-import { washForId } from '@/shared/lib/wash';
+import { randomWash } from '@/shared/lib/wash';
 
 interface SheetState {
   target: RequestTarget;
@@ -74,6 +74,12 @@ export default function Discover() {
     () => (me?.profile && current ? computeCompatibility(me.profile, current.profile) : null),
     [me?.profile, current],
   );
+
+  // A fresh random wash for each person shown — re-rolled whenever the current
+  // profile changes (so every user gets a different color), but memoized on the
+  // id so it stays put while you scroll that one profile.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const wash = useMemo(() => randomWash(), [current?.profile.id]);
 
   // Seamlessly load the next batch the moment we run out, unless the pool is
   // exhausted. Sends/skips commit before they advance, so a refetch here excludes
@@ -194,7 +200,7 @@ export default function Discover() {
               top: 0,
               bottom: 0,
               backgroundColor: DARK_PAGE,
-              experimental_backgroundImage: washForId(current.profile.id).stops,
+              experimental_backgroundImage: wash.stops,
             }}
           />
         ) : null}
