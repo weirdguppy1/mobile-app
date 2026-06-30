@@ -42,7 +42,7 @@
 
 /* Spike utilities (Step 1). */
 @utility prose-title {
-  @apply font-display text-4xl tracking-tight font-bold;
+  @apply font-display text-4xl tracking-normal font-bold;
 }
 
 @utility button-primary {
@@ -51,7 +51,7 @@
 
 /* Remaining prose + component utilities (Step 3). */
 @utility prose-display {
-  @apply font-display text-5xl tracking-tighter font-bold;
+  @apply font-display text-5xl tracking-normal font-bold;
 }
 
 @utility prose-subtitle {
