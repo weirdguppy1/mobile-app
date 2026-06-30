@@ -7,6 +7,7 @@
 @theme {
   --color-ink: #f4f4f5;        /* primary text / contrast / filled buttons (light on dark) */
   --color-canvas: #0d0e12;     /* page + base surface */
+  --color-surface: #16171c;    /* elevated surface — cards/inputs lift off the page */
   --color-graphite: #d4d4dc;   /* strong secondary text */
   --color-slate: #b4b4bd;      /* tertiary / body */
   --color-ash: #9a9aa4;        /* muted captions */
@@ -30,13 +31,13 @@
   --color-wash: rgba(255, 255, 255, 0.05);
 }
 
-/* DESIGN.md --shadow-card as a reusable utility. */
+/* Elevation for the dark theme: a drop shadow alone is near-invisible on a
+   near-black page, so lift reads mostly from the lighter surface color; this adds
+   a soft cast for floating elements over washes/photos. */
 @utility shadow-card {
   box-shadow:
-    0px 0.8px 2.4px -0.6px rgba(0, 0, 0, 0.05),
-    0px 2.4px 7.2px -1.25px rgba(0, 0, 0, 0.05),
-    0px 6.4px 19.1px -1.875px rgba(0, 0, 0, 0.05),
-    0px 20px 60px -2.5px rgba(0, 0, 0, 0.05);
+    0px 2px 8px -2px rgba(0, 0, 0, 0.45),
+    0px 12px 32px -8px rgba(0, 0, 0, 0.4);
 }
 
 /* Spike utilities (Step 1). */
@@ -82,15 +83,15 @@
 }
 
 @utility card {
-  @apply rounded-xl border border-silver bg-canvas;
+  @apply rounded-xl border border-silver bg-surface;
 }
 
 @utility dropdown {
-  @apply absolute left-0 right-0 max-h-70 overflow-hidden rounded-xl border border-silver bg-canvas;
+  @apply absolute left-0 right-0 max-h-70 overflow-hidden rounded-xl border border-silver bg-surface;
 }
 
 @utility field-input {
-  @apply h-12 rounded-lg border px-4 font-primary text-ink bg-canvas;
+  @apply h-12 rounded-lg border px-4 font-primary text-ink bg-surface;
   /* font-size only, NO line-height: an explicit lineHeight on a single-line RN
      TextInput makes the text jump down on the first keystroke. text-base would
      pull in a ~24px line-height, so set the size directly instead. */
@@ -106,7 +107,7 @@
 }
 
 @utility option-chip {
-  @apply rounded-full border border-silver bg-canvas px-4 py-2.5;
+  @apply rounded-full border border-silver bg-surface px-4 py-2.5;
 }
 
 @utility option-chip-selected {
@@ -120,5 +121,5 @@
 /* Dotted "add a prompt" tile. rounded-xl (not border-continuous): dashed + a
    continuous corner curve renders unevenly in React Native. */
 @utility add-prompt-tile {
-  @apply w-full flex-row items-center justify-center gap-2 rounded-xl border-2 border-dashed border-silver bg-canvas py-5;
+  @apply w-full flex-row items-center justify-center gap-2 rounded-xl border-2 border-dashed border-silver bg-surface py-5;
 }

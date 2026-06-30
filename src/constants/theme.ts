@@ -9,6 +9,7 @@
 export const Brand = {
   ink: '#f4f4f5',
   canvas: '#0d0e12',
+  surface: '#16171c',
   graphite: '#d4d4dc',
   slate: '#b4b4bd',
   ash: '#9a9aa4',
