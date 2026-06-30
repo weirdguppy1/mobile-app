@@ -33,7 +33,8 @@ Direction was validated through ~12 mockup rounds in the visual companion. The d
 
 ### A — Theme & surfaces
 
-- **Dark is the default and only theme this pass.** Tokens stay structured so a light theme can be added later, but no light theme is built now.
+- **Dark is the default and only theme this pass.** Tokens stay structured (semantic names, not raw hex at call sites) so a light theme can be dropped in later by swapping a token map — no component changes.
+- **Light mode is preserved as a documented backup** (see "Light mode — future backup" below), not built now.
 - **Page:** `#0d0e12`. **Primary text:** `#f4f4f5`. **Secondary text:** `#b4b4bd`. **Tertiary/muted:** `~#9a9aa4`.
 - **Hairlines / dividers:** white at low alpha (`rgba(255,255,255,0.07)`).
 - **Cards are strong glass** (see C): translucent fill, heavy blur + saturate, 1px top-highlight border; the ambient wash reads *through* the card.
@@ -80,6 +81,20 @@ Direction was validated through ~12 mockup rounds in the visual companion. The d
 - **Buttons:** full-pill. Primary = solid (white-on-dark for high-contrast CTA); ghost = 1px hairline border.
 - Inputs, tabs, dropdowns inherit the dark + glass treatment.
 - **Semantic** `yes`/`maybe`/`pass` reserved for like/match only (unchanged rule, new context).
+
+### F.5 — Light mode — future backup (NOT built this pass)
+
+Preserved so the explored light direction isn't lost. When light mode is implemented later, use this token map (validated in brainstorming as the "cool, not clinical, not coffee" direction):
+
+- **Page:** cool off-white `#f6f7f9` (deliberately *not* pure white — clinical — and *not* warm paper `#faf8f4` — reads coffee/editorial).
+- **Cards:** white `#ffffff`, lifting off the page via `shadow-card`; border optional. Glass cards become a **light** frost (`rgba(255,255,255,0.55)` + blur) rather than dark glass.
+- **Text ramp:** the existing ink→silver achromatic ramp (`#000` / `#333` / `#666` / `#999` / `#ccc`).
+- **Hairline:** `rgba(0,0,0,0.06)`.
+- **Washes:** same per-person rotation, retuned to low-opacity blooms on the light base (lighter alpha than dark).
+- **Heart:** white circle + ink outline 🤍 (no color fill, same rule).
+- Type, layout, pill buttons, photo treatment, motion — all identical to dark; only the surface/glass/text tokens swap.
+
+Architecturally this is enabled by the semantic-token structure in §A. No implementation work in this pass beyond keeping call sites token-driven.
 
 ### G — Motion (keep + unify)
 
