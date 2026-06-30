@@ -93,26 +93,32 @@ git commit -m "feat(theme): invert achromatic ramp to dark default"
 ### Task 2: Swap display font to Clash Display
 
 **Files:**
-- Create: `assets/fonts/Clash_Display/ClashDisplay-Bold.ttf`, `assets/fonts/Clash_Display/ClashDisplay-Semibold.ttf`
+- Use (already added by the user): `assets/fonts/ClashDisplay-Variable.ttf`
 - Modify: `src/app/_layout.tsx:14-18`
+- Modify: `src/global.css` (display-utility weight, Step 4)
 - Delete (after): `assets/fonts/Space_Grotesk/` (only once nothing references it)
 
 **Interfaces:**
-- Produces: loaded font families `'ClashDisplay-Bold'`, `'ClashDisplay-Semibold'` matching `--font-display` / `--font-display-medium` from Task 1.
+- Produces: loaded font families `'ClashDisplay-Bold'`, `'ClashDisplay-Semibold'` matching `--font-display` / `--font-display-medium` from Task 1. Both are registered from the single variable file; the explicit weight on the display utilities (Step 4) drives the variable weight axis.
 
-- [ ] **Step 1: Download the font.** From https://www.fontshare.com/fonts/clash-display download the family; copy the static `ClashDisplay-Bold.ttf` and `ClashDisplay-Semibold.ttf` into `assets/fonts/Clash_Display/`. (These are the only two weights the system uses.)
+- [ ] **Step 1: Confirm the font file is present** — Run: `ls assets/fonts/ClashDisplay-Variable.ttf` — Expected: the path prints (the user added it).
 
-- [ ] **Step 2: Edit `src/app/_layout.tsx` `useFonts` map** — replace the two SpaceGrotesk lines:
+- [ ] **Step 2: Edit `src/app/_layout.tsx` `useFonts` map** — register the one variable file under both family names so the existing `--font-display` / `--font-display-medium` names from Task 1 resolve:
 
 ```tsx
   const [fontsLoaded] = useFonts({
     Satoshi: require("@/assets/fonts/Satoshi.ttf"),
-    "ClashDisplay-Bold": require("@/assets/fonts/Clash_Display/ClashDisplay-Bold.ttf"),
-    "ClashDisplay-Semibold": require("@/assets/fonts/Clash_Display/ClashDisplay-Semibold.ttf"),
+    "ClashDisplay-Bold": require("@/assets/fonts/ClashDisplay-Variable.ttf"),
+    "ClashDisplay-Semibold": require("@/assets/fonts/ClashDisplay-Variable.ttf"),
   });
 ```
 
 - [ ] **Step 3: Confirm no Space Grotesk references remain** — Run: `grep -rn "SpaceGrotesk\|Space_Grotesk" src` — Expected: no output. (If the grep finds any, they were already replaced by the global.css change in Task 1; investigate before deleting font files.)
+
+- [ ] **Step 4: Give the display utilities an explicit weight** (a variable font renders at its default instance — often Regular — unless a weight is set; without this, Clash titles look too thin). In `src/global.css`, add a weight to the two display utilities:
+  - `prose-display`: append `@apply font-bold;` (i.e. `@apply font-display text-5xl tracking-tighter font-bold;`)
+  - `prose-title`: append `@apply font-bold;` (i.e. `@apply font-display text-4xl tracking-tight font-bold;`)
+  - Any direct `font-display` usage that should read heavy (e.g. the prompt card already moved to Satoshi in Task 8) — leave others as-is.
 
 - [ ] **Step 4: Type gate** — Run: `npx tsc --noEmit` — Expected: PASS.
 
@@ -120,7 +126,7 @@ git commit -m "feat(theme): invert achromatic ramp to dark default"
 
 ```bash
 git rm -r assets/fonts/Space_Grotesk
-git add assets/fonts/Clash_Display src/app/_layout.tsx
+git add assets/fonts/ClashDisplay-Variable.ttf src/app/_layout.tsx src/global.css
 git commit -m "feat(theme): replace Space Grotesk with Clash Display for display type"
 ```
 
