@@ -19,6 +19,16 @@ export function buildVitals(profile: Profile): string[] {
   return tokens;
 }
 
+/** The condensed header line shown on the Discover/Profile header: year · major
+ *  only (DESIGN.md evolution). Dorm/sleep live in chips + detail sections. */
+export function buildHeaderVitals(profile: Profile): string[] {
+  const tokens: string[] = [];
+  if (profile.graduation_year) tokens.push(String(profile.graduation_year));
+  const major = profile.majors?.[0];
+  if (major) tokens.push(major);
+  return tokens;
+}
+
 export type FeedItem =
   | { type: 'photo'; photo: SignedProfilePhoto }
   | { type: 'prompt'; prompt: ProfilePrompt };

@@ -1,4 +1,4 @@
-import { buildProfileFeed, buildVitals } from '@/features/profile/lib/profile-vitals';
+import { buildHeaderVitals, buildProfileFeed, buildVitals } from '@/features/profile/lib/profile-vitals';
 import { Profile, ProfilePrompt, SignedProfilePhoto } from '@/features/profile/types';
 
 const profile = (o: Partial<Profile>): Profile =>
@@ -15,6 +15,16 @@ describe('buildVitals', () => {
   });
   it('is empty when nothing is set', () => {
     expect(buildVitals(profile({}))).toEqual([]);
+  });
+});
+
+describe('buildHeaderVitals', () => {
+  it('returns only year and major, never dorm/sleep', () => {
+    expect(buildHeaderVitals(profile({ graduation_year: 2029, majors: ['Undeclared'], dorm_preference: 'East', sleep_schedule: 'early_bird' })))
+      .toEqual(['2029', 'Undeclared']);
+  });
+  it('skips missing values', () => {
+    expect(buildHeaderVitals(profile({ graduation_year: 2029 }))).toEqual(['2029']);
   });
 });
 
