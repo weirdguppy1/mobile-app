@@ -2,13 +2,22 @@ import "@/global.css";
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { DarkTheme, Stack, ThemeProvider } from "expo-router";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { Brand } from "@/constants/theme";
 import { queryClient } from "@/lib/query-client";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/store/auth-store";
+
+// Dark navigation theme so the navigator scene/content background is the dark
+// page color — not React Navigation's default white, which otherwise shows
+// through during the tab/stack transition fade (a white flash on switch).
+const navTheme = {
+  ...DarkTheme,
+  colors: { ...DarkTheme.colors, background: Brand.canvas, card: Brand.canvas },
+};
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -53,16 +62,18 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Protected guard={!session}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(auth)" />
-          </Stack.Protected>
-          <Stack.Protected guard={!!session}>
-            <Stack.Screen name="(app)" />
-          </Stack.Protected>
-          <Stack.Screen name="dev" />
-        </Stack>
+        <ThemeProvider value={navTheme}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Protected guard={!session}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(auth)" />
+            </Stack.Protected>
+            <Stack.Protected guard={!!session}>
+              <Stack.Screen name="(app)" />
+            </Stack.Protected>
+            <Stack.Screen name="dev" />
+          </Stack>
+        </ThemeProvider>
       </SafeAreaProvider>
     </QueryClientProvider>
   );
