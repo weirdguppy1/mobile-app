@@ -7,10 +7,11 @@ import { LoadingOverlay } from '@/features/auth/components/loading-overlay';
 import { OtpInput } from '@/features/auth/components/otp-input';
 import { ProgressBar } from '@/features/auth/components/progress-bar';
 import { ALCOHOL, INTERESTS, PROMPT_CATEGORIES } from '@/features/profile/constants';
+import { DARK_PAGE, DiscoverWashes } from '@/constants/theme';
 import {
   ActivateRamp, Button, CheckPop, ConfettiBurst, FadeIn, Field, FocusScale,
-  OptionGroup, PhotoGrid, PressScale, ScaleInput, SpotlightProvider, SpotlightScrim,
-  SpotlightSlot, TagInput, TextField,
+  GlassCard, GlassSheet, OptionGroup, PhotoGrid, PressScale, ScaleInput,
+  SpotlightProvider, SpotlightScrim, SpotlightSlot, TagInput, TextField,
 } from '@/shared/components';
 import { AddPromptButton } from '@/features/onboarding/components/AddPromptButton';
 import { ContinueOverlay } from '@/features/onboarding/components/ContinueOverlay';
@@ -113,7 +114,7 @@ export default function ComponentsGallery() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
         <ScrollView className="flex-1" contentContainerClassName="gap-8 px-6 py-6">
           <Section title="Typography">
@@ -162,6 +163,28 @@ export default function ComponentsGallery() {
             </View>
             <View className="card border-continuous shadow-card px-4 py-4">
               <Text className="prose-body text-ink">card + shadow-card</Text>
+            </View>
+          </Section>
+
+          <Section title="Glass — GlassCard / GlassSheet / heart (real blur over a wash)">
+            <View
+              className="overflow-hidden rounded-2xl"
+              style={{ backgroundColor: DARK_PAGE, experimental_backgroundImage: DiscoverWashes[0].stops }}>
+              <View className="gap-4 p-4">
+                <GlassCard className="gap-2 px-5 py-5">
+                  <Text className="prose-footnote text-slate">My ideal roommate Sunday</Text>
+                  <Text className="font-primary text-2xl font-bold tracking-tight text-ink">
+                    Slow coffee, loud music, no judgment.
+                  </Text>
+                </GlassCard>
+                <View className="flex-row">
+                  <RequestHeart target={{ kind: 'photo', photoId: '1' }} onPress={() => {}} />
+                </View>
+                <GlassSheet className="gap-1 px-5 pb-6 pt-4">
+                  <Text className="prose-footnote text-slate">GlassSheet</Text>
+                  <Text className="prose-body text-ink">Like-sheet / match-modal surface</Text>
+                </GlassSheet>
+              </View>
             </View>
           </Section>
 
@@ -298,6 +321,7 @@ export default function ComponentsGallery() {
                 profile={mockProfile}
                 photos={mockPhotos}
                 prompts={mockPrompts}
+                showDetails={false}
                 renderPhotoOverlay={(photo) => (
                   <RequestHeart target={{ kind: 'photo', photoId: photo.id }} onPress={() => setRequestSheetOpen(true)} />
                 )}
