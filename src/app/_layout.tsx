@@ -5,6 +5,7 @@ import { useFonts } from "expo-font";
 import { DarkTheme, Stack, ThemeProvider } from "expo-router";
 import * as SystemUI from "expo-system-ui";
 import { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { Brand } from "@/constants/theme";
@@ -67,21 +68,23 @@ export default function RootLayout() {
   if (!fontsLoaded || !hydrated) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
-        <ThemeProvider value={navTheme}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Protected guard={!session}>
-              <Stack.Screen name="index" />
-              <Stack.Screen name="(auth)" />
-            </Stack.Protected>
-            <Stack.Protected guard={!!session}>
-              <Stack.Screen name="(app)" />
-            </Stack.Protected>
-            <Stack.Screen name="dev" />
-          </Stack>
-        </ThemeProvider>
-      </SafeAreaProvider>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <SafeAreaProvider>
+          <ThemeProvider value={navTheme}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Protected guard={!session}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="(auth)" />
+              </Stack.Protected>
+              <Stack.Protected guard={!!session}>
+                <Stack.Screen name="(app)" />
+              </Stack.Protected>
+              <Stack.Screen name="dev" />
+            </Stack>
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

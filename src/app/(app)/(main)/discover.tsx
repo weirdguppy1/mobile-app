@@ -11,7 +11,7 @@ import { CompatibilityCard } from '@/features/discovery/components/Compatibility
 import { DiscoveryEmptyState } from '@/features/discovery/components/DiscoveryEmptyState';
 import { RequestHeart } from '@/features/discovery/components/RequestHeart';
 import { RequestPreview, RequestSheet } from '@/features/discovery/components/RequestSheet';
-import { SkipButton } from '@/features/discovery/components/SkipButton';
+import { SwipeToSkip } from '@/features/discovery/components/SwipeToSkip';
 import { useDiscoveryActions } from '@/features/discovery/hooks/use-discovery-actions';
 import { useDiscoveryFeed } from '@/features/discovery/hooks/use-discovery';
 import { computeCompatibility } from '@/features/discovery/lib/compatibility';
@@ -145,6 +145,7 @@ export default function Discover() {
     if (current) {
       return (
         <Animated.View key={current.profile.id} entering={profileEnter} style={{ flex: 1 }}>
+        <SwipeToSkip onSkip={onSkip}>
         <ProfileView
           profile={current.profile}
           photos={current.photos}
@@ -177,6 +178,7 @@ export default function Discover() {
             />
           )}
         />
+        </SwipeToSkip>
         </Animated.View>
       );
     }
@@ -205,13 +207,6 @@ export default function Discover() {
           />
         ) : null}
         {body()}
-        {current ? (
-          <View
-            pointerEvents="box-none"
-            style={{ position: 'absolute', left: 16, bottom: navBarHeight + 16 }}>
-            <SkipButton onPress={onSkip} />
-          </View>
-        ) : null}
       </SafeAreaView>
       <RequestSheet
         visible={!!sheet}
