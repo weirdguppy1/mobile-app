@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
@@ -25,7 +26,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
-import { Brand } from '@/constants/theme';
+import { Brand, Glass } from '@/constants/theme';
 import { noteSchema, NoteValues } from '@/features/discovery/types';
 import { PressScale, TextField } from '@/shared/components';
 import { useKeyboardVisible } from '@/shared/hooks/use-keyboard-visible';
@@ -234,8 +235,14 @@ export function RequestSheet({
 
         <Animated.View
           pointerEvents={idle ? 'auto' : 'none'}
-          className="bg-canvas"
           style={[styles.sheet, sheetStyle, { paddingBottom: sheetPadBottom }]}>
+          <BlurView
+            tint={Glass.sheet.tint}
+            intensity={Glass.sheet.intensity}
+            blurMethod="dimezisBlurView"
+            style={StyleSheet.absoluteFill}
+          />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: Glass.sheet.bg }]} />
           <View className="items-center pb-2 pt-3">
             <View className="h-1 w-9 rounded-full bg-silver" />
           </View>
@@ -338,7 +345,7 @@ function Preview({ preview }: { preview: RequestPreview }) {
   return (
     <View className="card border-continuous gap-2 px-5 py-4">
       <Text className="prose-footnote text-slate">{preview.prompt}</Text>
-      <Text className="font-display text-2xl tracking-tight text-ink">{preview.answer}</Text>
+      <Text className="font-primary text-2xl font-bold tracking-tight text-ink">{preview.answer}</Text>
     </View>
   );
 }
@@ -348,6 +355,7 @@ const styles = StyleSheet.create({
   backdrop: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: {
     maxHeight: '88%',
+    overflow: 'hidden',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     borderTopWidth: 1,

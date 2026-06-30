@@ -36,7 +36,7 @@ Direction was validated through ~12 mockup rounds in the visual companion. The d
 - **Dark is the default and only theme this pass.** Tokens stay structured (semantic names, not raw hex at call sites) so a light theme can be dropped in later by swapping a token map — no component changes.
 - **Light mode is preserved as a documented backup** (see "Light mode — future backup" below), not built now.
 - **Page:** `#0d0e12`. **Primary text:** `#f4f4f5`. **Secondary text:** `#b4b4bd`. **Tertiary/muted:** `~#9a9aa4`.
-- **Hairlines / dividers:** white at low alpha (`rgba(255,255,255,0.07)`).
+- **Hairlines / dividers:** white at low alpha (`rgba(255,255,255,0.08)`).
 - **Cards are strong glass** (see C): translucent fill, heavy blur + saturate, 1px top-highlight border; the ambient wash reads *through* the card.
 - The existing achromatic intent is preserved — chrome is monochrome (now light-on-dark); saturated color appears only in washes, photos, and the match moment.
 
@@ -111,7 +111,7 @@ Architecturally this is enabled by the semantic-token structure in §A. No imple
 | page background | `--color-background: #ffffff` | dark `#0d0e12` |
 | `--color-canvas` | `#ffffff` (page & card) | card = glass; base `#0d0e12` family |
 | text ramp | ink/graphite/slate on white | `#f4f4f5` / `#b4b4bd` / `#9a9aa4` on dark |
-| `--color-hairline` | `rgba(0,0,0,.06)` | `rgba(255,255,255,.07)` |
+| `--color-hairline` | `rgba(0,0,0,.06)` | `rgba(255,255,255,.08)` |
 | `--font-display` | `SpaceGrotesk-Bold` | `Clash Display` |
 | prompt answer face | moment font | Satoshi (via utility) |
 | card surface | `card` = white + silver border | `GlassCard` (BlurView) |
