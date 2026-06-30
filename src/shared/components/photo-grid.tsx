@@ -195,7 +195,7 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
           accessibilityLabel="Add photo"
           onPress={onAdd}
           className="photo-slot h-full w-full items-center justify-center">
-          <ImagePlus size={28} color={Brand.fog} strokeWidth={2} />
+          <ImagePlus size={28} color={Brand.ash} strokeWidth={2} />
         </PressScale>
       );
     }

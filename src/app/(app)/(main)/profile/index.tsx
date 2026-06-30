@@ -101,7 +101,7 @@ function LinkRow({ label, value, onPress, divider }: { label: string; value: str
         <Text className="prose-footnote font-semibold text-ink">{label}</Text>
         <Text className="prose-caption text-ash">{value}</Text>
       </View>
-      <ChevronRight size={18} color={Brand.fog} strokeWidth={2} />
+      <ChevronRight size={18} color={Brand.ash} strokeWidth={2} />
     </PressScale>
   );
 }
@@ -118,7 +118,7 @@ function EditRow({ field, profile, divider }: { field: ProfileField; profile: Pr
         <Text className="prose-caption text-ash" numberOfLines={1}>{field.read(profile)}</Text>
       </View>
       {field.hideable ? <Text className="prose-caption text-ash">{hidden ? 'Hidden' : 'Visible'}</Text> : null}
-      <ChevronRight size={18} color={Brand.fog} strokeWidth={2} />
+      <ChevronRight size={18} color={Brand.ash} strokeWidth={2} />
     </PressScale>
   );
 }
