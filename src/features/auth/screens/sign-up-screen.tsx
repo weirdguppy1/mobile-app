@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { Brand } from "@/constants/theme";
 import { LoadingOverlay } from "@/features/auth/components/loading-overlay";
 import { ProgressBar } from "@/features/auth/components/progress-bar";
 import { CampusStep } from "@/features/auth/components/steps/campus-step";
@@ -66,7 +67,7 @@ export function SignUpScreen() {
               accessibilityRole="button"
               className="-ml-1.5 h-8 w-8 items-center justify-center"
             >
-              <ArrowLeft className="icon" />
+              <ArrowLeft className="icon" color={Brand.ink} />
             </Pressable>
             <View className="flex-1">
               <ProgressBar current={progressStep} total={TOTAL_STEPS} />
