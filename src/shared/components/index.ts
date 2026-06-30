@@ -7,6 +7,8 @@ export { FadeIn } from './animations/fade-in';
 export { FocusScale } from './animations/focus-scale';
 export { StepTransition } from './animations/step-transition';
 export { Field } from './field';
+export { GlassCard } from './glass-card';
+export { GlassSheet } from './glass-sheet';
 export { OptionGroup } from './option-group';
 export { PhotoGrid, type PhotoItem } from './photo-grid';
 export { PressScale } from './press-scale';
