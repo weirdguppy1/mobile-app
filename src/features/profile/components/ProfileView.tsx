@@ -10,7 +10,7 @@ import { useSignedPhotoUri } from '@/features/profile/hooks/use-signed-photo-uri
 import { isFieldHidden } from '@/features/profile/lib/field-visibility';
 import { labelFor } from '@/features/profile/lib/label-for';
 import { buildDetailGroups } from '@/features/profile/lib/profile-detail-groups';
-import { buildProfileFeed, buildVitals } from '@/features/profile/lib/profile-vitals';
+import { buildHeaderVitals, buildProfileFeed } from '@/features/profile/lib/profile-vitals';
 import { Profile, ProfilePrompt, SignedProfilePhoto } from '@/features/profile/types';
 
 interface ProfileViewProps {
@@ -27,17 +27,21 @@ interface ProfileViewProps {
   renderPromptOverlay?: (prompt: ProfilePrompt, index: number) => ReactNode;
   /** Bottom padding so content clears a floating tab bar. */
   bottomInset?: number;
+  /** Render the detail sections (the label/value info tables). Off in Discovery —
+   *  that info is reserved for the full profile page. Defaults to true. */
+  showDetails?: boolean;
 }
 
 /** Read-only profile, exactly as another user will see it: name + vitals, photos
  *  interleaved with prompt cards, then visible detail sections. Pure/props-driven
  *  so it also powers the Discovery card later. Hidden fields are never rendered. */
 export function ProfileView({
-  profile, photos, prompts, headerAccessory, belowHeader, renderPhotoOverlay, renderPromptOverlay, bottomInset = 0,
+  profile, photos, prompts, headerAccessory, belowHeader, renderPhotoOverlay, renderPromptOverlay,
+  bottomInset = 0, showDetails = true,
 }: ProfileViewProps) {
-  const vitals = buildVitals(profile);
+  const vitals = buildHeaderVitals(profile);
   const feed = buildProfileFeed(photos, prompts);
-  const detailGroups = buildDetailGroups(profile);
+  const detailGroups = showDetails ? buildDetailGroups(profile) : [];
 
   const interests = profile.interests ?? [];
   const dealBreakers = isFieldHidden(profile.hidden_fields, 'deal_breakers') ? [] : (profile.deal_breakers ?? []);
@@ -91,7 +95,7 @@ function ProfilePhoto({ photo, overlay }: { photo: SignedProfilePhoto; overlay?:
   const [uri, handleError] = useSignedPhotoUri(photo);
 
   return (
-    <View className="overflow-hidden rounded-xl border border-silver bg-wash shadow-card" style={{ width: '100%', aspectRatio: 4 / 5 }}>
+    <View className="overflow-hidden rounded-2xl bg-wash" style={{ width: '100%', aspectRatio: 4 / 5 }}>
       {uri ? (
         <Image source={{ uri }} style={{ width: '100%', height: '100%' }} contentFit="cover" onError={handleError} />
       ) : (
