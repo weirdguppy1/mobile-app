@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { Brand } from '@/constants/theme';
+import { Brand, DARK_PAGE, DiscoverWashes } from '@/constants/theme';
 import { Avatar } from '@/features/messaging/components/Avatar';
 
 const REVEAL_D = 80;
@@ -100,8 +100,11 @@ export function ConnectionCelebration({
 
   return (
     <Modal transparent visible={visible} animationType="none" statusBarTranslucent>
-      <View style={styles.root}>
-        <Animated.View pointerEvents="none" className="bg-ink" style={[styles.circle, revealStyle]} />
+      {/* Warm wash: DARK_PAGE base + peachRose ambient blooms — the emotional peak backdrop. */}
+      <View style={[styles.root, { backgroundColor: DARK_PAGE, experimental_backgroundImage: DiscoverWashes[0].stops } as object]}>
+        {/* Reveal circle: expands from the Accept button, same dark canvas so it reads as
+            a circular wipe revealing the warm-washed scene rather than a bright blowout. */}
+        <Animated.View pointerEvents="none" style={[styles.circle, { backgroundColor: DARK_PAGE }, revealStyle]} />
 
         {/* connecting lines (under the dot + avatars) */}
         <Animated.View pointerEvents="none" style={[styles.line, { top: cy - 1 }, leftLineStyle]} />
@@ -119,8 +122,9 @@ export function ConnectionCelebration({
         </Animated.View>
 
         <Animated.View pointerEvents="none" style={[styles.labelWrap, { top: cy + AVATAR / 2 + 28 }, labelStyle]}>
-          <Text className="font-display text-3xl tracking-tight text-canvas">You're connected!</Text>
-          {themName ? <Text className="prose-subtitle text-center text-fog">Say hi to {themName}</Text> : null}
+          {/* Light text on the warm dark backdrop. */}
+          <Text className="font-display text-3xl tracking-tight text-ink">You're connected!</Text>
+          {themName ? <Text className="prose-subtitle text-center text-ash">Say hi to {themName}</Text> : null}
         </Animated.View>
       </View>
     </Modal>
@@ -130,11 +134,13 @@ export function ConnectionCelebration({
 const styles = StyleSheet.create({
   root: { flex: 1 },
   circle: { position: 'absolute', width: REVEAL_D, height: REVEAL_D, borderRadius: REVEAL_D / 2 },
-  line: { position: 'absolute', height: 2, backgroundColor: '#ffffff' },
+  // Brand.silver = rgba(255,255,255,0.14) — faint white lines readable on the dark wash.
+  line: { position: 'absolute', height: 2, backgroundColor: Brand.silver },
   dot: {
-    position: 'absolute', width: 14, height: 14, borderRadius: 7, backgroundColor: '#ffffff',
+    position: 'absolute', width: 14, height: 14, borderRadius: 7, backgroundColor: Brand.ink,
     shadowColor: Brand.yes, shadowOpacity: 0.9, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10,
   },
-  avatar: { position: 'absolute', borderRadius: AVATAR / 2, borderWidth: 2, borderColor: '#ffffff', overflow: 'hidden' },
+  // rgba(255,255,255,0.25) ring around avatars — visible against the dark warm backdrop.
+  avatar: { position: 'absolute', borderRadius: AVATAR / 2, borderWidth: 2, borderColor: 'rgba(255,255,255,0.30)', overflow: 'hidden' },
   labelWrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center', gap: 4 },
 });

@@ -30,7 +30,7 @@ export default function FieldEditorScreen() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
         <View className="flex-row items-center gap-2 px-4 pb-2 pt-1">
           <PressScale accessibilityRole="button" accessibilityLabel="Back" hitSlop={12} onPress={() => router.back()}>

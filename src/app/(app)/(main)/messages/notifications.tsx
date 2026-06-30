@@ -1,5 +1,6 @@
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
@@ -46,14 +47,18 @@ export default function NotificationsScreen() {
     }
   };
 
+  const openThread = (matchId: string) => {
+    router.replace({ pathname: '/messages/[matchId]', params: { matchId } }, { withAnchor: true });
+  };
+
   const onCelebrationDone = () => {
     const matchId = matchIdRef.current;
     setAccepting(null);
-    if (matchId) router.replace({ pathname: '/messages/[matchId]', params: { matchId } });
+    if (matchId) openThread(matchId);
   };
 
   const onOpen = (item: NotificationItem) => {
-    if (item.match_id) router.push({ pathname: '/messages/[matchId]', params: { matchId: item.match_id } });
+    if (item.match_id) openThread(item.match_id);
   };
 
   const body = () => {
@@ -84,6 +89,8 @@ export default function NotificationsScreen() {
 
   return (
     <>
+      {/* Override EditScreenShell's style="dark" — dark canvas needs light status bar icons. */}
+      <StatusBar style="light" />
       <EditScreenShell title="Notifications">{body()}</EditScreenShell>
       <ConnectionCelebration
         visible={!!accepting}

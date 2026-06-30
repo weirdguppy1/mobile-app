@@ -32,7 +32,7 @@ export function ChatComposer({ onSend, onTyping }: ChatComposerProps) {
         placeholder="Message…"
         placeholderTextColor={Brand.fog}
         multiline
-        className="flex-1 rounded-2xl border border-silver bg-canvas px-4 font-primary text-ink"
+        className="flex-1 rounded-2xl border border-silver bg-surface px-4 font-primary text-ink"
         style={{ fontSize: 16, minHeight: 44, maxHeight: 120, paddingTop: 11, paddingBottom: 11 }}
       />
       <PressScale

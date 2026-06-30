@@ -56,7 +56,7 @@ export function SignUpScreen() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1 }}>
         <View className="flex-1 px-6 pt-2 pb-4">
           <View className="h-10 flex-row items-center gap-3">

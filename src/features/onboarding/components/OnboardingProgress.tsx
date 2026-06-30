@@ -56,7 +56,7 @@ function Segment({ filled, anticipate }: { filled: boolean; anticipate: boolean 
   const fillStyle = useAnimatedStyle(() => ({ opacity: progress.value, transform: [{ scaleX: progress.value }] }));
 
   return (
-    <Animated.View style={containerStyle} className="h-1 flex-1 overflow-hidden rounded-full bg-[rgba(0,0,0,0.08)]">
+    <Animated.View style={containerStyle} className="h-1 flex-1 overflow-hidden rounded-full bg-silver">
       <Animated.View style={[fill, { transformOrigin: '0% 50%' }, fillStyle]} />
     </Animated.View>
   );

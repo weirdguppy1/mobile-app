@@ -11,7 +11,7 @@ interface AvatarProps {
 export function Avatar({ uri, name, size = 52 }: AvatarProps) {
   return (
     <View
-      className="items-center justify-center overflow-hidden rounded-full border border-silver bg-wash"
+      className="items-center justify-center overflow-hidden rounded-full border border-silver bg-surface"
       style={{ width: size, height: size }}>
       {uri ? (
         <Image source={{ uri }} style={{ width: '100%', height: '100%' }} contentFit="cover" />

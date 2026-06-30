@@ -7,6 +7,7 @@ import { Stack } from 'expo-router';
 // lands with the thread as the only route: Back exits to Discover instead of the
 // list, and the tab bar (index 0) covers the composer.
 export const unstable_settings = {
+  anchor: 'index',
   initialRouteName: 'index',
 };
 

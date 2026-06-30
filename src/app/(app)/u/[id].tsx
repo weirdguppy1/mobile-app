@@ -125,10 +125,17 @@ export default function UserProfileScreen() {
     }
   };
 
+  // This screen lives above the tabs. Anchoring the thread route loads the
+  // Messages index underneath it, so Back returns to the inbox and the tab bar
+  // does not cover the composer.
+  const openThread = (matchId: string) => {
+    router.push({ pathname: '/messages/[matchId]', params: { matchId } }, { withAnchor: true });
+  };
+
   const onCelebrationDone = () => {
     const matchId = matchIdRef.current;
     setAccepting(null);
-    if (matchId) router.replace({ pathname: '/messages/[matchId]', params: { matchId } });
+    if (matchId) openThread(matchId);
   };
 
   const showOverflow = !!relationship && relationship.state !== 'self' && relationship.state !== 'blocked';
@@ -211,7 +218,7 @@ export default function UserProfileScreen() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
         <View className="flex-row items-center justify-between px-3 pb-1 pt-1">
           <PressScale accessibilityRole="button" accessibilityLabel="Back" hitSlop={12} onPress={() => router.back()}>
@@ -232,7 +239,7 @@ export default function UserProfileScreen() {
           relationship={relationship}
           acceptBtnRef={acceptBtnRef}
           accepting={!!accepting}
-          onMessage={(matchId) => router.push({ pathname: '/messages/[matchId]', params: { matchId } })}
+          onMessage={openThread}
           onUnmatch={confirmUnmatch}
           onAccept={onAccept}
           onDecline={() => actions.decline.mutate()}

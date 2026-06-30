@@ -15,7 +15,9 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-/** Background tones — the keys of the MESH map below. `neutral` = bare white stage. */
+import { DARK_PAGE } from "@/constants/theme";
+
+/** Background tones — the keys of the MESH map below. `neutral` = bare dark stage. */
 export type Tone =
   | "warm" | "neutral" | "firstLight" | "energy" | "curiosity"
   | "conviction" | "expression" | "radiance" | "serenity" | "horizon";
@@ -31,113 +33,112 @@ interface Bloom {
 
 interface Mesh {
   base: string;
-  /** Overall wash strength — kept low so the white stage still dominates. */
+  /** Overall wash strength — kept subtle so the dark stage dominates. */
   opacity: number;
   blooms: Bloom[];
 }
 
-// Soft radial-bloom mesh gradients per DESIGN.md (grad-warm / grad-cool), drawn
-// with Skia and kept subtle over the white canvas (white-stage discipline).
-// neutral = no wash (the canvas shows through).
+// Dark-adapted radial-bloom mesh gradients. All base colors are DARK_PAGE so the
+// canvas is never washed to light. Bloom colors are low-saturation tinted glows
+// that read as accent halos on the dark surface. neutral = no wash (canvas shows).
 const MESH: Record<string, Mesh | null> = {
   firstLight: {
-    base: "#f8fafc",
-    opacity: 0.45,
+    base: DARK_PAGE,
+    opacity: 0.9,
     blooms: [
-      { x: 0.18, y: 0.2, r: 0.5, color: "#dbeafe" },
-      { x: 0.82, y: 0.15, r: 0.45, color: "#e0e7ff" },
-      { x: 0.5, y: 0.85, r: 0.6, color: "#f1f5f9" },
+      { x: 0.18, y: 0.2, r: 0.5, color: "rgba(140,180,255,0.28)" },
+      { x: 0.82, y: 0.15, r: 0.45, color: "rgba(160,170,255,0.22)" },
+      { x: 0.5, y: 0.85, r: 0.6, color: "rgba(120,160,240,0.18)" },
     ],
   },
 
   horizon: {
-    base: "#fdf4ee",
-    opacity: 0.7,
+    base: DARK_PAGE,
+    opacity: 0.9,
     blooms: [
-      { x: 0.45, y: 0.4, r: 1.1, color: "#ffe8c8" },
-      { x: 0.7, y: 0.1, r: 1.3, color: "#ffd9a0" },
-      { x: 0.85, y: -0.1, r: 1.45, color: "#ffcf6b" },
-      { x: 0.92, y: -0.18, r: 1.05, color: "#ff8c00" },
-      { x: 0.92, y: -0.18, r: 0.68, color: "#ffb833" },
-      { x: 0.92, y: -0.18, r: 0.42, color: "#ffe566" },
-      { x: 0.92, y: -0.18, r: 0.2, color: "#fffde0" },
+      { x: 0.45, y: 0.4, r: 1.1, color: "rgba(255,160,60,0.14)" },
+      { x: 0.7, y: 0.1, r: 1.3, color: "rgba(255,130,40,0.12)" },
+      { x: 0.85, y: -0.1, r: 1.45, color: "rgba(255,110,20,0.10)" },
+      { x: 0.92, y: -0.18, r: 1.05, color: "rgba(200,80,0,0.16)" },
+      { x: 0.92, y: -0.18, r: 0.68, color: "rgba(255,150,30,0.18)" },
+      { x: 0.92, y: -0.18, r: 0.42, color: "rgba(255,200,60,0.14)" },
     ],
   },
 
   warm: {
-    base: "#fdf4ee",
-    opacity: 0.55,
+    base: DARK_PAGE,
+    opacity: 0.9,
     blooms: [
-      { x: 0.5, y: 1.08, r: 0.95, color: "#ffb45e" },
-      { x: 0.5, y: 0.92, r: 0.7, color: "#ffd28a" },
-      { x: 0.28, y: 0.45, r: 0.5, color: "#ffd6b0" },
-      { x: 0.76, y: 0.32, r: 0.45, color: "#ffe0c2" },
-      { x: 0.5, y: 0.15, r: 0.6, color: "#f8d9ff" },
+      { x: 0.5, y: 1.08, r: 0.95, color: "rgba(255,150,100,0.18)" },
+      { x: 0.5, y: 0.92, r: 0.7, color: "rgba(255,180,120,0.14)" },
+      { x: 0.28, y: 0.45, r: 0.5, color: "rgba(255,160,100,0.12)" },
+      { x: 0.76, y: 0.32, r: 0.45, color: "rgba(255,140,180,0.12)" },
+      { x: 0.5, y: 0.15, r: 0.6, color: "rgba(220,150,255,0.16)" },
     ],
   },
 
   energy: {
-    base: "#fff7ed",
-    opacity: 0.55,
+    base: DARK_PAGE,
+    opacity: 0.9,
     blooms: [
-      { x: 0.15, y: 0.25, r: 0.55, color: "#fed7aa" },
-      { x: 0.82, y: 0.2, r: 0.5, color: "#fdba74" },
-      { x: 0.65, y: 0.75, r: 0.55, color: "#fca5a5" },
-      { x: 0.25, y: 0.8, r: 0.45, color: "#fde68a" },
+      { x: 0.15, y: 0.25, r: 0.55, color: "rgba(255,160,80,0.18)" },
+      { x: 0.82, y: 0.2, r: 0.5, color: "rgba(255,130,80,0.16)" },
+      { x: 0.65, y: 0.75, r: 0.55, color: "rgba(255,120,120,0.14)" },
+      { x: 0.25, y: 0.8, r: 0.45, color: "rgba(255,210,80,0.12)" },
     ],
   },
 
   curiosity: {
-    base: "#fafafa",
-    opacity: 0.5,
+    base: DARK_PAGE,
+    opacity: 0.9,
     blooms: [
-      { x: 0.22, y: 0.18, r: 0.5, color: "#e5e7eb" },
-      { x: 0.8, y: 0.2, r: 0.45, color: "#dbeafe" },
-      { x: 0.35, y: 0.82, r: 0.5, color: "#ede9fe" },
-      { x: 0.72, y: 0.7, r: 0.45, color: "#e0f2fe" },
+      { x: 0.22, y: 0.18, r: 0.5, color: "rgba(180,190,255,0.18)" },
+      { x: 0.8, y: 0.2, r: 0.45, color: "rgba(140,190,255,0.16)" },
+      { x: 0.35, y: 0.82, r: 0.5, color: "rgba(180,160,255,0.14)" },
+      { x: 0.72, y: 0.7, r: 0.45, color: "rgba(140,220,255,0.12)" },
     ],
   },
 
   conviction: {
-    base: "#fafafa",
-    opacity: 0.4,
+    base: DARK_PAGE,
+    opacity: 0.9,
     blooms: [
-      { x: 0.18, y: 0.2, r: 0.45, color: "#e5e7eb" },
-      { x: 0.82, y: 0.15, r: 0.4, color: "#f3f4f6" },
-      { x: 0.5, y: 0.82, r: 0.55, color: "#e7e5e4" },
+      { x: 0.18, y: 0.2, r: 0.45, color: "rgba(200,200,220,0.12)" },
+      { x: 0.82, y: 0.15, r: 0.4, color: "rgba(210,210,230,0.10)" },
+      { x: 0.5, y: 0.82, r: 0.55, color: "rgba(190,190,210,0.12)" },
     ],
   },
 
   expression: {
-    base: "#fef2f8",
-    opacity: 0.6,
+    base: DARK_PAGE,
+    opacity: 0.9,
     blooms: [
-      { x: 0.12, y: 0.18, r: 0.55, color: "#ffd6e8" },
-      { x: 0.82, y: 0.14, r: 0.5, color: "#f8c4ff" },
-      { x: 0.88, y: 0.72, r: 0.55, color: "#e0c3fc" },
-      { x: 0.24, y: 0.84, r: 0.5, color: "#ffe0c2" },
-      { x: 0.5, y: 0.45, r: 0.65, color: "#f0b6e0" },
+      { x: 0.12, y: 0.18, r: 0.55, color: "rgba(255,140,200,0.20)" },
+      { x: 0.82, y: 0.14, r: 0.5, color: "rgba(240,160,255,0.18)" },
+      { x: 0.88, y: 0.72, r: 0.55, color: "rgba(200,160,255,0.16)" },
+      { x: 0.24, y: 0.84, r: 0.5, color: "rgba(255,160,120,0.14)" },
+      { x: 0.5, y: 0.45, r: 0.65, color: "rgba(230,140,210,0.16)" },
     ],
   },
 
   radiance: {
-    base: "#ffffff",
-    opacity: 0.55,
+    base: DARK_PAGE,
+    opacity: 0.9,
     blooms: [
-      { x: 0.18, y: 0.22, r: 0.55, color: "#96c4ff" },
-      { x: 0.82, y: 0.16, r: 0.5, color: "#c4d6ff" },
-      { x: 0.7, y: 0.8, r: 0.55, color: "#b4c8ff" },
-      { x: 0.3, y: 0.88, r: 0.5, color: "#d6e4ff" },
+      { x: 0.18, y: 0.22, r: 0.55, color: "rgba(100,180,255,0.22)" },
+      { x: 0.82, y: 0.16, r: 0.5, color: "rgba(160,200,255,0.18)" },
+      { x: 0.7, y: 0.8, r: 0.55, color: "rgba(130,180,255,0.16)" },
+      { x: 0.3, y: 0.88, r: 0.5, color: "rgba(180,210,255,0.14)" },
     ],
   },
 
   serenity: {
-    base: "#fafaf9",
-    opacity: 0.45,
+    base: DARK_PAGE,
+    opacity: 0.9,
     blooms: [
-      { x: 0.22, y: 0.22, r: 0.45, color: "#e7e5e4" },
-      { x: 0.78, y: 0.18, r: 0.45, color: "#ede9fe" },
-      { x: 0.55, y: 0.78, r: 0.55, color: "#dbeafe" },
+      { x: 0.22, y: 0.22, r: 0.45, color: "rgba(190,190,210,0.14)" },
+      { x: 0.78, y: 0.18, r: 0.45, color: "rgba(180,160,255,0.16)" },
+      { x: 0.55, y: 0.78, r: 0.55, color: "rgba(140,190,255,0.14)" },
     ],
   },
   neutral: null,
@@ -158,8 +159,9 @@ function MeshLayer({ tone }: { tone: Tone }) {
 
   return (
     <Canvas style={StyleSheet.absoluteFill}>
+      {/* Base rect fills the canvas with DARK_PAGE so no light bleed-through. */}
+      <Rect x={0} y={0} width={width} height={height} color={mesh.base} />
       <Group opacity={mesh.opacity}>
-        <Rect x={0} y={0} width={width} height={height} color={mesh.base} />
         {mesh.blooms.map((bloom, i) => (
           <Rect key={i} x={0} y={0} width={width} height={height}>
             <RadialGradient

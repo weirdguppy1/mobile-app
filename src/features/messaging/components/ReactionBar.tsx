@@ -50,7 +50,7 @@ function PoppingEmoji({
         accessibilityRole="button"
         accessibilityLabel={`React ${emoji}`}
         onPress={() => onPick(emoji)}
-        className={`h-9 w-9 items-center justify-center rounded-full ${selected ? 'bg-wash' : ''}`}>
+        className={`h-9 w-9 items-center justify-center rounded-full ${selected ? 'bg-surface border border-silver' : ''}`}>
         <Text style={{ fontSize: 22 }}>{emoji}</Text>
       </PressScale>
     </Animated.View>

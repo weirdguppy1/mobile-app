@@ -42,12 +42,12 @@ export function ContinueOverlay({ canAdvance, onNext, saving, label = 'Continue'
       {/* Soft graduated wash into the content above the blur — stacked translucent strips
           (no linear gradient per DESIGN.md). Opacities tunable on device QA. */}
       <View pointerEvents="none">
-        <View style={{ height: 8, backgroundColor: 'rgba(255,255,255,0.18)' }} />
-        <View style={{ height: 8, backgroundColor: 'rgba(255,255,255,0.36)' }} />
-        <View style={{ height: 8, backgroundColor: 'rgba(255,255,255,0.52)' }} />
+        <View style={{ height: 8, backgroundColor: 'rgba(13,14,18,0.18)' }} />
+        <View style={{ height: 8, backgroundColor: 'rgba(13,14,18,0.36)' }} />
+        <View style={{ height: 8, backgroundColor: 'rgba(13,14,18,0.52)' }} />
       </View>
       <BlurView
-        tint="light"
+        tint="dark"
         blurMethod="dimezisBlurView"
         intensity={24}
         style={[styles.blur, { paddingBottom: Math.max(insets.bottom, MIN_INSET) }]}>
@@ -68,5 +68,5 @@ export function ContinueOverlay({ canAdvance, onNext, saving, label = 'Continue'
 
 const styles = StyleSheet.create({
   wrap: { position: 'absolute', left: 0, right: 0, bottom: 0 },
-  blur: { backgroundColor: 'rgba(255,255,255,0.55)' },
+  blur: { backgroundColor: 'rgba(13,14,18,0.55)' },
 });

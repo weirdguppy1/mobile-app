@@ -82,8 +82,8 @@ export function MessageBubble({ message, isMine, myUserId, isLastOwn, onLongPres
           accessibilityLabel="Message — long-press to react"
           delayLongPress={220}
           onLongPress={handleLongPress}
-          className={`rounded-2xl px-4 py-2.5 ${isMine ? 'bg-sent' : 'bg-wash'}`}>
-          <Text className={`prose-body ${isMine ? 'text-canvas' : 'text-ink'}`}>{message.body}</Text>
+          className={`rounded-2xl px-4 py-2.5 ${isMine ? 'bg-sent' : 'bg-surface'}`}>
+          <Text className="prose-body text-ink">{message.body}</Text>
         </PressScale>
       </View>
 
@@ -92,7 +92,7 @@ export function MessageBubble({ message, isMine, myUserId, isLastOwn, onLongPres
           {reactions.map((r) => (
             <View
               key={r.emoji}
-              className={`flex-row items-center gap-0.5 rounded-full border bg-canvas px-1.5 py-0.5 ${r.mine ? 'border-ink' : 'border-silver'}`}>
+              className={`flex-row items-center gap-0.5 rounded-full border bg-surface px-1.5 py-0.5 ${r.mine ? 'border-ink' : 'border-silver'}`}>
               <Text style={{ fontSize: 11 }}>{r.emoji}</Text>
               {r.count > 1 ? <Text className="prose-caption text-slate">{r.count}</Text> : null}
             </View>

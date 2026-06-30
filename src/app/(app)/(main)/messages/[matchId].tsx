@@ -53,6 +53,10 @@ export default function ChatThreadScreen() {
   const markReadRef = useRef(() => markRead.mutate());
   markReadRef.current = () => markRead.mutate();
 
+  const goBackToConversations = useCallback(() => {
+    router.dismissTo('/messages');
+  }, []);
+
   // Mark the peer's messages read on open.
   useEffect(() => {
     if (matchId) markRead.mutate();
@@ -148,9 +152,9 @@ export default function ChatThreadScreen() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
-        <ChatHeader peer={peerQuery.data ?? null} onBack={() => router.back()} />
+        <ChatHeader peer={peerQuery.data ?? null} onBack={goBackToConversations} />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
           <View className="flex-1">
             {isLoading ? (

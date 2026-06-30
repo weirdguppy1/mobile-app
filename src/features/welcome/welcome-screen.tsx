@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Pressable, Text, View } from 'react-native';
 
-import { MeshGradient } from '@/features/welcome/components/mesh-gradient';
+import { DARK_PAGE, DiscoverWashes } from '@/constants/theme';
 import { TiltedCard } from '@/features/welcome/components/tilted-card';
 import { WELCOME_CARDS } from '@/features/welcome/data';
 import { FadeIn, PressScale } from '@/shared/components';
@@ -15,8 +15,16 @@ export function WelcomeScreen() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <StatusBar style="dark" />
-      <MeshGradient variant="hero" className="absolute inset-0" pointerEvents="none" />
+      <StatusBar style="light" />
+      {/* Dark ambient wash — peach-rose radial blooms on the dark page */}
+      <View
+        pointerEvents="none"
+        className="absolute inset-0"
+        style={{
+          backgroundColor: DARK_PAGE,
+          experimental_backgroundImage: DiscoverWashes[0].stops,
+        }}
+      />
 
       <View className="flex-1 px-6 pt-safe pb-safe-offset-5">
         <View className="relative flex-1" pointerEvents="none">

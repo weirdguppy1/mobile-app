@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -71,7 +72,8 @@ export default function OnboardingScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-canvas">
-        <ActivityIndicator color="#000000" />
+        <StatusBar style="light" />
+        <ActivityIndicator color="#f4f4f5" />
       </View>
     );
   }
@@ -92,6 +94,7 @@ export default function OnboardingScreen() {
 
   return (
     <View className="flex-1">
+      <StatusBar style="light" />
       <OnboardingBackground tone={tone} />
       <Animated.View className="flex-1" style={contentStyle}>
         <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>

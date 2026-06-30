@@ -39,7 +39,7 @@ function Segment({ filled }: { filled: boolean }) {
   const fillStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
 
   return (
-    <View className="h-1 flex-1 overflow-hidden rounded-full bg-[rgba(0,0,0,0.08)]">
+    <View className="h-1 flex-1 overflow-hidden rounded-full bg-[rgba(255,255,255,0.12)]">
       <Animated.View style={[fill, fillStyle]} />
     </View>
   );

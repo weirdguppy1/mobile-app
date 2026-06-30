@@ -43,7 +43,7 @@ export default function ProfileScreen() {
 
   return (
     <TabTransition className="flex-1 bg-canvas">
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
         <View className="flex-row items-center gap-3 px-6 pb-3 pt-2">
           <View className="flex-1">

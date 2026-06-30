@@ -29,7 +29,7 @@ export default function ScreensPreview() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
         <ScrollView className="flex-1" contentContainerClassName="gap-8 px-6 py-6">
           <View className="gap-3">

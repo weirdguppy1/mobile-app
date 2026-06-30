@@ -18,7 +18,7 @@ interface TiltedCardProps {
 export function TiltedCard({ card }: TiltedCardProps) {
   return (
     <View
-      className="w-39.5 gap-2.5 rounded-[14px] border-continuous bg-canvas p-2 pb-3 shadow-card"
+      className="w-39.5 gap-2.5 rounded-[14px] border-continuous bg-surface p-2 pb-3 shadow-card"
       style={{
         transform: [
           { translateX: card.offsetX },

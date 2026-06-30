@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { Text, View } from 'react-native';
 
-import { MeshGradient } from '@/features/welcome/components/mesh-gradient';
+import { DARK_PAGE, DiscoverWashes } from '@/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { PressScale } from '@/shared/components';
 import { useAuthStore } from '@/store/auth-store';
@@ -15,8 +15,12 @@ export default function Home() {
 
   return (
     <View className="flex-1 bg-canvas">
-      <StatusBar style="dark" />
-      <MeshGradient variant="hero" className="absolute inset-0" pointerEvents="none" />
+      <StatusBar style="light" />
+      <View
+        pointerEvents="none"
+        className="absolute inset-0"
+        style={{ backgroundColor: DARK_PAGE, experimental_backgroundImage: DiscoverWashes[0].stops }}
+      />
       <View className="flex-1 px-6 pt-safe pb-safe-offset-6">
         <View className="flex-1 items-center justify-center gap-2.5">
           <Text className="prose-display text-ink">You&apos;re in.</Text>

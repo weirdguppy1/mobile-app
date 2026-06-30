@@ -1,8 +1,9 @@
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Bell } from 'lucide-react-native';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { Bell, Search, X } from 'lucide-react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Brand } from '@/constants/theme';
@@ -20,6 +21,17 @@ export default function MessagesScreen() {
   // keeps this list and the unread badges live across tabs.
   const { data, isLoading, isError } = useConversations();
   const unreadNotifications = useUnreadNotificationCount();
+  const [query, setQuery] = useState('');
+
+  // Filter chats by the peer's name or their latest message.
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? (data ?? []).filter(
+        (c) =>
+          (c.peer.firstName ?? '').toLowerCase().includes(q) ||
+          (c.lastMessage?.body ?? '').toLowerCase().includes(q),
+      )
+    : data ?? [];
 
   const body = () => {
     if (isLoading) {
@@ -33,10 +45,17 @@ export default function MessagesScreen() {
       );
     }
     if (!data || data.length === 0) return <EmptyConversations />;
+    if (filtered.length === 0) {
+      return (
+        <View className="flex-1 items-center justify-center px-10">
+          <Text className="prose-subtitle text-center">No chats match "{query.trim()}".</Text>
+        </View>
+      );
+    }
     return (
       <View className="flex-1">
         <FlashList
-          data={data}
+          data={filtered}
           keyExtractor={(c) => c.match.id}
           renderItem={({ item }) => (
             <ConversationRow
@@ -52,10 +71,34 @@ export default function MessagesScreen() {
 
   return (
     <TabTransition className="flex-1 bg-canvas">
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
         <View className="flex-row items-center gap-3 px-6 pb-2 pt-2">
-          <Text className="prose-title flex-1 text-ink">Messages</Text>
+          <View
+            className="flex-1 flex-row items-center gap-2 rounded-2xl border border-silver bg-surface px-3"
+            style={{ height: 40 }}>
+            <Search size={18} color={Brand.graphite} strokeWidth={2} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search chats"
+              placeholderTextColor={Brand.fog}
+              className="flex-1 font-primary text-ink"
+              style={{ fontSize: 15, paddingVertical: 0 }}
+              returnKeyType="search"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            {query.length > 0 ? (
+              <PressScale
+                accessibilityRole="button"
+                accessibilityLabel="Clear search"
+                hitSlop={8}
+                onPress={() => setQuery('')}>
+                <X size={16} color={Brand.graphite} strokeWidth={2} />
+              </PressScale>
+            ) : null}
+          </View>
           <PressScale
             accessibilityRole="button"
             accessibilityLabel={unreadNotifications > 0 ? `Notifications, ${unreadNotifications} unread` : 'Notifications'}
