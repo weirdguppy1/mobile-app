@@ -5,31 +5,29 @@
    are reserved for swipe/match states. These generate color utilities such as
    bg-canvas, text-ink, and border-silver, plus the font-primary family. */
 @theme {
-  --color-ink: #000000;
-  --color-canvas: #ffffff;
-  --color-graphite: #333333;
-  --color-slate: #666666;
-  --color-ash: #999999;
-  --color-fog: #b3b3b3;
-  --color-silver: #cccccc;
+  --color-ink: #f4f4f5;        /* primary text / contrast / filled buttons (light on dark) */
+  --color-canvas: #0d0e12;     /* page + base surface */
+  --color-graphite: #d4d4dc;   /* strong secondary text */
+  --color-slate: #b4b4bd;      /* tertiary / body */
+  --color-ash: #9a9aa4;        /* muted captions */
+  --color-fog: #6e6e77;        /* subheads / disabled */
+  --color-silver: rgba(255, 255, 255, 0.14); /* hairline borders */
 
   --color-yes: #31c431;
   --color-maybe: #ffae00;
-  --color-pass: #ff0000;
+  --color-pass: #ff5a5a;       /* lighter red reads better on dark */
 
-  /* Sent-message bubble (chat). */
   --color-sent: #0a84ff;
 
-  /* semantic aliases (AGENTS.md uses bg-background / text-foreground) */
-  --color-background: #ffffff;
-  --color-foreground: #000000;
+  --color-background: #0d0e12;
+  --color-foreground: #f4f4f5;
 
   --font-primary: 'Satoshi';
-  --font-display: 'SpaceGrotesk-Bold';
-  --font-display-medium: 'SpaceGrotesk-Medium';
+  --font-display: 'ClashDisplay-Bold';
+  --font-display-medium: 'ClashDisplay-Semibold';
 
-  --color-hairline: rgba(0, 0, 0, 0.06);
-  --color-wash: rgba(0, 0, 0, 0.04);
+  --color-hairline: rgba(255, 255, 255, 0.08);
+  --color-wash: rgba(255, 255, 255, 0.05);
 }
 
 /* DESIGN.md --shadow-card as a reusable utility. */

@@ -7,16 +7,16 @@
  */
 
 export const Brand = {
-  ink: '#000000',
-  canvas: '#ffffff',
-  graphite: '#333333',
-  slate: '#666666',
-  ash: '#999999',
-  fog: '#b3b3b3',
-  silver: '#cccccc',
+  ink: '#f4f4f5',
+  canvas: '#0d0e12',
+  graphite: '#d4d4dc',
+  slate: '#b4b4bd',
+  ash: '#9a9aa4',
+  fog: '#6e6e77',
+  silver: 'rgba(255,255,255,0.14)',
   yes: '#31c431',
   maybe: '#ffae00',
-  pass: '#ff0000',
+  pass: '#ff5a5a',
   sent: '#0a84ff',
 } as const;
 
