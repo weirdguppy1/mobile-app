@@ -3,6 +3,7 @@ import "@/global.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { DarkTheme, Stack, ThemeProvider } from "expo-router";
+import * as SystemUI from "expo-system-ui";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -54,6 +55,12 @@ export default function RootLayout() {
       data.subscription.unsubscribe();
     };
   }, [setSession, setHydrated]);
+
+  // Paint the native root view (behind the React views) dark, so no white shows
+  // at the edges during stack/screen transitions — the OS window default is white.
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(Brand.canvas);
+  }, []);
 
   // Hold the native splash until fonts load and the session has resolved, so we
   // never flash the public screens before redirecting an authenticated user.
