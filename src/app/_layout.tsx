@@ -13,8 +13,8 @@ import { useAuthStore } from "@/store/auth-store";
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Satoshi: require("@/assets/fonts/Satoshi.ttf"),
-    "SpaceGrotesk-Bold": require("@/assets/fonts/Space_Grotesk/static/SpaceGrotesk-Bold.ttf"),
-    "SpaceGrotesk-Medium": require("@/assets/fonts/Space_Grotesk/static/SpaceGrotesk-Medium.ttf"),
+    "ClashDisplay-Bold": require("@/assets/fonts/ClashDisplay-Variable.ttf"),
+    "ClashDisplay-Semibold": require("@/assets/fonts/ClashDisplay-Variable.ttf"),
   });
 
   const session = useAuthStore((s) => s.session);
