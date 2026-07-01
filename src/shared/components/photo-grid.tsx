@@ -246,11 +246,12 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
       {itemWidth > 0 ? (
         <View style={{ height: containerHeight }}>
           {reorderable.length > 0 ? (
-            // SortableGrid renders into a ScrollView, which clips children to
-            // its bounds — so it must cover every row a dragged tile can visit
-            // (the full grid, trailing row included), not just the saved rows.
-            // zIndex lives on this wrapper because the grid's own root element
-            // isn't styleable from here.
+            // SortableGrid renders into a ScrollView whose base style is
+            // overflow:'scroll' → clipsToBounds on the native side, which
+            // hard-clips a dragged tile to the grid rect. overflow:'visible'
+            // (merged after the base style) disables that clip so the photo
+            // floats freely. zIndex lives on this wrapper because the grid's
+            // own root element isn't styleable from here.
             <View style={{ height: containerHeight, zIndex: dragging ? 1 : 0 }}>
               <SortableGrid
                 key={gridKey}
@@ -258,7 +259,7 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
                 dimensions={dimensions}
                 renderItem={renderPhoto}
                 scrollEnabled={false}
-                style={{ height: containerHeight }}
+                style={{ height: containerHeight, overflow: 'visible' }}
               />
             </View>
           ) : null}
