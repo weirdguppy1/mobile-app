@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { ImagePlus } from 'lucide-react-native';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { type LayoutChangeEvent, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import {
@@ -51,6 +51,10 @@ interface PhotoGridProps {
 const COLUMNS = 3;
 const GAP = 8; // px between cells, both axes
 const ACTIVATION_DELAY = 220; // ms touch-and-hold before a drag begins
+// How long the grid stays stacked above the trailing tiles after a drop, so the
+// released tile finishes settling into its slot (the library uses a ~300ms
+// timing) before the add/upload cells return to the top of the stack.
+const SETTLE_MS = 350;
 // Tile pop-out: shrink + fade, then the row is actually removed.
 const EXIT_DURATION = 220; // ms
 const EXIT_SCALE = 0.8; // how far the tile shrinks as it fades to nothing
@@ -67,6 +71,7 @@ interface PhotoTileProps {
   itemWidth: number;
   itemHeight: number;
   onRemove: (id: string) => void;
+  onDragStart: () => void;
   onDrop: (droppedId: string, position: number) => void;
 }
 
@@ -76,7 +81,7 @@ interface PhotoTileProps {
  *  the parent to delete the row. So the tile holds its slot while it pops, then
  *  the remaining tiles spring up to fill the gap. The exit style lives on the
  *  inner content view so it never fights the grid's outer drag/position transform. */
-function PhotoTile({ p, itemWidth, itemHeight, onRemove, onDrop }: PhotoTileProps) {
+function PhotoTile({ p, itemWidth, itemHeight, onRemove, onDragStart, onDrop }: PhotoTileProps) {
   const exit = useSharedValue(0); // 0 = present, 1 = fully popped out
   const removing = useRef(false);
 
@@ -108,6 +113,7 @@ function PhotoTile({ p, itemWidth, itemHeight, onRemove, onDrop }: PhotoTileProp
       orientation={p.orientation}
       strategy={p.strategy}
       activationDelay={ACTIVATION_DELAY}
+      onDragStart={onDragStart}
       onDrop={onDrop}>
       <Animated.View style={[slot, { width: itemWidth, height: itemHeight }, exitStyle]}>
         <PhotoImage uri={p.item.uri} />
@@ -150,7 +156,6 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
 
   const rows = (count: number) => (count > 0 ? Math.ceil(count / COLUMNS) * (itemHeight + GAP) - GAP : 0);
   const containerHeight = rows(reorderable.length + trailing.length);
-  const gridHeight = rows(reorderable.length);
 
   // SortableGrid can't seed an item that wasn't present when the grid mounted
   // (its reposition reaction skips the undefined→defined transition), so a newly
@@ -169,7 +174,24 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
   }
   const gridKey = String(gridEpoch);
 
+  // While a tile is being dragged (and briefly after release, while it settles
+  // into its slot) the grid must paint above the trailing tiles, or their
+  // photo-slot backgrounds cover the floating photo. At rest the order flips
+  // back, because the trailing tiles have to sit above the grid's ScrollView —
+  // a ScrollView consumes touches even with scrolling disabled, so an add
+  // button underneath it would be untappable.
+  const [dragging, setDragging] = useState(false);
+  const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => clearTimeout(settleTimer.current ?? undefined), []);
+
+  const handleDragStart = () => {
+    if (settleTimer.current) clearTimeout(settleTimer.current);
+    setDragging(true);
+  };
+
   const handleDrop = (droppedId: string, position: number) => {
+    if (settleTimer.current) clearTimeout(settleTimer.current);
+    settleTimer.current = setTimeout(() => setDragging(false), SETTLE_MS);
     const from = reorderable.findIndex((x) => x.id === droppedId);
     if (from !== -1 && from !== position) onReorder(from, position);
   };
@@ -183,6 +205,7 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
       itemWidth={itemWidth}
       itemHeight={itemHeight}
       onRemove={onRemove}
+      onDragStart={handleDragStart}
       onDrop={handleDrop}
     />
   );
@@ -223,14 +246,21 @@ export function PhotoGrid({ photos, onAdd, onRemove, onReorder, max = 6 }: Photo
       {itemWidth > 0 ? (
         <View style={{ height: containerHeight }}>
           {reorderable.length > 0 ? (
-            <SortableGrid
-              key={gridKey}
-              data={reorderable}
-              dimensions={dimensions}
-              renderItem={renderPhoto}
-              scrollEnabled={false}
-              style={{ height: gridHeight }}
-            />
+            // SortableGrid renders into a ScrollView, which clips children to
+            // its bounds — so it must cover every row a dragged tile can visit
+            // (the full grid, trailing row included), not just the saved rows.
+            // zIndex lives on this wrapper because the grid's own root element
+            // isn't styleable from here.
+            <View style={{ height: containerHeight, zIndex: dragging ? 1 : 0 }}>
+              <SortableGrid
+                key={gridKey}
+                data={reorderable}
+                dimensions={dimensions}
+                renderItem={renderPhoto}
+                scrollEnabled={false}
+                style={{ height: containerHeight }}
+              />
+            </View>
           ) : null}
           {trailing.map((tile, k) => {
             const pos = calculateGridPosition(reorderable.length + k, dimensions, GridOrientation.Vertical);
