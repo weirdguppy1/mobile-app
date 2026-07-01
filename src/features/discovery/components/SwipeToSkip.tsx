@@ -17,8 +17,8 @@ interface SwipeToSkipProps {
   children: ReactNode;
 }
 
-const COMMIT_FRACTION = 0.35; // of screen width
-const COMMIT_VELOCITY = -800; // px/s, fast flick left
+const COMMIT_FRACTION = 0.25; // of screen width
+const COMMIT_VELOCITY = -500; // px/s, a gentle flick left
 
 /**
  * Wraps a Discovery profile so a horizontal left-swipe dismisses the person and
@@ -32,19 +32,18 @@ export function SwipeToSkip({ onSkip, children }: SwipeToSkipProps) {
   const { width } = useWindowDimensions();
   const reduced = useReducedMotion();
   const tx = useSharedValue(0);
+  const committed = useSharedValue(false);
 
   const pan = Gesture.Pan()
     .activeOffsetX([-15, 15])
-    .failOffsetY([-12, 12])
+    .failOffsetY([-16, 16])
     .onUpdate((e) => {
       tx.value = e.translationX < 0 ? e.translationX : e.translationX * 0.2;
     })
     .onEnd((e) => {
       const past = e.translationX < -width * COMMIT_FRACTION || e.velocityX < COMMIT_VELOCITY;
-      if (!past) {
-        tx.value = withSpring(0, { damping: 18, stiffness: 220 });
-        return;
-      }
+      if (!past) return; // spring-back handled in onFinalize
+      committed.value = true;
       if (reduced) {
         scheduleOnRN(onSkip);
         return;
@@ -56,6 +55,11 @@ export function SwipeToSkip({ onSkip, children }: SwipeToSkipProps) {
           if (finished) scheduleOnRN(onSkip);
         },
       );
+    })
+    // Fires after onEnd AND after a cancel — if we didn't commit, snap back so the
+    // card can never get stuck partway off-screen.
+    .onFinalize(() => {
+      if (!committed.value) tx.value = withSpring(0, { damping: 18, stiffness: 220 });
     });
 
   const style = useAnimatedStyle(() => ({
