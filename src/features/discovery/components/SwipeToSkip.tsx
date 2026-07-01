@@ -42,7 +42,8 @@ export function SwipeToSkip({ onSkip, children }: SwipeToSkipProps) {
     .onEnd((e) => {
       const past = Math.abs(e.translationX) > width * COMMIT_FRACTION || Math.abs(e.velocityX) > COMMIT_VELOCITY;
       if (!past) {
-        tx.value = withSpring(0, { damping: 18, stiffness: 220 });
+        // Near-critically damped so the card settles back without a bounce.
+        tx.value = withSpring(0, { damping: 28, stiffness: 220 });
         return;
       }
       const dir = e.translationX < 0 || e.velocityX < 0 ? -1 : 1;
