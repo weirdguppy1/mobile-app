@@ -12,54 +12,51 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets';
 
 interface SwipeToSkipProps {
-  /** Called once a left-swipe commits — advances to the next person. */
+  /** Called once a horizontal swipe commits — advances to the next person. */
   onSkip: () => void;
   children: ReactNode;
 }
 
 const COMMIT_FRACTION = 0.25; // of screen width
-const COMMIT_VELOCITY = -500; // px/s, a gentle flick left
+const COMMIT_VELOCITY = 600; // px/s — a quick flick commits even on a short drag
 
 /**
- * Wraps a Discovery profile so a horizontal left-swipe dismisses the person and
- * advances to the next. The card tracks the finger (slight tilt + fade); past a
- * distance OR velocity threshold it slides off-left and commits, otherwise it
- * springs back. The pan only claims horizontal movement (activeOffsetX +
- * failOffsetY) so the profile still scrolls vertically. Right drags resist.
+ * Wraps a Discovery profile so a horizontal swipe (either direction) dismisses
+ * the person and advances to the next. The card tracks the finger (slight tilt +
+ * fade); past a distance OR velocity threshold it slides off that side and
+ * commits, otherwise it springs back. The pan only claims horizontal movement
+ * (activeOffsetX + failOffsetY) so the profile still scrolls vertically.
  * Reduced motion: the commit fires immediately without the slide-off.
  */
 export function SwipeToSkip({ onSkip, children }: SwipeToSkipProps) {
   const { width } = useWindowDimensions();
   const reduced = useReducedMotion();
   const tx = useSharedValue(0);
-  const committed = useSharedValue(false);
 
   const pan = Gesture.Pan()
     .activeOffsetX([-15, 15])
-    .failOffsetY([-16, 16])
+    .failOffsetY([-12, 12])
     .onUpdate((e) => {
-      tx.value = e.translationX < 0 ? e.translationX : e.translationX * 0.2;
+      tx.value = e.translationX;
     })
     .onEnd((e) => {
-      const past = e.translationX < -width * COMMIT_FRACTION || e.velocityX < COMMIT_VELOCITY;
-      if (!past) return; // spring-back handled in onFinalize
-      committed.value = true;
+      const past = Math.abs(e.translationX) > width * COMMIT_FRACTION || Math.abs(e.velocityX) > COMMIT_VELOCITY;
+      if (!past) {
+        tx.value = withSpring(0, { damping: 18, stiffness: 220 });
+        return;
+      }
+      const dir = e.translationX < 0 || e.velocityX < 0 ? -1 : 1;
       if (reduced) {
         scheduleOnRN(onSkip);
         return;
       }
       tx.value = withTiming(
-        -width * 1.1,
+        dir * width * 1.1,
         { duration: 220, easing: Easing.out(Easing.cubic) },
         (finished) => {
           if (finished) scheduleOnRN(onSkip);
         },
       );
-    })
-    // Fires after onEnd AND after a cancel — if we didn't commit, snap back so the
-    // card can never get stuck partway off-screen.
-    .onFinalize(() => {
-      if (!committed.value) tx.value = withSpring(0, { damping: 18, stiffness: 220 });
     });
 
   const style = useAnimatedStyle(() => ({
