@@ -17,12 +17,14 @@ import {
 } from 'react-native';
 import Animated, {
   Easing,
-  runOnJS,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
@@ -37,7 +39,11 @@ const formSchema = z.object({ note: noteSchema });
 const REVEAL_DIAMETER = 80;
 const SMALL_DIAMETER = 28; // size the success state collapses into at screen center
 
-type Status = 'idle' | 'confirming' | 'reveal' | 'success' | 'collapsing';
+type Status = 'idle' | 'closing' | 'confirming' | 'reveal' | 'success' | 'collapsing';
+
+// Pull-down past this distance (or a flick past this speed) dismisses the sheet.
+const DISMISS_DISTANCE = 110; // px
+const DISMISS_VELOCITY = 700; // px/s
 
 /** What the requester tapped, rendered as a preview at the top of the sheet. */
 export type RequestPreview =
@@ -78,7 +84,8 @@ export function RequestSheet({
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
 
-  const enter = useSharedValue(0);       // sheet entrance slide
+  const enter = useSharedValue(0);       // sheet entrance/exit slide
+  const dragY = useSharedValue(0);       // pull-down offset while dragging
   const formOpacity = useSharedValue(1); // sheet fades out during the takeover
   const textOpacity = useSharedValue(1); // CTA label fade
   const successOpacity = useSharedValue(0);
@@ -106,12 +113,13 @@ export function RequestSheet({
     reset({ note: '' });
     setStatus('idle');
     setError(null);
+    dragY.value = 0;
     formOpacity.value = 1;
     textOpacity.value = 1;
     successOpacity.value = 0;
     circleScale.value = 1;
     circleOpacity.value = 1;
-  }, [visible, preview, reset, formOpacity, textOpacity, successOpacity, circleScale, circleOpacity]);
+  }, [visible, preview, reset, dragY, formOpacity, textOpacity, successOpacity, circleScale, circleOpacity]);
 
   // Entrance slide.
   useEffect(() => {
@@ -130,10 +138,13 @@ export function RequestSheet({
   }, [status, successOpacity]);
 
   const sheetStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: (1 - enter.value) * height }],
+    transform: [{ translateY: (1 - enter.value) * height + dragY.value }],
     opacity: formOpacity.value,
   }));
-  const backdropStyle = useAnimatedStyle(() => ({ opacity: enter.value * formOpacity.value }));
+  // The backdrop tracks both the enter/exit slide and the pull-down progress.
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: enter.value * formOpacity.value * (1 - Math.min(dragY.value / height, 1)),
+  }));
   const textStyle = useAnimatedStyle(() => ({ opacity: textOpacity.value }));
   const circleStyle = useAnimatedStyle(() => ({
     left: circleX.value - REVEAL_DIAMETER / 2,
@@ -152,6 +163,47 @@ export function RequestSheet({
     const maxY = Math.max(y, height - y);
     return (2 * Math.hypot(maxX, maxY)) / REVEAL_DIAMETER + 1;
   };
+
+  // Close with the entrance played in reverse: the sheet slides down and the
+  // backdrop fades before the parent hides the Modal (animationType="none"
+  // means the Modal itself contributes no exit animation).
+  const animateClose = () => {
+    if (status !== 'idle') return;
+    setStatus('closing');
+    Keyboard.dismiss();
+    if (reduced) {
+      onClose();
+      return;
+    }
+    enter.value = withTiming(0, { duration: 260, easing: Easing.in(Easing.cubic) }, (finished) => {
+      if (finished) scheduleOnRN(onClose);
+    });
+  };
+
+  // Pull-down-to-dismiss. Lives on the sheet header (grab handle + title row)
+  // so it never competes with the multiline note field below. A short drag
+  // springs back; past the distance/velocity threshold the sheet slides off.
+  const beginClose = () => {
+    setStatus('closing');
+    Keyboard.dismiss();
+  };
+  const pan = Gesture.Pan()
+    .enabled(status === 'idle')
+    .onUpdate((e) => {
+      dragY.value = Math.max(0, e.translationY);
+    })
+    .onEnd((e) => {
+      const commit = e.translationY > DISMISS_DISTANCE || e.velocityY > DISMISS_VELOCITY;
+      if (!commit) {
+        // Near-critically damped so the sheet settles back without a bounce.
+        dragY.value = withSpring(0, { damping: 28, stiffness: 300 });
+        return;
+      }
+      scheduleOnRN(beginClose);
+      dragY.value = withTiming(height, { duration: 220, easing: Easing.out(Easing.cubic) }, (finished) => {
+        if (finished) scheduleOnRN(onClose);
+      });
+    });
 
   const runSend = async ({ note }: NoteValues) => {
     if (status !== 'idle') return;
@@ -188,7 +240,7 @@ export function RequestSheet({
       setStatus('success');
     } else {
       circleScale.value = withTiming(target, { duration: 560, easing: Easing.inOut(Easing.cubic) }, (finished) => {
-        if (finished) runOnJS(setStatus)('success');
+        if (finished) scheduleOnRN(setStatus, 'success');
       });
     }
   };
@@ -201,7 +253,7 @@ export function RequestSheet({
     const finish = () => onCompleteRef.current();
     if (reduced) {
       successOpacity.value = withTiming(0, { duration: 160 });
-      circleOpacity.value = withTiming(0, { duration: 160 }, (f) => f && runOnJS(finish)());
+      circleOpacity.value = withTiming(0, { duration: 160 }, (f) => f && scheduleOnRN(finish));
       return;
     }
     successOpacity.value = withTiming(0, { duration: 260, easing: Easing.in(Easing.cubic) });
@@ -212,7 +264,7 @@ export function RequestSheet({
       SMALL_DIAMETER / REVEAL_DIAMETER,
       { duration: 520, easing: Easing.inOut(Easing.cubic) },
       (finished) => {
-        if (finished) runOnJS(finish)();
+        if (finished) scheduleOnRN(finish);
       },
     );
   };
@@ -223,107 +275,115 @@ export function RequestSheet({
   const sheetPadBottom = keyboardVisible ? 16 : Math.max(insets.bottom, 16);
 
   return (
-    <Modal transparent visible={visible} animationType="none" onRequestClose={idle ? onClose : undefined} onDismiss={onDismissed} statusBarTranslucent>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.root}>
-        <AnimatedPressable
-          accessibilityRole="button"
-          accessibilityLabel="Close"
-          onPress={idle ? onClose : undefined}
-          pointerEvents={idle ? 'auto' : 'none'}
-          style={[styles.backdrop, backdropStyle]}
-        />
-
-        <Animated.View
-          pointerEvents={idle ? 'auto' : 'none'}
-          style={[styles.sheet, sheetStyle, { paddingBottom: sheetPadBottom }]}>
-          <BlurView
-            tint={Glass.sheet.tint}
-            intensity={Glass.sheet.intensity}
-            blurMethod="dimezisBlurView"
-            style={StyleSheet.absoluteFill}
-          />
-          <View style={[StyleSheet.absoluteFill, { backgroundColor: Glass.sheet.bg }]} />
-          <View className="items-center pb-2 pt-3">
-            <View className="h-1 w-9 rounded-full bg-silver" />
-          </View>
-          <View className="flex-row items-center justify-between px-6 pb-2">
-            <Text className="prose-title text-ink">
-              {recipientName ? `Request ${recipientName}` : 'Send a request'}
-            </Text>
-            <PressScale accessibilityRole="button" accessibilityLabel="Close" hitSlop={12} onPress={onClose}>
-              <X size={20} color={Brand.graphite} strokeWidth={2} />
-            </PressScale>
-          </View>
-
-          <View className="gap-4 px-6 py-4">
-            {preview ? <Preview preview={preview} /> : null}
-
-            <Controller
-              control={control}
-              name="note"
-              render={({ field }) => (
-                <TextField
-                  label="Add a note"
-                  value={field.value}
-                  onChangeText={field.onChange}
-                  onBlur={field.onBlur}
-                  placeholder="e.g. Also a CS major — looking for a quiet dorm too"
-                  multiline
-                  className="h-24 py-3"
-                  style={{ textAlignVertical: 'top' }}
-                  invalid={!!formState.errors.note}
-                  message={formState.errors.note?.message}
-                  autoFocus
-                />
-              )}
-            />
-
-            {error ? <Text className="prose-footnote text-pass">{error}</Text> : null}
-
-            <PressScale
-              accessibilityRole="button"
-              accessibilityLabel="Send request"
-              disabled={!idle || !formState.isValid}
-              onPress={idle ? handleSubmit(runSend) : undefined}
-              className={`button-primary ${!formState.isValid ? 'button-disabled' : ''}`}>
-              <Animated.Text className="prose-button text-canvas" style={textStyle}>
-                Send request
-              </Animated.Text>
-            </PressScale>
-          </View>
-        </Animated.View>
-
-        {showTakeover ? (
-          // bg-canvas, not bg-ink: ink is the light text color on this dark theme,
-          // so an ink fill reads as a white flash. The takeover should go dark.
-          <Animated.View pointerEvents="none" className="bg-canvas" style={[styles.circle, circleStyle]} />
-        ) : null}
-
-        {showSuccess ? (
+    <Modal transparent visible={visible} animationType="none" onRequestClose={idle ? animateClose : undefined} onDismiss={onDismissed} statusBarTranslucent>
+      {/* Modals get their own native window, so gestures inside need their own
+          gesture-handler root (the app-level one doesn't reach in here). */}
+      <GestureHandlerRootView style={styles.flex}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.root}>
           <AnimatedPressable
             accessibilityRole="button"
-            accessibilityLabel="Keep browsing"
-            onPress={status === 'success' ? dismissSuccess : undefined}
-            pointerEvents={status === 'success' ? 'auto' : 'none'}
-            style={[StyleSheet.absoluteFill, styles.successWrap, successStyle]}>
-            <View className="items-center gap-5 px-10">
-              <View className="h-28 w-28 overflow-hidden rounded-full border-2 border-silver bg-graphite">
-                {recipientPhotoUrl ? (
-                  <Image source={{ uri: recipientPhotoUrl }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-                ) : (
-                  <View className="h-full w-full items-center justify-center">
-                    <Text className="font-display text-3xl text-canvas">{recipientName?.[0] ?? '🙂'}</Text>
-                  </View>
-                )}
+            accessibilityLabel="Close"
+            onPress={idle ? animateClose : undefined}
+            pointerEvents={idle ? 'auto' : 'none'}
+            style={[styles.backdrop, backdropStyle]}
+          />
+
+          <Animated.View
+            pointerEvents={idle ? 'auto' : 'none'}
+            style={[styles.sheet, sheetStyle, { paddingBottom: sheetPadBottom }]}>
+            <BlurView
+              tint={Glass.sheet.tint}
+              intensity={Glass.sheet.intensity}
+              blurMethod="dimezisBlurView"
+              style={StyleSheet.absoluteFill}
+            />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: Glass.sheet.bg }]} />
+            <GestureDetector gesture={pan}>
+              <View>
+                <View className="items-center pb-2 pt-3">
+                  <View className="h-1 w-9 rounded-full bg-silver" />
+                </View>
+                <View className="flex-row items-center justify-between px-6 pb-2">
+                  <Text className="prose-title text-ink">
+                    {recipientName ? `Request ${recipientName}` : 'Send a request'}
+                  </Text>
+                  <PressScale accessibilityRole="button" accessibilityLabel="Close" hitSlop={12} onPress={animateClose}>
+                    <X size={20} color={Brand.graphite} strokeWidth={2} />
+                  </PressScale>
+                </View>
               </View>
-              <Text className="font-display text-3xl tracking-tight text-ink" style={styles.center}>
-                {recipientName ? `Request sent to ${recipientName}` : 'Request sent'}
-              </Text>
-              <Text className="prose-caption text-fog" style={styles.center}>Tap anywhere to keep browsing</Text>
+            </GestureDetector>
+
+            <View className="gap-4 px-6 py-4">
+              {preview ? <Preview preview={preview} /> : null}
+
+              <Controller
+                control={control}
+                name="note"
+                render={({ field }) => (
+                  <TextField
+                    label="Add a note"
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    placeholder="anything goes..."
+                    multiline
+                    className="h-24 py-3"
+                    style={{ textAlignVertical: 'top' }}
+                    invalid={!!formState.errors.note}
+                    message={formState.errors.note?.message}
+                    autoFocus
+                  />
+                )}
+              />
+
+              {error ? <Text className="prose-footnote text-pass">{error}</Text> : null}
+
+              <PressScale
+                accessibilityRole="button"
+                accessibilityLabel="Send request"
+                disabled={!idle || !formState.isValid}
+                onPress={idle ? handleSubmit(runSend) : undefined}
+                className={`button-primary ${!formState.isValid ? 'button-disabled' : ''}`}>
+                <Animated.Text className="prose-button text-canvas" style={textStyle}>
+                  Send request
+                </Animated.Text>
+              </PressScale>
             </View>
-          </AnimatedPressable>
-        ) : null}
-      </KeyboardAvoidingView>
+          </Animated.View>
+
+          {showTakeover ? (
+            // bg-canvas, not bg-ink: ink is the light text color on this dark theme,
+            // so an ink fill reads as a white flash. The takeover should go dark.
+            <Animated.View pointerEvents="none" className="bg-canvas" style={[styles.circle, circleStyle]} />
+          ) : null}
+
+          {showSuccess ? (
+            <AnimatedPressable
+              accessibilityRole="button"
+              accessibilityLabel="Keep browsing"
+              onPress={status === 'success' ? dismissSuccess : undefined}
+              pointerEvents={status === 'success' ? 'auto' : 'none'}
+              style={[StyleSheet.absoluteFill, styles.successWrap, successStyle]}>
+              <View className="items-center gap-5 px-10">
+                <View className="h-28 w-28 overflow-hidden rounded-full border-2 border-silver bg-graphite">
+                  {recipientPhotoUrl ? (
+                    <Image source={{ uri: recipientPhotoUrl }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+                  ) : (
+                    <View className="h-full w-full items-center justify-center">
+                      <Text className="font-display text-3xl text-canvas">{recipientName?.[0] ?? '🙂'}</Text>
+                    </View>
+                  )}
+                </View>
+                <Text className="font-display text-3xl tracking-tight text-ink" style={styles.center}>
+                  {recipientName ? `Request sent to ${recipientName}` : 'Request sent'}
+                </Text>
+                <Text className="prose-caption text-fog" style={styles.center}>Tap anywhere to keep browsing</Text>
+              </View>
+            </AnimatedPressable>
+          ) : null}
+        </KeyboardAvoidingView>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
@@ -353,6 +413,7 @@ function Preview({ preview }: { preview: RequestPreview }) {
 }
 
 const styles = StyleSheet.create({
+  flex: { flex: 1 },
   root: { flex: 1, justifyContent: 'flex-end' },
   backdrop: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: {
