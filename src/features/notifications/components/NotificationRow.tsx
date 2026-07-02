@@ -10,6 +10,10 @@ import { PressScale } from '@/shared/components';
 
 interface NotificationRowProps {
   item: NotificationItem;
+  /** Render the row's "new" treatment (dot + faint wash). Driven by the screen's
+   *  opened-with-unread snapshot rather than item.read, which flips to true the
+   *  moment the inbox is opened. */
+  isNew?: boolean;
   /** Open the related thread (message / match / reaction). */
   onOpen: (item: NotificationItem) => void;
   /** Accept a request; passes the button's screen-centre so the celebration expands from it. */
@@ -18,7 +22,7 @@ interface NotificationRowProps {
   disabled?: boolean;
 }
 
-export function NotificationRow({ item, onOpen, onAccept, onDecline, disabled }: NotificationRowProps) {
+export function NotificationRow({ item, isNew, onOpen, onAccept, onDecline, disabled }: NotificationRowProps) {
   const copy = notificationCopy(item.type, item.actor.firstName, item.preview);
   const acceptRef = useRef<View>(null);
 
@@ -27,7 +31,7 @@ export function NotificationRow({ item, onOpen, onAccept, onDecline, disabled }:
   };
 
   const content = (
-    <View className="flex-row items-center gap-3 px-6 py-3">
+    <View className={`flex-row items-center gap-3 px-6 py-3 ${isNew ? 'bg-wash' : ''}`}>
       <PressScale
         accessibilityRole="button"
         accessibilityLabel={`View ${item.actor.firstName ?? 'profile'}`}
@@ -67,7 +71,7 @@ export function NotificationRow({ item, onOpen, onAccept, onDecline, disabled }:
 
       <View className="items-end gap-1">
         <Text className="prose-caption text-ash">{conversationTime(item.created_at)}</Text>
-        {!item.read ? <View className="h-2 w-2 rounded-full bg-ink" /> : null}
+        {isNew ? <View className="h-2 w-2 rounded-full bg-ink" /> : null}
       </View>
     </View>
   );

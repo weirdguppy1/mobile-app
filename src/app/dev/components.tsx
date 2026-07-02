@@ -392,10 +392,10 @@ export default function ComponentsGallery() {
             </View>
           </Section>
 
-          <Section title="Notifications — rows (request / message / match)">
+          <Section title="Notifications — rows (request / message / match; unread rows get the new treatment)">
             <View className="rounded-2xl border border-silver py-1">
               {mockNotifs.map((n) => (
-                <NotificationRow key={n.id} item={n} onOpen={() => {}} onAccept={() => {}} onDecline={() => {}} />
+                <NotificationRow key={n.id} item={n} isNew={!n.read} onOpen={() => {}} onAccept={() => {}} onDecline={() => {}} />
               ))}
             </View>
           </Section>

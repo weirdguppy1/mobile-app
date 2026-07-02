@@ -32,6 +32,17 @@ export default function NotificationsScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Which rows get the "new" treatment. mark-read flips item.read almost
+  // immediately after the screen opens, so the indicator can't be driven by
+  // item.read alone — snapshot the unread ids from the first load and keep
+  // those rows marked for the rest of the visit. Anything unread that arrives
+  // later (realtime) is also new; it stays unread until the next visit.
+  const newIdsRef = useRef<Set<string> | null>(null);
+  if (data && newIdsRef.current === null) {
+    newIdsRef.current = new Set(data.filter((n) => !n.read).map((n) => n.id));
+  }
+  const isNew = (n: NotificationItem) => !n.read || (newIdsRef.current?.has(n.id) ?? false);
+
   const myAvatar = me?.photos?.[0]?.signedUrl ?? null;
   const myName = me?.profile.first_name ?? null;
 
@@ -75,6 +86,7 @@ export default function NotificationsScreen() {
           renderItem={({ item }) => (
             <NotificationRow
               item={item}
+              isNew={isNew(item)}
               onOpen={onOpen}
               onAccept={onAccept}
               onDecline={(it) => decline.mutate({ requesterId: it.actor.id, notificationId: it.id })}
