@@ -64,7 +64,8 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
-    "seed": "node ./scripts/seed-full.mjs"
+    "seed": "node ./scripts/seed-full.mjs",
+    "seed-notis": "node ./scripts/seed-notifications.mjs"
   },
   "private": true
 }
