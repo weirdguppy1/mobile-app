@@ -40,7 +40,7 @@ export function WelcomeScreen() {
 
         <View className="gap-4 pb-2">
           <FadeIn delay={300}>
-            <Text className="prose-display text-ink">Find your{'\n'}perfect roommate.</Text>
+            <Text className="prose-display text-ink">HiFive</Text>
           </FadeIn>
 
           <FadeIn delay={370}>
