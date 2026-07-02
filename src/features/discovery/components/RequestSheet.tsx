@@ -62,9 +62,9 @@ interface RequestSheetProps {
 
 /**
  * Attach a required note to a connection request, then play the send takeover:
- * the CTA label fades, the button holds a beat, a black circle expands from it to
- * fill the screen (the profile behind fades away), and a success screen with the
- * recipient's photo settles in. The success screen stays until the user taps to
+ * the CTA label fades, the button holds a beat, a canvas-dark circle expands from
+ * it to fill the screen (the profile behind fades away), and a success screen with
+ * the recipient's photo settles in. The success screen stays until the user taps to
  * dismiss, then it fades while shrinking back into a small circle at the centre.
  */
 export function RequestSheet({
@@ -294,7 +294,9 @@ export function RequestSheet({
         </Animated.View>
 
         {showTakeover ? (
-          <Animated.View pointerEvents="none" className="bg-ink" style={[styles.circle, circleStyle]} />
+          // bg-canvas, not bg-ink: ink is the light text color on this dark theme,
+          // so an ink fill reads as a white flash. The takeover should go dark.
+          <Animated.View pointerEvents="none" className="bg-canvas" style={[styles.circle, circleStyle]} />
         ) : null}
 
         {showSuccess ? (
@@ -305,7 +307,7 @@ export function RequestSheet({
             pointerEvents={status === 'success' ? 'auto' : 'none'}
             style={[StyleSheet.absoluteFill, styles.successWrap, successStyle]}>
             <View className="items-center gap-5 px-10">
-              <View className="h-28 w-28 overflow-hidden rounded-full border-2 border-canvas bg-graphite">
+              <View className="h-28 w-28 overflow-hidden rounded-full border-2 border-silver bg-graphite">
                 {recipientPhotoUrl ? (
                   <Image source={{ uri: recipientPhotoUrl }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                 ) : (
@@ -314,7 +316,7 @@ export function RequestSheet({
                   </View>
                 )}
               </View>
-              <Text className="font-display text-3xl tracking-tight text-canvas" style={styles.center}>
+              <Text className="font-display text-3xl tracking-tight text-ink" style={styles.center}>
                 {recipientName ? `Request sent to ${recipientName}` : 'Request sent'}
               </Text>
               <Text className="prose-caption text-fog" style={styles.center}>Tap anywhere to keep browsing</Text>
