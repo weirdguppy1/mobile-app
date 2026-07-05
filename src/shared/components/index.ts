@@ -13,5 +13,6 @@ export { OptionGroup } from './option-group';
 export { PhotoGrid, type PhotoItem } from './photo-grid';
 export { PressScale } from './press-scale';
 export { ScaleInput } from './scale-input';
+export { SheetModal } from './sheet-modal';
 export { TagInput } from './tag-input';
 export { TextField } from './text-field';

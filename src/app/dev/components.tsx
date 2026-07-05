@@ -10,7 +10,7 @@ import { ALCOHOL, INTERESTS, PROMPT_CATEGORIES } from '@/features/profile/consta
 import { DARK_PAGE, DiscoverWashes } from '@/constants/theme';
 import {
   ActivateRamp, Button, CheckPop, ConfettiBurst, FadeIn, Field, FocusScale,
-  GlassCard, GlassSheet, OptionGroup, PhotoGrid, PressScale, ScaleInput,
+  GlassCard, GlassSheet, OptionGroup, PhotoGrid, PressScale, ScaleInput, SheetModal,
   SpotlightProvider, SpotlightScrim, SpotlightSlot, TagInput, TextField,
 } from '@/shared/components';
 import { AddPromptButton } from '@/features/onboarding/components/AddPromptButton';
@@ -110,6 +110,7 @@ export default function ComponentsGallery() {
   const [promptSheetOpen, setPromptSheetOpen] = useState(false);
   const [demoAnswer, setDemoAnswer] = useState('Late-night ramen and a movie.');
   const [requestSheetOpen, setRequestSheetOpen] = useState(false);
+  const [sheetModalOpen, setSheetModalOpen] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
 
   return (
@@ -341,6 +342,17 @@ export default function ComponentsGallery() {
               onComplete={() => setRequestSheetOpen(false)}
               onClose={() => setRequestSheetOpen(false)}
             />
+          </Section>
+
+          <Section title="Shared — SheetModal (glass sheet shell: pull-down / X / backdrop dismiss)">
+            <Button variant="ghost" onPress={() => setSheetModalOpen(true)}>Open sheet modal</Button>
+            <SheetModal visible={sheetModalOpen} title="Sheet modal" onClose={() => setSheetModalOpen(false)}>
+              <View className="gap-2 px-6 py-4">
+                <Text className="prose-footnote text-slate">
+                  Shared bottom-sheet shell. Pull the header down, tap the X, or tap the backdrop.
+                </Text>
+              </View>
+            </SheetModal>
           </Section>
 
           <Section title="Discovery — compatibility card (count-up on mount)">
