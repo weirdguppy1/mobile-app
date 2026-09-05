@@ -37,14 +37,26 @@ export default function RootLayout() {
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      // Authorize the realtime socket so postgres_changes are RLS-scoped (a client
-      // must not receive messages/reactions for matches it isn't part of).
-      supabase.realtime.setAuth(data.session?.access_token ?? null);
-      setSession(data.session);
-      setHydrated(true);
-    });
+    // A stored session can be stale or orphaned (e.g. after a local db reset
+    // deletes its user). If resolving it rejects — or hangs — the splash must
+    // not hold forever: boot signed-out instead and let the user sign back in.
+    const timeout = new Promise<{ data: { session: null } }>((resolve) =>
+      setTimeout(() => resolve({ data: { session: null } }), 5000),
+    );
+    Promise.race([supabase.auth.getSession(), timeout])
+      .then(({ data }) => {
+        if (!mounted) return;
+        // Authorize the realtime socket so postgres_changes are RLS-scoped (a client
+        // must not receive messages/reactions for matches it isn't part of).
+        supabase.realtime.setAuth(data.session?.access_token ?? null);
+        setSession(data.session);
+      })
+      .catch(() => {
+        if (mounted) setSession(null);
+      })
+      .finally(() => {
+        if (mounted) setHydrated(true);
+      });
 
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       supabase.realtime.setAuth(nextSession?.access_token ?? null);
