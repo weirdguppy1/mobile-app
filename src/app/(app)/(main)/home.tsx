@@ -11,7 +11,7 @@ import { useAuthStore } from '@/store/auth-store';
  * The real post-signup app (swipe deck, profile, etc.) lands here later.
  */
 export default function Home() {
-  const session = useAuthStore((s) => s.session);
+  const session = useAuthStore((s) => s.session)
 
   return (
     <View className="flex-1 bg-canvas">
